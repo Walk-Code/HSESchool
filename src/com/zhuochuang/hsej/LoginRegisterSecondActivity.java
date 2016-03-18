@@ -1,0 +1,249 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.TaskType;
+import com.util.MD5;
+import com.util.Utils;
+
+public class LoginRegisterSecondActivity extends BaseActivity{
+
+	JSONObject mDataObj;
+	JSONObject mAuthCodeObj;
+	CountDownTimer mCountDownTimer;
+	String mAuthCode = null;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		
+		setContentView(R.layout.activity_login_register_second);
+		setTitleText(R.string.login_register_title);
+		
+		((EditText) findViewById(R.id.editview_password)).setInputType(0x81 | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+		((EditText) findViewById(R.id.editview_password_more)).setInputType(0x81 | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+		
+		((EditText)findViewById(R.id.editview_pahone)).addTextChangedListener(new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+				// TODO Auto-generated method stub
+				mAuthCodeObj = null;
+				mAuthCode = null;
+				((EditText)findViewById(R.id.editview_authcode)).setText("");
+				if(mCountDownTimer != null){
+					mCountDownTimer.cancel();
+				}
+				findViewById(R.id.textview_seconds).setEnabled(true);
+				((TextView)findViewById(R.id.textview_seconds)).setText(getResources().getString(R.string.passwordauthcode_hint1));
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+	
+	public void onTipBtnClick(View view){
+		String phone = ((EditText)findViewById(R.id.editview_pahone)).getText().toString();
+		switch (view.getId()) {
+		case R.id.textview_seconds:
+			if(Utils.isTextEmpty(phone)){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_phone_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(!Utils.isMobileNO(phone)){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_phone_valid), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			showDialogCustom(DIALOG_CUSTOM);
+			HashMap<String, Object> paramss = new HashMap<String, Object>();
+			paramss.put("phone", phone);
+			paramss.put("key", "");
+			paramss.put("userId", getIntent().getStringExtra("id"));
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserGetCode, paramss, LoginRegisterSecondActivity.this);
+			break;
+			
+		case R.id.textview_loginwelcome_done:
+			String nickName = ((EditText)findViewById(R.id.editview_nickname)).getText().toString();
+			if(nickName == null || nickName.length() == 0 || nickName.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_nickname_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(phone == null || phone.length() == 0 || phone.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_phone_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(!Utils.isMobileNO(phone)){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_phone_valid), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			String password = ((EditText)findViewById(R.id.editview_password)).getText().toString();
+			if(password == null || password.length() == 0 || password.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_password_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			String passwordMore = ((EditText)findViewById(R.id.editview_password_more)).getText().toString();
+			if(passwordMore == null || passwordMore.length() == 0 || passwordMore.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_password_more_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(!password.equalsIgnoreCase(passwordMore)){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_password_more_same), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(mAuthCode == null){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.passwordauthcode_hint6), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			String code = ((EditText)findViewById(R.id.editview_authcode)).getText().toString();
+			if(code == null || code.length() == 0 || code.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.passwordauthcode_hint2), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if(mAuthCode.equalsIgnoreCase("unknown")){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.passwordauthcode_hint4), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(!mAuthCode.equalsIgnoreCase(code)){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.passwordauthcode_hint5), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			showDialogCustom(DIALOG_CUSTOM);
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("nickName", nickName);
+			params.put("phone", phone);
+			params.put("email", ((EditText)findViewById(R.id.editview_email)).getText().toString());
+			//params.put("password", password);
+			try {
+				params.put("password", MD5.getStringMD5String(MD5.getStringMD5String(Configs.EncryptConfuse + password)));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			params.put("tag", 1);
+			params.put("id", getIntent().getStringExtra("id"));
+			params.put("sign", 2);
+			params.put("isBangding", true);
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserRegister, params, LoginRegisterSecondActivity.this);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		if(mCountDownTimer != null){
+			mCountDownTimer.cancel();
+		}
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		removeDialogCustom();
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(LoginRegisterSecondActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_UserGetCode:
+			if(result instanceof JSONObject && ((JSONObject)result).has("item")){
+				mAuthCodeObj = ((JSONObject)result).optJSONObject("item");
+				mAuthCode = mAuthCodeObj.optString("code");
+				((EditText)findViewById(R.id.editview_authcode)).setFocusable(true);
+				((EditText)findViewById(R.id.editview_authcode)).setCursorVisible(true);
+				((EditText)findViewById(R.id.editview_authcode)).requestFocus();
+				mCountDownTimer = new CountDownTimer(mAuthCodeObj.optInt("seconds") * 1000, 1000) {
+					@Override
+					public void onTick(long millisUntilFinished) {
+						// TODO Auto-generated method stub
+						findViewById(R.id.textview_seconds).setEnabled(false);
+						((TextView)findViewById(R.id.textview_seconds)).setText(millisUntilFinished / 1000 + "s");
+					}
+					
+					@Override
+					public void onFinish() {
+						// TODO Auto-generated method stub
+						findViewById(R.id.textview_seconds).setEnabled(true);
+						((TextView)findViewById(R.id.textview_seconds)).setText(getResources().getString(R.string.passwordauthcode_hint1));
+						mAuthCode = "unknown";
+					}
+				};
+				if(mCountDownTimer != null){
+					mCountDownTimer.start();
+				}
+			}
+			break;
+			
+		case TaskOrMethod_UserRegister:
+			if(result instanceof JSONObject){
+				
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_success), Toast.LENGTH_SHORT).show();
+				
+				new Handler().postDelayed(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						((HSESchoolApp)getApplication()).finishActivityList();
+						LoginRegisterSecondActivity.this.finish();
+						EventManager.getInstance().sendMessage(EventManager.EventType_LoginForRegister, 
+								((EditText)findViewById(R.id.editview_pahone)).getText().toString(),
+								((EditText)findViewById(R.id.editview_password)).getText().toString());
+					}
+				}, 800);
+				
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

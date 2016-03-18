@@ -1,0 +1,431 @@
+package com.zhuochuang.hsej.store;
+
+import java.text.DecimalFormat;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.ListViewForScrollView;
+import com.model.DataLoader;
+import com.model.DefineHandler;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskListener;
+import com.model.TaskType;
+import com.model.data.Deliver;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.util.Utils;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+import com.zhuochuang.hsej.WebViewActivity;
+
+public class StoreCheckOrderActivity extends BaseActivity{
+	private ListView mListView;
+	private View view;
+	private PopupWindow popWindow;
+	private PopupWindow mPopWindowForList;
+	private View mListViewHeaderView;
+	private JSONArray itmeArr;
+	private String mDelivery ;//选择送货方式
+	private static final int REQUEST_CODE = 1;
+	private JSONArray mShoppingCarArr;
+	private String mPayType;
+	private double mTotal;
+	private int mGetCount;
+	private int mStatus;
+	private Handler mHandler = new Handler(){
+
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			switch (msg.what) {
+			case 0:
+				((TextView)findViewById(R.id.store_shopping_delivery)).setText(getResources().getString(R.string.store_shopping_delivery));
+				break;
+			case 1:
+				((TextView)findViewById(R.id.store_shopping_delivery)).setText(getResources().getString(R.string.store_buyer_way));
+			case 2:
+				if(0 < ((String)msg.obj).length()){					
+					Intent intent = new Intent(StoreCheckOrderActivity.this, WebViewActivity.class);					
+					intent.putExtra("result", (String)msg.obj);
+					startActivity(intent);
+					finish();
+				}
+				break;
+			default:
+				break;
+			}		
+		}		
+	};
+	@Override
+	protected void onCreate(Bundle arg0) {		
+		super.onCreate(arg0);
+		mMainLayout.removeAllViews();
+		setContentView(R.layout.store_order);
+		initView();
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserAddressListUserAddress, null, this);
+	}
+	
+	private void initView() {
+		mPayType = "1";
+		mListView = (ListView) findViewById(R.id.shopping_list);
+		String shoppingCar =  getIntent().getStringExtra("ShoppingCar");		
+		try {
+			mShoppingCarArr = new JSONArray(shoppingCar);			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}	
+		((TextView)findViewById(R.id.total_price)).setText(getResources().getString(R.string.money_sigh)+new DecimalFormat("#.00").format(getIntent().getDoubleExtra("money",0)));
+		if(0 == mShoppingCarArr.length()){
+			return;
+		}
+		
+		mListViewHeaderView = LayoutInflater.from(this).inflate(R.layout.store_check_order_list_header, null);
+		mListView.addHeaderView(mListViewHeaderView,null,true);
+		
+		mListView.setAdapter(new ContentAdapter(){
+			
+			@Override
+			public int getCount() {				
+				return mShoppingCarArr.length() == 0 ? 0 :mShoppingCarArr.length();
+			}
+			
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if(convertView == null){
+					convertView = LayoutInflater.from(StoreCheckOrderActivity.this).inflate(R.layout.store_check_order_list_item, null);					
+				}
+				mTotal = 0.0;
+				mGetCount = 0;
+				final JSONObject obj = mShoppingCarArr.optJSONObject(position);
+				((TextView)convertView.findViewById(R.id.store_name)).setText(obj.optString("shopName"));
+				String deliverFee = "";
+				if("" == obj.optString("deliverFee")){
+					deliverFee = "0.00";
+					convertView.findViewById(R.id.order_freight).setVisibility(View.GONE);
+				}else{
+					convertView.findViewById(R.id.order_freight).setVisibility(View.VISIBLE);
+					deliverFee = obj.optString("deliverFee");
+					((TextView)convertView.findViewById(R.id.store_my_order_sum)).setText(getResources().getString(R.string.money_sigh)+deliverFee);
+				}
+    			((TextView)convertView.findViewById(R.id.store_my_order_count_sum)).setText(getResources().getString(R.string.money_sigh)+obj.optString("money"));
+    			((TextView)convertView.findViewById(R.id.store_my_order_count)).setText(getResources().getString(R.string.sum_to)+obj.optString("totality")+"件");
+    			
+    			convertView.findViewById(R.id.store_send_goods).setOnClickListener(new OnClickListener() {					
+					@Override
+					public void onClick(View v) {
+						popupWindow();						
+					}
+				});	
+    			
+    			final JSONArray goodsArr = obj.optJSONArray("goods");
+    			ListViewForScrollView listView = (ListViewForScrollView) convertView.findViewById(R.id.order_goods_list);
+    			
+    			listView.setAdapter(new ContentAdapter(){
+
+					@Override
+					public int getCount() {
+						return null != goodsArr ? goodsArr.length() : 0;
+					}
+
+					@Override
+					public View getView(int position, View convertView,ViewGroup parent) {
+						if(null == convertView){
+							convertView = LayoutInflater.from(StoreCheckOrderActivity.this).inflate(R.layout.store_order_list_item,null);
+						}					
+						JSONObject goodsObj = goodsArr.optJSONObject(position);
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_name)).setText(goodsObj.optString("goodsName"));
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_color)).setText(goodsObj.optString("colour"));
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_size)).setText(goodsObj.optString("spec"));
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_price)).setText(getResources().getString(R.string.money_sigh)+new DecimalFormat("#.00").format(goodsObj.optDouble("price")));
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_sum)).setText("X"+goodsObj.optString("number"));
+						
+						ImageLoader.getInstance().displayImage(goodsObj.optString("image"), (ImageView)convertView.findViewById(R.id.store_my_order_goods_images),
+								ImageLoaderConfigs.displayImageOptionsBg);
+						return convertView;
+					}    				
+    			});
+				return convertView;
+			}
+		});
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				if(arg2 == 0){
+					StoreCheckOrderActivity.this.startActivityForResult(new Intent(StoreCheckOrderActivity.this,StoreShoppingAddressActivity.class),REQUEST_CODE);
+				}
+				
+			}
+		});
+		
+		findViewById(R.id.pay_finish).setOnClickListener(new OnClickListener() {			
+			@SuppressLint("NewApi")
+			@Override
+			public void onClick(View v) {				
+				mDelivery="0";			
+				if(itmeArr.optJSONObject(0).length() > 0){
+					Set<String> sL=new LinkedHashSet<String>();
+					Deliver deliver	= new Deliver(itmeArr.optJSONObject(0).optString("address"),itmeArr.optJSONObject(0).optString("name"),itmeArr.optJSONObject(0).optString("phone"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_OrdersSaveOrders, DataLoader.getInstance()
+						.setsaveOrders(comBination(mShoppingCarArr,deliver)),new TaskListener() {
+							
+							@Override
+							public void taskStarted(TaskType type) {								
+							}
+							
+							@Override
+							public void taskIsCanceled(TaskType type) {
+						    }
+							
+							@Override
+							public void taskFinished(TaskType type, Object result, boolean isHistory) {
+								if(result == null){
+									return;
+								}
+								
+								if(result instanceof Error){
+									Toast.makeText(StoreCheckOrderActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+									return;
+								}
+								
+								if(type == TaskType.TaskOrMethod_OrdersSaveOrders){
+									if(result instanceof JSONObject){ 
+										if(((JSONObject)result).optString("result").equals("1")){										
+											showDialog();
+											new Handler().postDelayed(new Runnable() {
+											
+												@Override
+												public void run() {
+													popWindow.dismiss();												
+												}
+											}, 500);
+											JSONObject obj = ((JSONObject)result);										
+											DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_GetWay,
+													DataLoader.getInstance().setGetWayTypeParams(obj.optJSONObject("items").optString("sign"),
+																								 obj.optJSONObject("items").optString("request_xml"),
+																								 obj.optJSONObject("items").optString("pay_type")),StoreCheckOrderActivity.this);															
+										}else{
+											Toast.makeText(StoreCheckOrderActivity.this, getResources().getString(R.string.store_commint_order_err), Toast.LENGTH_SHORT).show();
+										}
+									}else{
+										//Toast.makeText(StroeCheck, text, duration)
+									}
+								}
+							}
+						});
+		        	}
+			   }
+		});
+		 //选择支付方式
+	    findViewById(R.id.store_pay_online).setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {			
+				((ImageView) findViewById(R.id.store_pay_online)).setImageResource(R.drawable.list_option_tick);
+				((ImageView) findViewById(R.id.store_goods_cash)).setImageResource(R.drawable.list_option_no);
+				mPayType = "1";
+			}
+		});
+	    
+	    findViewById(R.id.store_goods_cash).setOnClickListener(new  OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				((ImageView) findViewById(R.id.store_pay_online)).setImageResource(R.drawable.list_option_no);
+				((ImageView) findViewById(R.id.store_goods_cash)).setImageResource(R.drawable.list_option_tick);
+				mPayType= "2";
+			}
+		});		    
+	}
+	
+	public String  comBination(JSONArray json,Deliver deliver){
+		for(int i = 0 ; i < json.length(); i++){
+			JSONObject jsonObject = json.optJSONObject(i);
+			JSONObject delivers = new JSONObject();
+			try {
+				delivers.put("address", deliver.getAddress());
+				delivers.put("name", deliver.getName());
+				delivers.put("phone", deliver.getPhone());
+				jsonObject.put("deliver", delivers);
+				jsonObject.put("means",mDelivery);
+				jsonObject.put("payType", mPayType);
+				jsonObject.remove("totality");
+				jsonObject.remove("deliverFee");
+				JSONArray goods = jsonObject.optJSONArray("goods");
+				for(int j = 0;j < goods.length();j++){
+					JSONObject good = goods.optJSONObject(j);
+					good.remove("goodsName");
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}		
+		}	
+		return json.toString();
+	}
+	
+	private void popupWindow(){ 
+		 view = LayoutInflater.from(this).inflate(R.layout.store_check_order_popupwindow_item, null);
+		 view.findViewById(R.id.store_shopping_delivery_layout).setOnClickListener(new OnClickListener() {	
+			 
+			@Override
+			public void onClick(View v) {					
+				((ImageView)view.findViewById(R.id.store_shopping_delivery)).setImageResource(R.drawable.list_option_tick);
+				((ImageView)view.findViewById(R.id.store_buyer_way)).setImageResource(R.drawable.list_option_no);				 	
+				 mDelivery = "0";
+				 Message message = new Message();
+				 message.what = 0;
+				 mHandler.sendMessage(message);
+			}
+		 });
+		 
+		 view.findViewById(R.id.store_buyer_way_layout).setOnClickListener(new OnClickListener() {			
+			@Override
+			public void onClick(View v) {	
+				((ImageView)view.findViewById(R.id.store_buyer_way)).setImageResource(R.drawable.list_option_tick);
+				((ImageView)view.findViewById(R.id.store_shopping_delivery)).setImageResource(R.drawable.list_option_no);
+				mDelivery = "1";
+			    Message message = new Message();
+			    message.what = 1;
+			    mHandler.sendMessage(message);
+			}
+				
+		});
+		
+		mPopWindowForList = new PopupWindow(view, Utils.getScreenWidth(this), Utils.getScreenHeight(this)/3*2, true);
+		mPopWindowForList.setBackgroundDrawable(new BitmapDrawable());
+		mPopWindowForList.setOutsideTouchable(true);
+		mPopWindowForList.setAnimationStyle(R.style.popupwindow_animation_store_car);
+	    WindowManager.LayoutParams params = getWindow().getAttributes();
+	    params.alpha = 0.8f;
+	    getWindow().setAttributes(params);
+	    
+	    mPopWindowForList.setOnDismissListener(new OnDismissListener() {			
+			@Override
+			public void onDismiss() {
+				WindowManager.LayoutParams params = getWindow().getAttributes();  
+                params.alpha = 1.0f;//设置为不透明，即恢复原来的界面  
+                getWindow().setAttributes(params);  
+				
+			}
+		});
+	    
+	    mPopWindowForList.showAtLocation(LayoutInflater.from(this).inflate(R.layout.store_order, null), Gravity.BOTTOM, 0, 0);	
+	    
+		view.findViewById(R.id.store_popup_close).setOnClickListener(new OnClickListener() {					
+			@Override
+			public void onClick(View v) {
+				mPopWindowForList.dismiss();
+		   }
+		});
+		
+	}
+	
+	private void showDialog(){
+        View view = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.store_car_hint, null);
+        view.findViewById(R.id.store_car_hints).getBackground().setAlpha(200);
+        ((ImageView)view.findViewById(R.id.icon_pay_succeed)).setVisibility(View.VISIBLE);
+        ((TextView)view.findViewById(R.id.store_car_hint)).setText(getResources().getString(R.string.pay_success));
+        popWindow = new PopupWindow(view, Utils.getScreenWidth(this)/3*2, Utils.getScreenHeight(StoreCheckOrderActivity.this)/5, true);  
+        popWindow.setBackgroundDrawable(new BitmapDrawable());
+        popWindow.setOutsideTouchable(true);
+        popWindow.showAtLocation(view.findViewById(R.id.store_car_hints),Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL, 0, 0);
+	}
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){		
+			Toast.makeText(StoreCheckOrderActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			//Log.d("StoreCheck",((Error) result).getMessage());
+			//mResult = ((Error) result).getMessage();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_UserAddressListUserAddress:
+			if(((JSONObject)result).has("items")){
+			    itmeArr = ((JSONObject)result).optJSONArray("items");
+				if(itmeArr.length() > 0){
+					mListViewHeaderView.findViewById(R.id.store_add_address).setVisibility(View.GONE);
+					mListViewHeaderView.findViewById(R.id.store_order_layout).setVisibility(View.VISIBLE);
+					mListViewHeaderView.findViewById(R.id.store_order_arrow).setVisibility(View.VISIBLE);
+					for(int i = 0 ; i < itmeArr.length(); i++){
+					   if(itmeArr.optJSONObject(i).optInt("mark") == 1){
+							((TextView)mListViewHeaderView.findViewById(R.id.store_consignee)).setText(getResources().getString(R.string.goods_consignee)+itmeArr.optJSONObject(i).optString("name"));					
+							((TextView)mListViewHeaderView.findViewById(R.id.store_consignee_phone)).setText(itmeArr.optJSONObject(i).optString("phone"));
+							((TextView)mListViewHeaderView.findViewById(R.id.store_address)).setText(itmeArr.optJSONObject(i).optString("address")); 
+						 }
+					}
+				}else{
+					new AlertDialog.Builder(StoreCheckOrderActivity.this).setCancelable(false)
+					.setMessage(StoreCheckOrderActivity.this.getResources().getString(R.string.add_address_null))
+					.setPositiveButton(StoreCheckOrderActivity.this.getResources()
+							.getString(R.string.go_add_address),new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog,int which) {
+							Intent intent = new Intent(StoreCheckOrderActivity.this,StoreAddAddressActivity.class);
+							StoreCheckOrderActivity.this.startActivity(intent);
+							((Activity) StoreCheckOrderActivity.this).overridePendingTransition(R.anim.push_bottom_in,R.anim.push_bottom_out);
+						}
+					}).setNegativeButton(StoreCheckOrderActivity.this.getResources().getString(R.string.store_shopping_car_cancle),null).show();	
+				}
+			}else{
+				mListViewHeaderView.findViewById(R.id.store_add_address).setVisibility(View.VISIBLE);
+				mListViewHeaderView.findViewById(R.id.store_order_layout).setVisibility(View.GONE);
+				mListViewHeaderView.findViewById(R.id.store_order_arrow).setVisibility(View.GONE);
+			}			
+			break;
+		case TaskOrMethod_GetWay:
+			Message message = new Message();
+			message.what = 2;
+			message.obj = result.toString();
+			mHandler.sendMessage(message);
+			break;
+		default:
+			break;			
+		}
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if(resultCode == REQUEST_CODE){
+			((TextView)mListViewHeaderView.findViewById(R.id.store_consignee)).setText(data.getStringExtra("Name"));
+			((TextView)mListViewHeaderView.findViewById(R.id.store_consignee_phone)).setText(data.getStringExtra("Phone"));
+			((TextView)mListViewHeaderView.findViewById(R.id.store_address)).setText(data.getStringExtra("Address"));
+		}
+	}
+	
+}

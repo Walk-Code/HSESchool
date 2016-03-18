@@ -1,0 +1,46 @@
+package com.zhuochuang.hsej.entity;
+
+import java.util.List;
+
+public class CommunityStructEntity {
+	private int result;
+	private List<StructEntity> structures;
+
+	public int getResult() {
+		return result;
+	}
+
+	public void setResult(int result) {
+		this.result = result;
+	}
+
+	public List<StructEntity> getStructures() {
+		return structures;
+	}
+
+	public void setStructures(List<StructEntity> structures) {
+		this.structures = structures;
+	}
+
+	public static class StructEntity {
+		private int id;
+		private String name;
+
+		public int getId() {
+			return id;
+		}
+
+		public void setId(int id) {
+			this.id = id;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+	}
+}

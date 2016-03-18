@@ -1,0 +1,379 @@
+package com.zhuochuang.hsej.store;
+
+import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.TimeZone;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.PopupWindow.OnDismissListener;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.ListViewForScrollView;
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+import com.zhuochuang.hsej.WebViewActivity;
+import com.zhuochuang.hsej.store.StorePupopWindow.onPopupWindowItemClickListener;
+
+public class StoreOrderActivity extends BaseActivity {
+	private StorePupopWindow pupopWindow;
+	private String[] items;
+	private String[] item;
+	private PullToRefreshListView mListView;
+	private JSONArray mItemsArr;
+	private JSONArray mFilterArr;
+	private ContentAdapter mAdapter;
+	private String mStatus;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		mMainLayout.removeAllViews();
+		setContentView(R.layout.store_check_order);
+		items = getResources().getStringArray(R.array.store_order_selection);	
+		item = getResources().getStringArray(R.array.store_order_status);
+		initView();
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_OrdersListOrders,DataLoader.getInstance().getListOrdersTypeParams("",""), this);
+	}
+
+	private void initView() {
+		//mParams = getWindow().getAttributes();
+		mStatus = "";
+		mListView = (PullToRefreshListView) findViewById(R.id.store_order_list);
+		pupopWindow = new StorePupopWindow(StoreOrderActivity.this, 1,2);
+		pupopWindow.changeData(Arrays.asList(items),getIntent().getIntExtra("com.zhuochuang.hsej.store", 0));
+		pupopWindow.setOnPoPupWindowClickListener(new onPopupWindowItemClickListener() {
+			@Override
+			public void onPopupWindowItemClick(int position) {
+				//mParams.alpha = 0.8f;
+				//getWindow().setAttributes(mParams);
+				((TextView) findViewById(R.id.details_list)).setText(items[position]);			 
+				if (0 != position) {										
+					mFilterArr = screening(position+"");
+					//mAdapter.notifyDataSetChanged();
+				}else{
+					mFilterArr = mItemsArr;
+				}
+				mAdapter.notifyDataSetChanged();
+			}
+		});
+		
+		pupopWindow.setOnDismissListener(new OnDismissListener() {
+			@Override
+			public void onDismiss() {
+				backgroundAlpha(1f);
+				findViewById(R.id.details_list).setVisibility(View.VISIBLE);
+				findViewById(R.id.main_left).setVisibility(View.VISIBLE);
+				findViewById(R.id.details_list_).setVisibility(View.GONE);
+			}
+		});
+
+		findViewById(R.id.details_list).setOnClickListener(
+			new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					backgroundAlpha(0.8f);
+					findViewById(R.id.details_list).setVisibility(View.GONE);
+					findViewById(R.id.details_list_).setVisibility(View.VISIBLE);
+					findViewById(R.id.main_left).setVisibility(View.GONE);
+					//mParams.alpha = 0.8f;
+					pupopWindow.showAsDropDown(findViewById(R.id.store_detail_title));
+				}
+			});
+		
+		findViewById(R.id.main_left).setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				finish();
+			}
+		});
+		
+		mListView.setAdapter(mAdapter = new ContentAdapter() {
+
+			@Override
+			public int getCount() {
+				if(mFilterArr != null){
+					return mFilterArr.length();
+				}
+				return 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if(convertView == null){
+					convertView = LayoutInflater.from(StoreOrderActivity.this).inflate(R.layout.store_my_order_list_item, null);					
+				}
+			    final JSONObject obj = mFilterArr.optJSONObject(position);
+				final JSONArray orderGoods = obj.optJSONArray("orderGoods");			
+				((TextView)convertView.findViewById(R.id.store_name)).setText(obj.optString("shopName"));
+				((TextView)convertView.findViewById(R.id.store_pay_status)).setText(returnStatus(obj.optString("status")));
+				((TextView)convertView.findViewById(R.id.store_my_order_number)).setText(getResources()
+						.getString(R.string.order_number)+obj.optString("orderNum"));				
+				((TextView)convertView.findViewById(R.id.store_my_order_time)).setText(getResources()
+						.getString(R.string.order_time)+getStringFromLong(obj.optLong("createDate")));
+				((TextView)convertView.findViewById(R.id.store_my_order_sum)).setText(getResources().getString(R.string.sum_to)+orderGoods.length()+
+						getResources().getString(R.string.sum_to_sign)+new DecimalFormat("#.00").format(obj.optDouble("money")));								
+				ListViewForScrollView listView = (ListViewForScrollView) convertView.findViewById(R.id.order_list);
+				
+				convertView.findViewById(R.id.store_name).setOnClickListener(new OnClickListener() {
+					
+					@Override
+					public void onClick(View v) {
+						Intent intent = new Intent(StoreOrderActivity.this, StorePersonActivity.class);
+						intent.putExtra("shopId",obj.optString("shopId"));
+						startActivity(intent);
+					}
+				});
+				
+				
+				listView.setAdapter(new ContentAdapter(){
+
+					@Override
+					public int getCount() {			
+						return orderGoods.length() == 0 ? 0 : orderGoods.length();
+					}
+
+					@Override
+					public View getView(int position, View convertView, ViewGroup parent) {
+						if(convertView == null){
+							convertView = LayoutInflater.from(StoreOrderActivity.this).inflate(R.layout.store_order_list_item, null);					
+						}
+						JSONObject goods = orderGoods.optJSONObject(position);
+						ImageLoader.getInstance().displayImage(goods.optString("goodsImage"),
+								(ImageView)convertView.findViewById(R.id.store_my_order_goods_images),ImageLoaderConfigs.displayImageOptionsBg);
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_name)).setText(goods.optString("goodsName"));
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_price)).setText(getResources().getString(R.string.money_sigh)+new DecimalFormat("#.00").format(goods.optDouble("price")));
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_sum)).setText("X"+goods.optString("number"));
+						((TextView)convertView.findViewById(R.id.store_deliverytype)).setText(returnDeliveryType(obj.optString("payType")));						
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_color)).setText(getResources().getString(R.string.goods_color)+goods.optString("colour"));
+						((TextView)convertView.findViewById(R.id.store_my_order_goods_size)).setText(getResources().getString(R.string.goods_size)+goods.optString("spec"));
+						return convertView;
+					}
+					
+				});
+				
+				switch (obj.optString("status")) {
+				case "1":
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(getResources().getString(R.string.store_pay));
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setBackgroundResource(R.drawable.shape_store_car_pay_bg);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setTextColor(Color.parseColor("#DD514F"));
+					break;
+				case "2":
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(items[2]);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setBackgroundResource(R.drawable.shape_store_car_pay_bg);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setTextColor(Color.parseColor("#DD514F"));
+					break;
+				case "3":
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(items[3]);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setBackgroundResource(R.drawable.shape_store_car_pay_bg);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setTextColor(Color.parseColor("#DD514F"));
+					break;
+				case "4":	
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(items[4]);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setBackgroundResource(R.drawable.shape_store_car_pay_bg);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setTextColor(Color.parseColor("#DD514F"));
+					break;
+				case "5":
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(items[1]);
+					break;
+				case "6":	
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(getResources().getString(R.string.stores_goods_to_evaluate));
+					break;
+				case "7":
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(items[7]);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setBackgroundResource(R.drawable.shape_store_car_pay_bg);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setTextColor(Color.parseColor("#DD514F"));
+					break;
+				case "8":
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(items[8]);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setBackgroundResource(R.drawable.shape_store_car_pay_bg);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setTextColor(Color.parseColor("#DD514F"));
+					break;
+				case "9":
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setText(item[3]);
+					/*((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setBackgroundResource(R.drawable.shape_store_car_pay_bg);
+					((TextView)convertView.findViewById(R.id.store_my_order_confirm)).setTextColor(Color.parseColor("#DD514F"));*/
+					break;		
+				default:
+					break;
+				}
+				
+				final int Orderstatus = obj.optInt("status");			
+				convertView.findViewById(R.id.store_my_order_confirm).setOnClickListener(new OnClickListener(){
+
+					@Override
+					public void onClick(View v) {							
+						switch(Orderstatus){
+						case 1:	
+							showDialogCustom(DIALOG_CUSTOM);
+							DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_OrdersGetPayUrl,
+									DataLoader.getInstance().setOrderNumTypeParams(obj.optString("orderNum")),StoreOrderActivity.this);
+							break;
+						case 2:
+							
+							break;
+						case 5:
+							//配送完成
+							break;
+						case 6:
+							Intent intent = new Intent(StoreOrderActivity.this, StoreGoodsEvaluateActivity.class);
+							intent.putExtra("GoodsData", orderGoods.toString());
+							startActivity(intent);
+							break;
+						case 9:
+							//评价
+							break;
+						default:
+							break;
+						}										
+				   }						
+			});			
+				return convertView;
+			}
+
+		});
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,int position, long id) {	
+				/*try {
+					Intent intent = new Intent(StoreOrderActivity.this,StoreOrderDetailActivity.class);
+					intent.putExtra("OrderData", mFilterArr.get(position).toString());
+					startActivity(intent);
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}*/
+			}
+		});
+	 mListView.setOnRefreshListener(new OnRefreshListener() {
+		@Override
+		public void onRefresh() {
+			DataLoader.getInstance().startTaskForResult(
+					TaskType.TaskOrMethod_OrdersListOrders,DataLoader.getInstance().getListOrdersTypeParams(mStatus,""), StoreOrderActivity.this);			
+		}});
+	
+	mListView.startRefresh();
+	}
+	
+	public String returnDeliveryType(String means){
+		if(means.equals("1")){
+			return getResources().getString(R.string.store_pay_online);
+		}else{
+			return getResources().getString(R.string.store_goods_cash);
+		}
+	}
+	
+	public void backgroundAlpha(float bgAlpha){  
+        WindowManager.LayoutParams lp = getWindow().getAttributes();  
+        lp.alpha = bgAlpha; 
+        getWindow().setAttributes(lp);  
+}  
+	
+	//返回订单状态
+	public String returnStatus(String status){
+		if(status != null){
+		int statusNumber = Integer.parseInt(status);		
+		return items[statusNumber];
+		}else{
+			return "null";
+		}
+	}
+	//筛选
+	public JSONArray screening(String status){
+		JSONArray array = new JSONArray();
+		if(mItemsArr.length() > 0 && mItemsArr != null){
+			for(int i = 0 ;i < mItemsArr.length(); i++ ){
+				JSONObject obj = mItemsArr.optJSONObject(i);
+				if(status.equals(obj.optString("status"))){
+					array.put(obj);
+				}
+			}			
+		}
+		return array;
+	}
+	//时间
+	public static String getStringFromLong(long millis){	
+		Calendar cal = Calendar.getInstance();
+	    cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+	    cal.setTimeInMillis(millis*1l);
+	    return (cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-"+ cal.get(Calendar.DAY_OF_MONTH) + " " + cal.get(Calendar.HOUR_OF_DAY) + ":"
+	            + cal.get(Calendar.MINUTE));
+	}  
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		if(mListView != null){
+			mListView.complete();
+		}
+		
+		if (result == null) {
+			return;
+		}
+		
+		if (result instanceof Error) {
+			Toast.makeText(StoreOrderActivity.this,((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_OrdersListOrders:
+			if(result instanceof JSONObject){
+				if (((JSONObject) result).has("items")) {
+					mItemsArr = ((JSONObject) result).optJSONArray("items");			
+					if (mItemsArr.length() > 0 && mItemsArr != null) {
+						mListView.setVisibility(View.VISIBLE);
+						mFilterArr = mItemsArr;
+						mAdapter.notifyDataSetChanged();
+					}
+				}				
+			}			
+			break;
+		case TaskOrMethod_OrdersGetPayUrl:
+			if(result instanceof JSONObject){		
+				if (((JSONObject) result).has("items")) {						
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_GetWay,
+							DataLoader.getInstance().setGetWayTypeParams(((JSONObject) result).optJSONObject("items").optString("sign"),
+																		((JSONObject) result).optJSONObject("items").optString("request_xml"),
+																		((JSONObject) result).optJSONObject("items").optString("pay_type")),StoreOrderActivity.this);										
+				}				
+			}			
+			break;
+		case TaskOrMethod_GetWay:
+			removeDialogCustom();
+			Intent intent = new Intent(StoreOrderActivity.this, WebViewActivity.class);					
+			intent.putExtra("result",result.toString());
+			StoreOrderActivity.this.startActivity(intent);
+			break;
+		default:
+			break;
+		}
+	}
+}

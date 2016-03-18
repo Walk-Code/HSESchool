@@ -1,0 +1,56 @@
+package com.zhuochuang.hsej.adapter;
+
+import java.util.List;
+
+import android.content.Context;
+import android.view.View;
+import android.widget.TextView;
+
+import com.util.TabBarView.TabBarAdapter;
+import com.zhuochuang.hsej.R;
+
+/**
+ * 失物招领跟二手页面tab适配器
+ * 
+ * @author Administrator
+ * 
+ */
+public class SecondHandandLostTabAdapter implements TabBarAdapter {
+	private Context context;
+	private List<Integer> tabNames;
+
+	public SecondHandandLostTabAdapter(Context context, List<Integer> tabNames) {
+		this.context = context;
+		this.tabNames = tabNames;
+	}
+
+	@Override
+	public View getSeletedView(int position, View convertView) {
+		if (convertView == null) {
+			convertView = View.inflate(context,
+					R.layout.tabbar_cell_myclassmate, null);
+		}
+		((TextView) convertView.findViewById(R.id.textview)).setText(tabNames
+				.get(position));
+		convertView.findViewById(R.id.line).setVisibility(View.VISIBLE);
+		return convertView;
+	}
+
+	@Override
+	public View getNOSeletedView(int position, View convertView) {
+		if (convertView == null) {
+			convertView = View.inflate(context,
+					R.layout.tabbar_cell_myclassmate, null);
+		}
+		((TextView) convertView.findViewById(R.id.textview)).setText(tabNames
+				.get(position));
+		convertView.findViewById(R.id.line).setVisibility(View.GONE);
+		return convertView;
+	}
+
+	@Override
+	public int getCount() {
+		return tabNames.size();
+	}
+
+}

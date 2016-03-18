@@ -1,0 +1,75 @@
+package com.zhuochuang.hsej;
+
+import android.content.Intent;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+
+import com.zhuochuang.hsej.entity.EnglishScoreEntity;
+
+public class EnglishScoreQueryResultActivity extends BaseActivity {
+	private EnglishScoreEntity mScoreEntity;
+
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_english_score_query_result);
+		setTitleText(R.string.activity_english_score_query_result_title);
+
+		initData();
+	}
+
+	private void initData() {
+		mScoreEntity = (EnglishScoreEntity) getIntent().getExtras()
+				.getSerializable("score_entity");
+		Resources mResources = getResources();
+		double passScore = Double.parseDouble(mScoreEntity.getPassScore());
+		double myScore = Double.parseDouble(mScoreEntity.getTotalScore());
+		((TextView) findViewById(R.id.english_result_pass_score))
+				.setText(String.format(
+						mResources.getString(R.string.text_tgfs),
+						mScoreEntity.getPassScore()));
+		((TextView) findViewById(R.id.english_result_my_score))
+				.setText(mScoreEntity.getTotalScore());
+		String type = mScoreEntity.getType();
+		if (myScore >= passScore) {
+			((TextView) findViewById(R.id.english_result_info)).setText(String
+					.format(mResources.getString(R.string.english_pass_info),
+							type));
+		} else {
+			((TextView) findViewById(R.id.english_result_info)).setText(String
+					.format(mResources
+							.getString(R.string.english_not_pass_info), type));
+
+		}
+		((TextView) findViewById(R.id.english_result_name))
+				.setText(mScoreEntity.getXm());
+		((TextView) findViewById(R.id.english_result_numb))
+				.setText(mScoreEntity.getZkzh());
+		((TextView) findViewById(R.id.english_result_class_avg))
+				.setText(mScoreEntity.getBjAverage());
+		((TextView) findViewById(R.id.english_result_class_rank))
+				.setText(mScoreEntity.getBjRanking());
+		((TextView) findViewById(R.id.english_result_school_avg))
+				.setText(mScoreEntity.getXxAverage());
+		((TextView) findViewById(R.id.english_result_school_rank))
+				.setText(mScoreEntity.getXxRanking());
+
+	}
+
+	public void onScoreDetailClick(View view) {
+		Intent intent = new Intent(this,
+				EnglishScoreQueryResultDetailsActivity.class);
+		intent.putExtra("stuName", mScoreEntity.getXm());
+		intent.putExtra("schName", mScoreEntity.getXxmc());
+		intent.putExtra("examType", mScoreEntity.getType());
+		intent.putExtra("stuZkzh", mScoreEntity.getZkzh());
+		intent.putExtra("totalScore", mScoreEntity.getTotalScore());
+		intent.putExtra("listenScore", mScoreEntity.getListenScore());
+		intent.putExtra("readScore", mScoreEntity.getReadScore());
+		intent.putExtra("writeScore", mScoreEntity.getWriteScore());
+		startActivity(intent);
+	}
+
+}

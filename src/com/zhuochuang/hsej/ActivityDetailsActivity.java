@@ -1,0 +1,787 @@
+package com.zhuochuang.hsej;
+
+import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.WindowManager;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.widget.AbsListView;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.TextView.BufferType;
+import android.widget.Toast;
+
+import com.layout.ActivityJoinDialog;
+import com.layout.ConsumeTextView;
+import com.layout.CustomCommentView;
+import com.layout.CustomWebView;
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRemoreListener;
+import com.layout.TouchableSpan;
+import com.layout.emoji.EmojiUtils;
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.util.Utils;
+
+@SuppressLint("SetJavaScriptEnabled")
+public class ActivityDetailsActivity extends BaseActivity{
+	
+	View mHeaderView;
+	PullToRefreshListView mListView;
+	ContentAdapter mListAdapter;
+	CustomCommentView mCustomCommentView;
+	CustomWebView mCustomWebView;
+	JSONObject mHeaderObj;
+	JSONArray mCommentListArr;
+
+	String mimeType = "text/html", encoding = "UTF-8";
+	String mCommentReplyUserId = null;
+	String mCommentReplyId = null;
+	int mCommentDeleteIndex = 0;
+	int mPageNo = 1;
+	boolean mIsReadMore = false;
+	boolean mIsJoin = false;
+	boolean mIsFavorite = false;
+	boolean mIsNotifyToFriends = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.activity_activitydetails);
+		setTitleText(R.string.activitydetails_title);
+		mMainLayout.findViewById(R.id.ico_share).setVisibility(View.VISIBLE);
+		((HSESchoolApp)getApplicationContext()).setUmengShareParams("3", getIntent().getStringExtra("id"), "");
+		
+		showDialogCustom(DIALOG_CUSTOM);
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("activityId", getIntent().getStringExtra("id"));
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ActivityGetActivity, params, ActivityDetailsActivity.this);
+	}
+
+	private void initHeaderView() {
+		mHeaderView = View.inflate(ActivityDetailsActivity.this, R.layout.listcell_activitydetails_header, null);
+		mListView.addHeaderView(mHeaderView);
+		mCustomCommentView = (CustomCommentView) findViewById(R.id.custom_commentview);
+		mCustomCommentView.setVisibility(View.GONE);
+	}
+	
+	private void setHeaderData(){
+		if(mHeaderObj == null){
+			return;
+		}
+		SimpleDateFormat timeFormat = new SimpleDateFormat(getResources().getString(R.string.time_format1));
+		
+		((TextView)mHeaderView.findViewById(R.id.textview_title)).setText(mHeaderObj.optString("name"));
+		((TextView)mHeaderView.findViewById(R.id.textview_date)).setText(
+				String.format(getResources().getString(R.string.activitydetails_addresstimeend), 
+						mHeaderObj.optString("address"), 
+						timeFormat.format(new Date(mHeaderObj.optLong("startTime", 0))),
+						timeFormat.format(new Date(mHeaderObj.optLong("endTime", 0)))));
+		
+		((TextView)mHeaderView.findViewById(R.id.textview_count)).setText(
+				String.format(getResources().getString(R.string.activitydetails_joincount), mHeaderObj.optString("applicants")));
+//		((TextView)mHeaderView.findViewById(R.id.textview_content)).setText(mHeaderObj.optString("introduction"));
+		((TextView)mHeaderView.findViewById(R.id.textview_title)).setText(mHeaderObj.optString("name"));
+		
+		mCustomWebView = (CustomWebView) mHeaderView.findViewById(R.id.webview);
+		WebSettings webSetting = mCustomWebView.getSettings();
+        webSetting.setSupportZoom(false);
+        webSetting.setBuiltInZoomControls(false);
+        webSetting.setUseWideViewPort(false);
+        webSetting.setJavaScriptEnabled(true);
+        webSetting.setLoadWithOverviewMode(true);
+        
+        String webInfo = "<html><head><meta http-equiv=\"Content-Type\" content=\"text/html charset=utf-8\" />"+
+        		"<body style=\"padding:10px;\">" + 
+				"</div><span style=\"font-size:%d px;\">%s<br/></span></div></body></html>";
+        //mCustomWebView.loadDataWithBaseURL(null, mHeaderObj.optString("introduction"), mimeType, encoding, null);
+        mCustomWebView.loadDataWithBaseURL(null, String.format(webInfo, 16, 
+        		replaceHtml(mHeaderObj.optString("introduction"))), mimeType, encoding, null);
+        		//mHeaderObj.has("content")? mHeaderObj.optString("content") : mHeaderObj.optString("intro")), mimeType, encoding, null);
+		
+		
+		mHeaderView.findViewById(R.id.textview_join).setEnabled(true);
+		
+		
+		switch (mHeaderObj.optInt("startStatus", 0)) {
+		case 0:
+			mHeaderView.findViewById(R.id.textview_join).setBackgroundResource(R.drawable.btn_red_button_selector);
+			((TextView)mHeaderView.findViewById(R.id.textview_join)).setTextColor(Color.argb(255, 240, 240, 240));
+			((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitydetails_join));
+			if(mHeaderObj.has("applyStatus")){
+				switch (mHeaderObj.optInt("applyStatus", 0)) {
+				case 2:
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitydetails_auditing));
+					break;
+				case 3:
+					break;
+				case 4:
+					mHeaderView.findViewById(R.id.textview_join).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setTextColor(Color.argb(255, 190, 190, 190));
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitydetails_join_already));
+					mHeaderView.findViewById(R.id.textview_join).setEnabled(false);
+					break;
+				case 5:
+					mHeaderView.findViewById(R.id.textview_join).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setTextColor(Color.argb(255, 190, 190, 190));
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitydetails_refuse));
+					mHeaderView.findViewById(R.id.textview_join).setEnabled(false);
+					break;
+				case 6:
+					mHeaderView.findViewById(R.id.textview_join).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setTextColor(Color.argb(255, 190, 190, 190));
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitydetails_join_partin));
+					mHeaderView.findViewById(R.id.textview_join).setEnabled(false);
+					break;
+				default:
+					break;
+				}
+				/*if(mHeaderObj.optString("applyStatus").equalsIgnoreCase("2")){
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitydetails_auditing));
+					mHeaderView.findViewById(R.id.textview_join).setEnabled(false);
+				}
+				else if(mHeaderObj.optString("applyStatus").equalsIgnoreCase("4")){
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitydetails_unjoin));
+				}
+				else{
+					((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitydetails_join));
+				}*/
+			}
+			break;
+		case 1:
+			mHeaderView.findViewById(R.id.textview_join).setEnabled(false);
+			mHeaderView.findViewById(R.id.textview_join).setBackgroundResource(R.drawable.bg_activity_statu_going);
+			((TextView)mHeaderView.findViewById(R.id.textview_join)).setTextColor(Color.argb(255, 233, 78, 81));
+			((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitylist_going));
+			break;
+		case 2:
+			mHeaderView.findViewById(R.id.textview_join).setEnabled(false);
+			mHeaderView.findViewById(R.id.textview_join).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+			((TextView)mHeaderView.findViewById(R.id.textview_join)).setTextColor(Color.argb(255, 190, 190, 190));
+			((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitylist_finish));
+			break;
+		case 8:
+			mHeaderView.findViewById(R.id.textview_join).setEnabled(false);
+			mHeaderView.findViewById(R.id.textview_join).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+			((TextView)mHeaderView.findViewById(R.id.textview_join)).setTextColor(Color.argb(255, 190, 190, 190));
+			((TextView)mHeaderView.findViewById(R.id.textview_join)).setText(getResources().getString(R.string.activitylist_aborted));
+			break;
+		default:
+			break;
+		}
+		
+		if(mHeaderObj == null || !mHeaderObj.has("allowComment") || mHeaderObj.optBoolean("allowComment")){
+			mCustomCommentView.setVisibility(View.VISIBLE);
+			mHeaderView.findViewById(R.id.group_comment).setVisibility(View.VISIBLE);
+			mHeaderView.findViewById(R.id.gourp_comment_line).setVisibility(View.VISIBLE);
+		}
+		else{
+			mHeaderView.findViewById(R.id.group_comment).setVisibility(View.GONE);
+			mHeaderView.findViewById(R.id.gourp_comment_line).setVisibility(View.GONE);
+			mCustomCommentView.setVisibility(View.GONE);
+		}
+		
+		mHeaderView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if(mCustomCommentView != null){
+					mCustomCommentView.resetCustomEditview(ActivityDetailsActivity.this);
+					mCommentReplyUserId = null;
+					mCommentReplyId = null;
+				}
+			}
+		});
+	}
+	
+	@SuppressWarnings("deprecation")
+	private String replaceHtml(String data){
+		int width = ((WindowManager)getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getWidth();
+        width =(int)(width / getResources().getDisplayMetrics().density) - Utils.dipToPixels(this, 20);
+		
+		return data.replaceAll("&lt;", "<")
+				.replaceAll("&gt;", ">")
+				.replaceAll("&#xd;", "")
+				.replaceAll("&#xD;", "")
+				.replaceAll("&nbsp;", " ")
+				.replaceAll("&quot;", "\"")
+				.replaceAll("(<img[^>]*?)(\\s+width\\s*=\\s*\\S+)","$1")
+				.replaceAll("(<img[^>]*?)(\\s+height\\s*=\\s*\\S+)","$1")
+				.replaceAll("(<img[^>]*?)(\\s+style\\s*=\\s*\\S+)","$1")
+				.replaceAll("<img", "<img width=\"" + width + "\"")
+				.replaceAll("(<IMG[^>]*?)(\\s+width\\s*=\\s*\\S+)","$1")
+				.replaceAll("(<IMG[^>]*?)(\\s+height\\s*=\\s*\\S+)","$1")
+				.replaceAll("(<IMG[^>]*?)(\\s+style\\s*=\\s*\\S+)","$1")
+				.replaceAll("<IMG", "<img width=\"" + width + "\"");
+	}
+	
+	private void initListView(){
+		mListView = (PullToRefreshListView) findViewById(R.id.pullto_listview);
+		initHeaderView();
+		mListView.setAdapter(mListAdapter = new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				if(mCommentListArr != null && mCommentListArr.length() > 0){
+					return mCommentListArr.length();
+				}
+				return 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = View.inflate(ActivityDetailsActivity.this, R.layout.listcell_postdetails, null);
+					convertView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+				}
+				final JSONObject obj = mCommentListArr.optJSONObject(position);
+				if(obj != null){
+					JSONObject fromUserObj = null;
+					JSONObject toUserObj = null;
+					String fromUserName = null;
+					String toUserName = null;
+					
+					if(obj.has("fromUser")){
+						fromUserObj = obj.optJSONObject("fromUser");
+						fromUserName = fromUserObj.optString("nickName");
+					}
+					
+					if(fromUserObj == null){
+						return convertView;
+					}
+					
+					if(obj.has("toUser")){
+						toUserObj = obj.optJSONObject("toUser");
+						toUserName = toUserObj.optString("nickName");
+					}
+					
+					String finalComment;
+					SpannableString spanName;
+					
+					if(toUserObj != null){
+						finalComment = String.format(getResources().getString(R.string.comment_reply_more), fromUserName, toUserName, obj.optString("content"));
+						
+						spanName = new SpannableString(EmojiUtils.getEmojiCharSequence(finalComment));
+						TouchableSpan touchableSpan1 = new TouchableSpan(ActivityDetailsActivity.this, Color.argb(255, 82, 107, 146), Color.argb(255, 82, 107, 146), Color.argb(90, 0, 0, 0));
+						touchableSpan1.setPressString(fromUserName);
+						touchableSpan1.setPressUserId(fromUserObj.optString("id"));
+						spanName.setSpan(touchableSpan1, finalComment.toString().indexOf(fromUserName), fromUserName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+						
+						TouchableSpan touchableSpan2 = new TouchableSpan(ActivityDetailsActivity.this, Color.argb(255, 82, 107, 146), Color.argb(255, 82, 107, 146), Color.argb(90, 0, 0, 0));
+						touchableSpan2.setPressString(toUserName);
+						touchableSpan2.setPressUserId(toUserObj.optString("id"));
+						spanName.setSpan(touchableSpan2, finalComment.toString().indexOf(toUserName, fromUserName.length()), finalComment.toString().indexOf(toUserName, fromUserName.length()) + toUserName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+					}
+					else{
+						finalComment = String.format(getResources().getString(R.string.comment_reply), fromUserName, obj.optString("content"));
+						
+						spanName = new SpannableString(EmojiUtils.getEmojiCharSequence(finalComment));
+						TouchableSpan touchableSpan1 = new TouchableSpan(ActivityDetailsActivity.this, Color.argb(255, 82, 107, 146), Color.argb(255, 82, 107, 146), Color.argb(90, 0, 0, 0));
+						touchableSpan1.setPressString(fromUserName);
+						touchableSpan1.setPressUserId(fromUserObj.optString("id"));
+						spanName.setSpan(touchableSpan1, finalComment.toString().indexOf(fromUserName), fromUserName.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+					}
+					
+					((ConsumeTextView)convertView.findViewById(R.id.textview_title)).setText(spanName, BufferType.SPANNABLE);
+					((ConsumeTextView)convertView.findViewById(R.id.textview_title)).setMovementMethod(ConsumeTextView.LocalLinkMovementMethod.getInstance());
+				
+					((TextView)convertView.findViewById(R.id.textview_date)).setText(Utils.friendlyTime(ActivityDetailsActivity.this, obj.optLong("createDate")));
+				
+					ImageLoader.getInstance().displayImage(fromUserObj.optString("headImage"), ((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsRound);
+					convertView.findViewById(R.id.group_imageview).setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							// TODO Auto-generated method stub
+							if(!DataLoader.getInstance().isLogin()){
+								Toast.makeText(ActivityDetailsActivity.this, getResources().getString(R.string.login_notify), Toast.LENGTH_SHORT).show();
+								startActivity(new Intent(ActivityDetailsActivity.this, LoginActivity.class));
+								ActivityDetailsActivity.this.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+								return;
+							}
+							String id = null;
+							try {
+								id = obj.optJSONObject("fromUser").optString("id");
+							} catch (Exception e) {
+								// TODO: handle exception
+							}
+							if(id == null){
+								return;
+							}
+							Intent intent = null;
+							if(id.equalsIgnoreCase(DataLoader.getInstance().getHeaderUsetId())){
+								intent = new Intent(ActivityDetailsActivity.this, MyPageActivity.class);
+							}
+							else{
+								intent = new Intent(ActivityDetailsActivity.this, PersonPageActivity.class);
+								intent.putExtra("id", id);
+							}
+							startActivity(intent);
+						}
+					});
+					
+					convertView.findViewById(R.id.group_content).setOnClickListener(new OnListCommentClick(fromUserObj, obj.optString("id"), position));
+				}
+				
+				return convertView;
+			}
+		});
+		
+		if(mHeaderObj == null || !mHeaderObj.has("allowComment") || mHeaderObj.optBoolean("allowComment")){
+			mListView.setRemoreable(true);
+			mListView.setOnRemoreListener(new OnRemoreListener() {
+				
+				@Override
+				public void onRemore() {
+					// TODO Auto-generated method stub
+					mPageNo++;
+					HashMap<String, Object> params = new HashMap<String, Object>();
+					params.put("resourceType", "3");
+					params.put("resourceId", getIntent().getStringExtra("id"));
+					params.put("pageNo", mPageNo);
+					params.put("pageSize", "20");
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_DiscussListDiscussions, params, ActivityDetailsActivity.this);
+				}
+			});
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("resourceType", "3");
+			params.put("resourceId", getIntent().getStringExtra("id"));
+			params.put("pageNo", 1);
+			params.put("pageSize", "20");
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_DiscussListDiscussions, params, ActivityDetailsActivity.this);
+		}
+		else{
+			removeDialogCustom();
+		}
+	}
+	
+	public void onShareClick(View view){
+		if(mHeaderObj != null && ((HSESchoolApp)getApplicationContext()).umSocialServiceShare != null){
+			((HSESchoolApp)getApplicationContext()).setUmengShareObj(ActivityDetailsActivity.this, mHeaderObj, Configs.UmengShare_Infomation);
+			((HSESchoolApp)getApplicationContext()).umSocialServiceShare.openShare(ActivityDetailsActivity.this, false);
+			((HSESchoolApp)getApplicationContext()).setOnFavoriteClick(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					String myId = DataLoader.getInstance().getHeaderUsetId();
+					if(myId == null || myId.length() == 0){
+						Toast.makeText(ActivityDetailsActivity.this, getResources().getString(R.string.login_notify), Toast.LENGTH_SHORT).show();
+						startActivity(new Intent(ActivityDetailsActivity.this, LoginActivity.class));
+						overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+						return;
+					}
+					
+					if(mHeaderObj.has("favoriteStatus") && mHeaderObj.optString("favoriteStatus").equalsIgnoreCase("0")){
+						Toast.makeText(ActivityDetailsActivity.this, getResources().getString(R.string.favorite_already), Toast.LENGTH_SHORT).show();
+						return;
+					}
+					mIsFavorite = true;
+					showDialogCustom(DIALOG_CUSTOM);
+					HashMap<String, Object> params = new HashMap<String, Object>();
+					params.put("resourceType", "3");
+					params.put("resourceIds", mHeaderObj.optString("id"));
+					params.put("statuses", "0");
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_FavoriteApply, params, ActivityDetailsActivity.this);
+				}
+			});
+			((HSESchoolApp)getApplicationContext()).setOnFriendClick(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					String myId = DataLoader.getInstance().getHeaderUsetId();
+					if(myId == null || myId.length() == 0){
+						Toast.makeText(ActivityDetailsActivity.this, getResources().getString(R.string.login_notify), Toast.LENGTH_SHORT).show();
+						startActivity(new Intent(ActivityDetailsActivity.this, LoginActivity.class));
+						overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+						return;
+					}
+					
+					startActivity(new Intent(ActivityDetailsActivity.this, ContactListActivity.class));
+				}
+			});
+		}
+	}
+
+	public void onJoinClick(final View view){
+		String myId = DataLoader.getInstance().getHeaderUsetId();
+		if(myId == null || myId.length() == 0){
+			Toast.makeText(ActivityDetailsActivity.this, getResources().getString(R.string.login_notify), Toast.LENGTH_SHORT).show();
+			startActivity(new Intent(ActivityDetailsActivity.this, LoginActivity.class));
+			overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+			return;
+		}
+		if(mHeaderObj == null){
+			return;
+		}
+		
+		if(mHeaderObj.optInt("applicants", 0) >= mHeaderObj.optInt("maxNumber", 1000)){
+			Toast.makeText(ActivityDetailsActivity.this, 
+					String.format(getResources().getString(R.string.activitydetails_joincount_max), mHeaderObj.optString("maxNumber")), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		if(!mHeaderObj.has("applyStatus") || !mHeaderObj.optString("applyStatus").equalsIgnoreCase("2")){
+			final ActivityJoinDialog dialog = new ActivityJoinDialog(ActivityDetailsActivity.this, mHeaderObj.optString("name"));
+			dialog.setOnCheckListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					// TODO Auto-generated method stub
+					switch (v.getId()) {
+					case R.id.btn_confirm:
+						mIsJoin = true;
+						showDialogCustom(DIALOG_CUSTOM);
+						HashMap<String, Object> params = new HashMap<String, Object>();
+						params.put("resourceType", "3");
+						params.put("resourceIds", mHeaderObj.optString("id"));
+						params.put("statuses", "2");
+						params.put("isInform", dialog.getIsCheck());
+						DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_FavoriteApply, params, ActivityDetailsActivity.this);
+						break;
+					default:
+						break;
+					}
+				}
+			});
+			dialog.show();
+			return;
+		}
+		
+		view.setEnabled(false);
+		
+		mIsJoin = true;
+		showDialogCustom(DIALOG_CUSTOM);
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("resourceType", "3");
+		params.put("resourceIds", mHeaderObj.optString("id"));
+		if(mHeaderObj.has("applyStatus") && mHeaderObj.optString("applyStatus").equalsIgnoreCase("2")){
+			params.put("statuses", "3");
+		}
+		else{
+			params.put("statuses", "2");
+		}
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_FavoriteApply, params, ActivityDetailsActivity.this);
+	
+		new Handler().postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				view.setEnabled(true);
+			}
+		}, 20);
+	}
+	
+	public void onSendClick(View v){
+		if(!DataLoader.getInstance().isLogin()){
+			new AlertDialog.Builder(ActivityDetailsActivity.this)
+			.setCancelable(false)
+		 	.setMessage(getResources().getString(R.string.login_notify))
+		 	.setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					startActivity(new Intent(ActivityDetailsActivity.this, LoginActivity.class));
+					overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+				}
+			})
+			.setNegativeButton(getResources().getString(R.string.cancel), null)
+		 	.show();
+			return;
+		}
+		if(!Utils.isInternetAvaiable(ActivityDetailsActivity.this)){
+			Toast.makeText(ActivityDetailsActivity.this, getResources().getString(R.string.internet_avaiable_false), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		String comment = mCustomCommentView.getEditView().getText().toString();
+		if(comment.length() > 300){
+			Toast.makeText(ActivityDetailsActivity.this, getResources().getString(R.string.publish_content_up), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		showDialogCustom(DIALOG_CUSTOM);
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		if(mCommentReplyUserId != null){
+			params.put("toUserId", mCommentReplyUserId);
+			params.put("resourceType", "6");
+			params.put("resourceId", mCommentReplyId);
+		}
+		else{
+			params.put("resourceType", "3");
+			params.put("resourceId", getIntent().getStringExtra("id"));
+		}
+		params.put("content", EmojiUtils.convertToUnicode(comment));
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_DiscussSendDiscussion, params, ActivityDetailsActivity.this);
+	}
+	
+	class OnListCommentClick implements OnClickListener{
+		JSONObject obj;
+		String postId;
+		int position;
+		public OnListCommentClick(JSONObject obj, String postId, int position){
+			this.obj = obj;
+			this.postId = postId;
+			this.position = position;
+		}
+		
+		@Override
+		public void onClick(View v) {
+			// TODO Auto-generated method stub
+			if(obj == null){
+				return;
+			}
+			String userId = DataLoader.getInstance().getHeaderUsetId();
+			if(userId == null || userId.length() == 0){
+				new AlertDialog.Builder(ActivityDetailsActivity.this)
+				.setCancelable(false)
+			 	.setMessage(getResources().getString(R.string.login_notify))
+			 	.setPositiveButton(getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// TODO Auto-generated method stub
+						startActivity(new Intent(ActivityDetailsActivity.this, LoginActivity.class));
+						overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+					}
+				})
+				.setNegativeButton(getResources().getString(R.string.cancel), null)
+			 	.show();
+				return;
+			}
+			if(obj.optString("id").equalsIgnoreCase(userId)){
+				mCommentDeleteIndex = position;
+				new AlertDialog.Builder(ActivityDetailsActivity.this)
+		        .setMessage(R.string.comment_detele)
+		        .setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+		            @Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+		            	showDialogCustom(DIALOG_CUSTOM);
+		            	HashMap<String, Object> params = new HashMap<String, Object>();
+						params.put("discussionId", postId);
+						DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_DiscussDeleteDiscussion, params, ActivityDetailsActivity.this);
+		            }
+		        })
+		        .setNegativeButton(R.string.cancel, null).show();
+				if(mCustomCommentView != null){
+					mCustomCommentView.hideKeyBoard(ActivityDetailsActivity.this);
+				}
+				return;
+			}
+			mCommentReplyUserId = obj.optString("id");
+			mCommentReplyId = postId;
+			if(mCustomCommentView != null){
+				mCustomCommentView.requestFouce();
+				mCustomCommentView.setEditViewHint(String.format(getResources().getString(R.string.custom_reply_user), obj.optString("nickName")));
+				mCustomCommentView.setEditViewText("");
+			}
+		}
+	}
+	
+	private void callHiddenWebViewMethod(String name){
+        if (mCustomWebView != null){
+            try{
+                Method method = WebView.class.getMethod(name);
+                method.invoke(mCustomWebView);
+            }
+            catch (Exception e){
+            }
+        }
+        if (mCustomWebView != null){
+        	try{
+        		Method method = WebView.class.getMethod(name);
+        		method.invoke(mCustomWebView);
+        	}
+        	catch (Exception e){
+        	}
+        }
+    }
+	
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		if(mCustomWebView != null){
+			mCustomWebView.setVisibility(View.GONE);
+            if(mMainLayout != null){
+                mMainLayout.removeView(mCustomWebView);
+            }
+            mCustomWebView.removeAllViews();
+            mCustomWebView.destroy();
+        }
+	}
+	
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+
+		if(mCustomWebView != null){
+            if(Utils.getAndroidSDKVersion() < 11){
+                callHiddenWebViewMethod("onResume");
+            }
+            else{
+            	mCustomWebView.onResume();
+            }
+        }
+	}
+	
+    @Override
+    protected void onPause(){
+        super.onPause();
+        if(mCustomWebView != null){
+            if(Utils.getAndroidSDKVersion() < 11){
+            	mCustomWebView.pauseTimers();
+
+                if (isFinishing()){
+                	mCustomWebView.loadUrl("about:blank");
+                    setContentView(new FrameLayout(this));
+                }
+                callHiddenWebViewMethod("onPause");
+            }
+            else{
+            	mCustomWebView.onPause();
+            }
+        }
+    }
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		if(mListView != null){
+			mListView.complete();
+		}
+		
+		if(result == null){
+			mIsFavorite = false;
+			removeDialogCustom();
+			return;
+		}
+		
+		if(result instanceof Error){
+			mIsFavorite = false;
+			removeDialogCustom();
+			Toast.makeText(ActivityDetailsActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_ActivityGetActivity:
+			if(result instanceof JSONObject && ((JSONObject)result).has("item")){
+				mHeaderObj = ((JSONObject)result).optJSONObject("item");
+			}
+			if(mIsJoin){
+				mIsJoin = false;
+				removeDialogCustom();
+			}
+			else{
+				initListView();
+			}
+			setHeaderData();
+			break;
+		case TaskOrMethod_DiscussListDiscussions:
+			removeDialogCustom();
+			if(result instanceof JSONObject && ((JSONObject)result).has("items")){
+				JSONArray temp = ((JSONObject)result).optJSONArray("items");
+				if(temp != null && temp.length() > 10){
+					mListView.setRemoreable(true);
+				}
+				else{
+					mListView.setRemoreable(false);
+				}
+				EmojiUtils.replaceEmoji(temp);
+				if(mIsReadMore){
+					mIsReadMore = false;
+					mCommentListArr = DataLoader.getInstance().joinJSONArray(mCommentListArr, temp);
+				}
+				else{
+					mCommentListArr = temp;
+				}
+			}
+			else{
+				mListView.setRemoreable(false);
+			}
+			if(mListAdapter != null){
+				mListAdapter.notifyDataSetChanged();
+			}
+			break;
+		case TaskOrMethod_DiscussSendDiscussion:
+			mCommentReplyUserId = null;
+			mCommentReplyId = null;
+			removeDialogCustom();
+			if(result instanceof JSONObject && ((JSONObject)result).has("item")){
+				JSONObject item = ((JSONObject)result).optJSONObject("item");
+				EmojiUtils.replaceEmoji(item);
+				mCommentListArr = DataLoader.getInstance().insertStacktop(mCommentListArr, item);
+			}
+			if(mCustomCommentView != null){
+				mCustomCommentView.resetCustomEditview(ActivityDetailsActivity.this);
+			}
+			if(mListAdapter != null){
+				mListAdapter.notifyDataSetChanged();
+			}
+			break;
+			
+		case TaskOrMethod_FavoriteApply:
+			if(mIsFavorite){
+				mIsFavorite = false;
+				if(mHeaderObj != null){
+					try {
+						mHeaderObj.put("favoriteStatus", "0");
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+				}
+				removeDialogCustom();
+				Toast.makeText(ActivityDetailsActivity.this, getResources().getString(R.string.umeng_favorite_success), Toast.LENGTH_SHORT).show();
+			}
+			else{
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("activityId", getIntent().getStringExtra("id"));
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ActivityGetActivity, params, ActivityDetailsActivity.this);
+			}
+			break;
+			
+		case TaskOrMethod_DiscussDeleteDiscussion:
+			removeDialogCustom();
+			if(mCommentListArr != null){
+				Utils.removeIndex(mCommentListArr, mCommentDeleteIndex);
+			}
+			if(mListAdapter != null){
+				mListAdapter.notifyDataSetChanged();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+}

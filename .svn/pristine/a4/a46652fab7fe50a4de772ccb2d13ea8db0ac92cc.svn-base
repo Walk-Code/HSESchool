@@ -1,0 +1,96 @@
+package com.zhuochuang.hsej;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.layout.roundproress.RoundCornerProgressBar;
+import com.model.ImageLoaderConfigs;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.TextView;
+
+public class VoteResultActivity extends ListViewActivity{
+
+	View mHeaderView;
+	JSONObject mVoteObj;
+	JSONArray mVoteList;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+	}
+
+	@Override
+	public void getHeaderView() {
+		// TODO Auto-generated method stub
+		mHeaderView = ViewGroup.inflate(VoteResultActivity.this, R.layout.listcell_vote_header, null);
+		mListView.addHeaderView(mHeaderView, null, false);
+		mHeaderView.findViewById(R.id.imageview).setVisibility(View.GONE);
+		mHeaderView.findViewById(R.id.textview_name).setVisibility(View.GONE);
+		mHeaderView.findViewById(R.id.textview_num).setVisibility(View.VISIBLE);
+	}
+
+	@Override
+	public void getAdapter() {
+		// TODO Auto-generated method stub
+		mListAdapter = new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				if(mVoteList != null && mVoteList.length() > 0){
+					return mVoteList.length();
+				}
+				return 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(VoteResultActivity.this, R.layout.listcell_vote, null);
+				}
+				
+				JSONObject obj = mVoteList.optJSONObject(position);
+				if(obj != null){
+					((TextView)convertView.findViewById(R.id.textview_name)).setText(obj.optString("titleName"));
+					
+					convertView.findViewById(R.id.group_select).setVisibility(View.GONE);
+					convertView.findViewById(R.id.group_roundprogress).setVisibility(View.VISIBLE);
+					convertView.findViewById(R.id.textview_commit_percent).setVisibility(View.VISIBLE);
+					
+					RoundCornerProgressBar progressBar = (RoundCornerProgressBar) convertView.findViewById(R.id.view_roundprogress);
+					progressBar.setBackgroundColor(Color.TRANSPARENT);
+					progressBar.setProgressColor(Color.parseColor("#dc5151"));
+					progressBar.setMax(mVoteObj.optInt("voteNumber", 0));
+					progressBar.setProgress(obj.optInt("number", 0));
+					//((TextView)convertView.findViewById(R.id.textview_commit_percent)).setText(getResources().getString(R.string.vote_commit_num)
+					//		+ (position * 20) + getResources().getString(R.string.vote_perecnt));
+					((TextView)convertView.findViewById(R.id.textview_commit_percent)).setText(
+							getResources().getString(R.string.vote_commit_num) + obj.optString("percent"));
+				}
+				return convertView;
+			}
+		};
+	}
+
+	@Override
+	public void getFooterView() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void OnItemClickListener(AdapterView<?> parent, View view, int position, long id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

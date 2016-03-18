@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+   	    android:id="@+id/textview_percen"
+   	    android:layout_width="60dp"
+   		android:layout_height="wrap_content" 
+   		android:textSize="13dp"
+   		android:gravity="top|center_horizontal"
+   		android:text="99%"
+   		android:layout_alignParentRight="true"
+   		android:textColor="#999999"/>
+
+    <LinearLayout
+        android:layout_toLeftOf="@id/textview_percen"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical" >
+        <TextView
+	   	    android:id="@+id/textview_name"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="match_parent" 
+	   		android:layout_marginBottom="5dp"
+	   		android:textSize="13dp"
+	   		android:gravity="left"
+	   		android:textColor="#333333"/>
+        <View
+            android:id="@+id/view_percen"
+	        android:layout_width="150dp"
+	        android:layout_height="3dp"
+	        android:background="#6cd0f7"/>
+    </LinearLayout>
+</RelativeLayout>

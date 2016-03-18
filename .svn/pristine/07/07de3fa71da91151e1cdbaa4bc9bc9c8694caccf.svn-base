@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:background="#ffffff">
+    
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:background="@color/title_color" >
+
+
+                <EditText
+                    android:id="@+id/search_main"
+                    android:layout_width="0dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/store_search_box"
+                    android:drawableLeft="@drawable/nav_classify_icon_search"
+                    android:drawablePadding="10dp"
+                    android:editable="false"
+                    android:hint="搜索商品或店铺"
+                    android:paddingLeft="5dp"
+                    android:layout_weight="9"
+                    android:textColor="@color/title_text_color"
+                    android:layout_marginLeft="5dp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="8dp"
+                android:layout_weight="1" >
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+               		android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:src="@drawable/icon_shopping"
+                    android:id="@+id/home_shopping" />
+            </LinearLayout>
+        </LinearLayout>
+
+     <include
+	    layout="@layout/pulltolistview"
+	    android:id="@+id/pullto_listview"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"/>
+</LinearLayout>

@@ -1,0 +1,267 @@
+package com.zhuochuang.hsej;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.PopupWindow.OnDismissListener;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.CourseListDayView;
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.util.ContentAdapter;
+import com.util.Utils;
+
+/**
+ * 课程表
+ * @author Administrator
+ *
+ */
+public class CourseListActivity extends BaseActivity{
+
+	PopupWindow mPopupWindow;
+	View mPopupView;
+	ListView mListView;
+	ContentAdapter mAdapter;
+	
+	int mCurrentWeek = 1;
+	int mCurrentSelectedWeek = 1;
+	int mXqSum = 21;
+	
+	@SuppressLint("SimpleDateFormat")
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_courselist);
+		findViewById(R.id.group_kcb).setVisibility(View.VISIBLE);
+		
+		JSONObject obj = DataLoader.getInstance().getSettingConfig();
+		if(obj != null){
+			String key_xqsum;
+			String key_start_time;
+			String key_xn;
+			String key_xq;
+			String type = DataLoader.getInstance().getUsetInfoKey("xxdm");
+			if(type.equalsIgnoreCase("2")){
+				key_xqsum = "xqsum";
+				key_start_time = "start_time";
+				key_xn = "xn";
+				key_xq = "xq";
+			}
+			else if(type.equalsIgnoreCase("3")){
+				key_xqsum = "z_xqsum";
+				key_start_time = "z_start_time";
+				key_xn = "z_xn";
+				key_xq = "z_xq";
+			}
+			else{
+				key_xqsum = "xqsum";
+				key_start_time = "start_time";
+				key_xn = "xn";
+				key_xq = "xq";
+			}
+			mXqSum = obj.optInt(key_xqsum);
+			try {
+				//int s = getDays("2015-10-16", "2015-10-20");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+				mCurrentWeek = getDays(obj.optString(key_start_time), format.format(new Date()));
+				if(mCurrentWeek > mXqSum){
+					mCurrentWeek = mXqSum;
+				}
+			}
+			catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			setBottomXnXq(obj.optString(key_xn), obj.optString(key_xq));
+		}
+		if(mCurrentWeek == 0){
+			mCurrentWeek = 1;
+		}
+		setTitleWeek(mCurrentWeek);
+		showDialogCustom(DIALOG_CUSTOM);
+		getWeekData(mCurrentWeek);
+	}
+	
+	private void setTitleWeek(int week){
+		((TextView)findViewById(R.id.textview_kcbweektop)).setText(String.format(getResources().getString(R.string.kcb_djz), week + ""));
+	}
+
+	private void setBottomXnXq(String xn, String xq){
+		String xqs = xq.equalsIgnoreCase("1")? getResources().getString(R.string.kcb_xq1) : getResources().getString(R.string.kcb_xq2);
+		((TextView)findViewById(R.id.textview_xnxq)).setText(String.format(getResources().getString(R.string.kcb_xnxq), xn, xqs));
+	}
+	
+	private void getWeekData(int week){
+		mCurrentSelectedWeek = week;
+		setTitleWeek(mCurrentSelectedWeek);
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("qsz", week);
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_CourseListCourse, params, CourseListActivity.this);
+	}
+	
+	public void onKcbWeekClick(View view){
+		showPopup(view);
+	}
+	
+	private void showPopup(View view){
+		if(mPopupWindow == null){
+			mPopupView = ViewGroup.inflate(CourseListActivity.this, R.layout.popupwin_kcbweek, null);
+			mListView = (ListView) mPopupView.findViewById(R.id.listview);
+			mListView.setAdapter(mAdapter = new ContentAdapter(){
+
+				@Override
+				public int getCount() {
+					// TODO Auto-generated method stub
+					return mXqSum;
+				}
+
+				@Override
+				public View getView(int position, View convertView, ViewGroup parent) {
+					// TODO Auto-generated method stub
+					if(convertView == null){
+						convertView = ViewGroup.inflate(CourseListActivity.this, R.layout.listcell_kcbweek, null);
+						convertView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, Utils.dipToPixels(CourseListActivity.this, 50)));
+					}
+					if((position+1) == mCurrentSelectedWeek){
+						convertView.setBackgroundColor(Color.parseColor("#de504f"));
+						((TextView)convertView.findViewById(R.id.textview_week)).setTextColor(Color.WHITE);
+					}
+					else{
+						convertView.setBackgroundColor(Color.TRANSPARENT);
+						((TextView)convertView.findViewById(R.id.textview_week)).setTextColor(Color.parseColor("#4c4c4c"));
+					}
+					if((position+1) == mCurrentWeek){
+						((TextView)convertView.findViewById(R.id.textview_week)).setText(
+								String.format(getResources().getString(R.string.kcb_djz), (position + 1)+"") + getResources().getString(R.string.kcb_bz));
+					}
+					else{
+						((TextView)convertView.findViewById(R.id.textview_week)).setText(
+								String.format(getResources().getString(R.string.kcb_djz), (position + 1)+""));
+					}
+					return convertView;
+				}
+			});
+			
+			mListView.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+					// TODO Auto-generated method stub
+					mPopupWindow.dismiss();
+					showDialogCustom(DIALOG_CUSTOM);
+					getWeekData(arg2+1);
+				}
+			});
+			mPopupWindow = new PopupWindow(mPopupView, Utils.dipToPixels(CourseListActivity.this, 150), Utils.dipToPixels(CourseListActivity.this, 300));
+			mPopupWindow.setFocusable(true); 
+			mPopupWindow.setOutsideTouchable(true);
+			mPopupWindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.period_box));
+			
+			mPopupWindow.setOnDismissListener(new OnDismissListener() {
+				
+				@Override
+				public void onDismiss() {
+					// TODO Auto-generated method stub
+					findViewById(R.id.view_arrow).setBackgroundResource(R.drawable.arrow_pack_up2);
+				}
+			});
+		}
+		mPopupWindow.showAsDropDown(view, -Utils.dipToPixels(CourseListActivity.this, 50), -Utils.dipToPixels(CourseListActivity.this, 14));
+		mPopupWindow.update();
+		findViewById(R.id.view_arrow).setBackgroundResource(R.drawable.arrow_unfold2);
+		if(mAdapter != null){
+			mAdapter.notifyDataSetChanged();
+		}
+	}
+    
+    public static int getDays(String startdate, String enddate) {
+    	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        Calendar start = Calendar.getInstance();
+        Calendar end = Calendar.getInstance();
+        Date startDate = null;
+        Date endDate = null;
+		try {
+			startDate = format.parse(startdate);
+			endDate= format.parse(enddate);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if(startDate == null || endDate == null){
+			return 1;
+		}
+    
+        start.setTime(startDate); 
+        end.setTime(endDate);
+        
+        int sumSunday = 0;
+        
+        while(start.compareTo(end) <= 0) {
+            int w = start.get(Calendar.DAY_OF_WEEK);
+            if(w == Calendar.SUNDAY)
+                sumSunday ++;
+           // System.out.println(format.format(start.getTime()));
+            start.set(Calendar.DATE, start.get(Calendar.DATE) + 1);
+        }
+        
+        return sumSunday + 1;
+    }
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		removeDialogCustom();
+		if(result == null){
+			return;
+		}
+		if(result instanceof Error){
+			((CourseListDayView)findViewById(R.id.day_1)).setDayData(CourseListActivity.this, null);
+			((CourseListDayView)findViewById(R.id.day_2)).setDayData(CourseListActivity.this, null);
+			((CourseListDayView)findViewById(R.id.day_3)).setDayData(CourseListActivity.this, null);
+			((CourseListDayView)findViewById(R.id.day_4)).setDayData(CourseListActivity.this, null);
+			((CourseListDayView)findViewById(R.id.day_5)).setDayData(CourseListActivity.this, null);
+			Toast.makeText(CourseListActivity.this, ((Error)result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_CourseListCourse:
+			if(!(result instanceof JSONObject) && !((JSONObject)result).has("items")){
+				return;
+			}
+			JSONObject items = ((JSONObject)result).optJSONObject("items");
+			if(items == null){
+				return;
+			}
+			((CourseListDayView)findViewById(R.id.day_1)).setDayData(CourseListActivity.this, items.optJSONArray("1"));
+			((CourseListDayView)findViewById(R.id.day_2)).setDayData(CourseListActivity.this, items.optJSONArray("2"));
+			((CourseListDayView)findViewById(R.id.day_3)).setDayData(CourseListActivity.this, items.optJSONArray("3"));
+			((CourseListDayView)findViewById(R.id.day_4)).setDayData(CourseListActivity.this, items.optJSONArray("4"));
+			((CourseListDayView)findViewById(R.id.day_5)).setDayData(CourseListActivity.this, items.optJSONArray("5"));
+			break;
+
+		default:
+			break;
+		}
+	}
+}

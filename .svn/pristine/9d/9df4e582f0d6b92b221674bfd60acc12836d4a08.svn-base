@@ -1,0 +1,569 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.Utils;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
+import android.widget.AbsListView.LayoutParams;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.EditText;
+import android.widget.ExpandableListView;
+import android.widget.ExpandableListView.OnChildClickListener;
+import android.widget.ImageView;
+import android.widget.ExpandableListView.OnGroupClickListener;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.TextView.OnEditorActionListener;
+
+@SuppressLint("HandlerLeak")
+public class SearchActivity extends BaseActivity{
+
+	private ExpandableListView mExpandableListView;
+	private BaseExpandableListAdapter mAdapter;
+	
+	private JSONArray mResultArr;
+	private String mSearchKey;
+	private Handler mHandler;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_search);
+		findViewById(R.id.navbar_base).setVisibility(View.GONE);
+		initExpandableListView();
+		
+		((EditText) findViewById(R.id.editview)).setOnEditorActionListener(new OnEditorActionListener() {
+			
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				// TODO Auto-generated method stub
+				if(actionId == EditorInfo.IME_ACTION_SEARCH || (event!=null && event.getKeyCode()== KeyEvent.KEYCODE_ENTER)){
+					 String str = ((EditText) findViewById(R.id.editview)).getText().toString();
+					 if(str != null && str.length() > 0 && str.replaceAll(" ", "").length() > 0){
+						 mSearchKey = str;
+						 Utils.removeSoftKeyboard(SearchActivity.this);
+						 showDialogCustom(DIALOG_CUSTOM);
+						 HashMap<String, Object> params = new HashMap<String, Object>();
+						 params.put("key", str);
+						 DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MycampusSearch, params, SearchActivity.this);
+						return true;
+					 }
+					 else{
+						 Toast.makeText(SearchActivity.this, getResources().getString(R.string.search_hint), Toast.LENGTH_SHORT).show();
+					 }
+	            }
+				return true;
+			}
+		});
+		
+		new Handler().postDelayed(new Runnable() {
+			
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				((EditText) findViewById(R.id.editview)).requestFocus();
+				InputMethodManager imm = (InputMethodManager) ((EditText) findViewById(R.id.editview)).getContext().getSystemService(Context.INPUT_METHOD_SERVICE);  
+		    	imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
+			}
+		}, 300);
+		
+		EventManager.getInstance().setHandlerListenner(mHandler = new Handler(){
+
+			@Override
+			public void handleMessage(Message msg) {
+				// TODO Auto-generated method stub
+				super.handleMessage(msg);
+				switch (msg.what) {
+				case EventManager.EventType_VoteChange:
+				case EventManager.EventType_SurveyChange:
+					HashMap<String, Object> params = new HashMap<String, Object>();
+					params.put("key", mSearchKey);
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MycampusSearch, params, SearchActivity.this);
+					break;
+				default:
+					break;
+				}
+			}
+		});
+	}
+	
+	private void initExpandableListView(){
+		mExpandableListView = (ExpandableListView) findViewById(R.id.expandablelistview);
+		mExpandableListView.setAdapter(mAdapter = new BaseExpandableListAdapter() {
+			
+			@Override
+			public boolean isChildSelectable(int groupPosition, int childPosition) {
+				// TODO Auto-generated method stub
+				return true;
+			}
+			
+			@Override
+			public boolean hasStableIds() {
+				// TODO Auto-generated method stub
+				return true;
+			}
+			
+			@Override
+			public View getGroupView(int groupPosition, boolean isExpanded,
+					View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(SearchActivity.this, R.layout.listcell_search_group, null);
+					convertView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, Utils.dipToPixels(SearchActivity.this, 40)));
+				}
+				
+				JSONObject obj = (JSONObject) getGroup(groupPosition);
+				if(obj != null){
+					((TextView)convertView.findViewById(R.id.textview)).setText(getResourceName(obj.optInt("resourceType")));
+				}
+				return convertView;
+			}
+			
+			@Override
+			public long getGroupId(int groupPosition) {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+			
+			@Override
+			public int getGroupCount() {
+				// TODO Auto-generated method stub
+				if(mResultArr != null && mResultArr.length() > 0){
+					return mResultArr.length();
+				}
+				return 0;
+			}
+			
+			@Override
+			public Object getGroup(int groupPosition) {
+				// TODO Auto-generated method stub
+				if(mResultArr != null && mResultArr.length() > 0){
+					return mResultArr.optJSONObject(groupPosition);
+				}
+				return null;
+			}
+			
+			@Override
+			public int getChildrenCount(int groupPosition) {
+				// TODO Auto-generated method stub
+				JSONObject obj = (JSONObject) getGroup(groupPosition);
+				if(obj != null && obj.has("items")){
+					//int length = obj.optJSONArray("items").length();
+					//return obj.optInt("total") > 3? 4 : length;
+					return obj.optInt("total") > 3? 4 : obj.optInt("total");
+				}
+				return 0;
+			}
+			
+			/**
+			 *  3	活动
+				4	资讯
+				5	服务
+				
+				return
+				0活动
+				1资讯
+				2服务
+				3投票调查问卷
+				4更多
+				
+			 */
+			@Override
+			public int getChildType(int groupPosition, int childPosition) {
+				// TODO Auto-generated method stub
+				JSONObject child = null;
+				JSONObject obj = (JSONObject) getGroup(groupPosition);
+				/*if(obj == null || !obj.has("resourceType")){
+					return 4;
+				}*/
+				JSONArray chileList = obj.optJSONArray("items");
+				/*if(chileList == null || chileList.length() == 0){
+					return 4;
+				}*/
+				child = chileList.optJSONObject(childPosition);
+				switch (obj.optInt("resourceType")) {
+				case 3:
+					//child = chileList.optJSONObject(childPosition);//(JSONObject) getChild(groupPosition, childPosition);
+					if(child != null && child.has("isSurveyTopic") && child.optBoolean("isSurveyTopic")){
+						return 3;
+					}
+					if(child != null && child.has("isVoteTopic") && child.optBoolean("isVoteTopic")){
+						return 3;
+					}
+					return 0;
+				case 4:
+					//child = chileList.optJSONObject(childPosition);//(JSONObject) getChild(groupPosition, childPosition);
+					if(child != null && child.has("isSurveyTopic") && child.optBoolean("isSurveyTopic")){
+						return 3;
+					}
+					if(child != null && child.has("isVoteTopic") && child.optBoolean("isVoteTopic")){
+						return 3;
+					}
+					return 1;
+				case 5:
+					return 2;
+					
+				default:
+					break;
+				}
+				return 4;
+			}
+
+			@Override
+			public int getChildTypeCount() {
+				// TODO Auto-generated method stub
+				return 4;
+			}
+
+			@Override
+			public View getChildView(int groupPosition, int childPosition,
+					boolean isLastChild, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+
+				ViewHolder0 hodler0 = null;
+				ViewHolder1 hodler1 = null;
+				ViewHolder2 hodler2 = null;
+				ViewHolder3 hodler3 = null;
+				ViewHolder4 hodler4 = null;
+				
+				int type = getChildType(groupPosition, childPosition);
+				if(getChildrenCount(groupPosition) == 4 && isLastChild){
+					type = 4;
+				}
+				
+				//if(convertView == null){
+					switch (type) {
+					case 0:
+						convertView = ViewGroup.inflate(SearchActivity.this, R.layout.listcell_activities, null);
+						hodler0 = new ViewHolder0();
+						hodler0.convertView0 = convertView;
+						convertView.setTag(hodler0);
+						break;
+					case 1:
+						convertView = ViewGroup.inflate(SearchActivity.this, R.layout.listcell_beauty_hs, null);
+						hodler1 = new ViewHolder1();
+						hodler1.convertView1 = convertView;
+						convertView.setTag(hodler1);
+						break;
+					case 2:
+						convertView = ViewGroup.inflate(SearchActivity.this, R.layout.listcell_schoolyardservice_more, null);
+						convertView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, Utils.dipToPixels(SearchActivity.this, 80)));
+						hodler2 = new ViewHolder2();
+						hodler2.convertView2 = convertView;
+						convertView.setTag(hodler2);
+						break;
+					case 3:
+						convertView = ViewGroup.inflate(SearchActivity.this, R.layout.listcell_surveytopic, null);
+						hodler3 = new ViewHolder3();
+						hodler3.convertView3 = convertView;
+						convertView.setTag(hodler3);
+						break;
+					case 4:
+						convertView = ViewGroup.inflate(SearchActivity.this, R.layout.listcell_searchmore_readmore, null);
+						hodler4 = new ViewHolder4();
+						hodler4.convertView4 = convertView;
+						convertView.setTag(hodler4);
+						break;
+					default:
+						break;
+					}
+				//}
+				/*else{
+					switch (type) {
+					case 0:
+						System.out.println("==556677====" + type);
+						hodler0 = (ViewHolder0) convertView.getTag();
+						break;
+					case 1:
+						hodler1 = (ViewHolder1) convertView.getTag();
+						break;
+					case 2:
+						hodler2 = (ViewHolder2) convertView.getTag();
+						break;
+					case 3:
+						hodler3 = (ViewHolder3) convertView.getTag();
+						break;
+					case 4:
+						hodler4 = (ViewHolder4) convertView.getTag();
+						break;
+					default:
+						break;
+					}
+				}*/
+				
+				JSONObject obj = (JSONObject) getChild(groupPosition, childPosition);
+				switch (type) {
+				case 0:
+					if(obj != null){
+						try {
+							((TextView)hodler0.convertView0.findViewById(R.id.textview_title)).setText(obj.optString("name"));
+							((TextView)hodler0.convertView0.findViewById(R.id.textview_addresstime)).setText(
+									String.format(getResources().getString(R.string.activitydetails_addresstime), obj.optString("address"), 
+											Utils.getTimeQuantum(SearchActivity.this, obj.optLong("startTime", 0), obj.optLong("endTime", 0))));
+							((TextView)hodler0.convertView0.findViewById(R.id.textview_date)).setText(Utils.getAlmostTimeDay(SearchActivity.this, obj.optLong("createDate")));
+							
+							switch (obj.optInt("startStatus", 0)) {
+							case 0:
+								hodler0.convertView0.findViewById(R.id.textview_statu).setBackgroundResource(R.drawable.bg_activity_statu_going);
+								((TextView)hodler0.convertView0.findViewById(R.id.textview_statu)).setTextColor(Color.argb(255, 233, 78, 81));
+								((TextView)hodler0.convertView0.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitylist_unstart));
+								break;
+							case 1:
+								hodler0.convertView0.findViewById(R.id.textview_statu).setBackgroundResource(R.drawable.bg_activity_statu_going);
+								((TextView)hodler0.convertView0.findViewById(R.id.textview_statu)).setTextColor(Color.argb(255, 233, 78, 81));
+								((TextView)hodler0.convertView0.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitylist_going));
+								break;
+							case 2:
+								hodler0.convertView0.findViewById(R.id.textview_statu).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+								((TextView)hodler0.convertView0.findViewById(R.id.textview_statu)).setTextColor(Color.argb(255, 190, 190, 190));
+								((TextView)hodler0.convertView0.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitylist_finish));
+								break;
+							case 8:
+								hodler0.convertView0.findViewById(R.id.textview_statu).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+								((TextView)hodler0.convertView0.findViewById(R.id.textview_statu)).setTextColor(Color.argb(255, 190, 190, 190));
+								((TextView)hodler0.convertView0.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitylist_aborted));
+								break;
+							default:
+								break;
+							}
+							String numStr = String.format(getResources().getString(R.string.activitylist_personcount), obj.optString("applicants", "0"), obj.optString("maxNumber", "0"));
+							((TextView)hodler0.convertView0.findViewById(R.id.textview_personcount)).setText(Utils.getActivityNum(numStr, obj.optString("applicants", "0")));
+						} 
+						catch (Exception e) {
+							// TODO: handle exception
+						}
+					}
+					break;
+				case 1:
+					if(obj != null){
+						try {
+							ImageLoader.getInstance().displayImage(obj.optString("image"), 
+									((ImageView)hodler1.convertView1.findViewById(R.id.image_beautyhs_schoolyard)), 
+									ImageLoaderConfigs.displayImageOptionsBg);
+							((TextView)hodler1.convertView1.findViewById(R.id.title_beautyhs_schoolyard)).setText(obj.optString("name"));
+							((TextView)hodler1.convertView1.findViewById(R.id.date_beautyhs_schoolyard)).setText(Utils.getAlmostTime(SearchActivity.this, obj.optLong("createDate")));
+							((TextView)hodler1.convertView1.findViewById(R.id.content_beautyhs_schoolyard)).setText(obj.optString("content"));
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+					}
+					break;
+				case 2:
+					if(obj != null){
+						try {
+							((TextView)hodler2.convertView2.findViewById(R.id.textview_title)).setText(obj.optString("name"));
+							((TextView)hodler2.convertView2.findViewById(R.id.textview_desc)).setText(obj.optString("description"));
+							ImageLoader.getInstance().displayImage(obj.optString("image"), ((ImageView)hodler2.convertView2.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsBg);
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+					}
+					break;
+
+				case 3:
+					try {
+						((TextView)hodler3.convertView3.findViewById(R.id.textview)).setText(obj.optString("description"));
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+					break;
+				case 4:
+					break;
+				default:
+					break;
+				}
+				return convertView;
+			}
+			
+			@Override
+			public long getChildId(int groupPosition, int childPosition) {
+				// TODO Auto-generated method stub
+				return 0;
+			}
+			
+			@Override
+			public Object getChild(int groupPosition, int childPosition) {
+				// TODO Auto-generated method stub
+				JSONObject group = (JSONObject)getGroup(groupPosition);
+				if(group == null){
+					return null;
+				}
+				JSONArray arr = group.optJSONArray("items");
+				if(arr != null && arr.length() > 0){
+					return arr.optJSONObject(childPosition);
+				}
+				return null;
+			}
+		});
+		
+		mExpandableListView.setOnGroupClickListener(new OnGroupClickListener() {
+			
+			@Override
+			public boolean onGroupClick(ExpandableListView parent, View v,
+					int groupPosition, long id) {
+				// TODO Auto-generated method stub
+				return true;
+			}
+		});
+		
+		mExpandableListView.setOnChildClickListener(new OnChildClickListener() {
+			
+			@Override
+			public boolean onChildClick(ExpandableListView parent, View v,
+					int groupPosition, int childPosition, long id) {
+				// TODO Auto-generated method stub
+				if(mAdapter != null){
+					JSONObject parentObj = (JSONObject) mAdapter.getGroup(groupPosition);
+					if(childPosition == 3){
+						Intent intent = new Intent(SearchActivity.this, SearchMoreActivity.class);
+						intent.putExtra("resourceType", parentObj.optInt("resourceType"));
+						intent.putExtra("key", mSearchKey);
+						startActivity(intent);
+						return true;
+					}
+					
+					JSONObject obj = (JSONObject) mAdapter.getChild(groupPosition, childPosition);
+					if(obj != null){
+						DataLoader.getInstance().openResource(SearchActivity.this, parentObj.optInt("resourceType"), obj);
+					}
+				}
+				return true;
+			}
+		});
+	}
+	
+	private String getResourceName(int type){
+		switch (type) {
+		case 3:
+			return getResources().getString(R.string.source_name3);
+		case 4:
+			return getResources().getString(R.string.source_name4);
+		case 5:
+			return getResources().getString(R.string.source_name5);
+		}
+		return "";
+	}
+	
+	class ViewHolder0{
+		View convertView0;
+	}
+	
+	class ViewHolder1{
+		View convertView1;
+	}
+	
+	class ViewHolder2{
+		View convertView2;
+	}
+	
+	class ViewHolder3{
+		View convertView3;
+	}
+	
+	class ViewHolder4{
+		View convertView4;
+	}
+	
+	public void onCancelClick(View view){
+		SearchActivity.this.finish();
+	}
+	
+	public void onSearchTextDelete(View view){
+		((EditText)findViewById(R.id.editview)).setText("");
+	}
+	
+	/*@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		if(ev.getAction() == MotionEvent.ACTION_DOWN){
+			View view = getCurrentFocus();
+			if(isShouldHideInput(view, ev)){
+				InputMethodManager manager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+				if(view != null && manager != null){
+					manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+				}
+			}
+		}
+		return super.dispatchTouchEvent(ev);
+	}
+	
+	private  boolean isShouldHideInput(View v, MotionEvent event) {  
+		
+        if (v != null && (v instanceof EditText)) {  
+        	View parent = (View)v.getParent();//获取EditText所在父控件
+            int[] leftTop = { 0, 0 };  
+            //当前的location位置  
+            parent.getLocationInWindow(leftTop);  
+            int left = leftTop[0];  
+            int top = leftTop[1];  
+            int bottom = top + parent.getHeight();  
+            int right = left + parent.getWidth();  
+            if (event.getX() > left && event.getX() < right  
+                    && event.getY() > top && event.getY() < bottom) {  
+                // 点击的是parent区域，保留点击EditText的事件  
+                return false;  
+            }
+        }  
+        return true;  
+    }  */
+
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		EventManager.getInstance().removeHandlerListenner(mHandler);
+	}
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		removeDialogCustom();
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(SearchActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_MycampusSearch:
+			if(result instanceof JSONObject && ((JSONObject)result).has("items")){
+				mResultArr = ((JSONObject)result).optJSONArray("items");
+			}
+			
+			mExpandableListView.setAdapter(mAdapter);
+			for (int i = 0; i < mAdapter.getGroupCount(); i++) {
+				mExpandableListView.expandGroup(i);
+			}
+
+			break;
+		default:
+			break;
+		}
+	}
+
+}

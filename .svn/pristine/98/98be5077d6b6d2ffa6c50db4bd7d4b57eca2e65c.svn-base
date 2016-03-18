@@ -1,0 +1,222 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.TaskType;
+import com.util.TabBarView;
+import com.util.TabBarView.OnItemSelectedListeners;
+import com.util.TabBarView.TabBarAdapter;
+
+import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class MyFavoriteActivity extends BaseActivity{
+
+	private TabBarView mTabBarView;
+	private String[] mTabNames;
+	private Fragment [] mFragments;
+	private FragmentManager mFragmentManager = null;
+	private FragmentTransaction mFragmentTransaction = null;
+	
+	private boolean mIsCompile = false;
+	private int mCurrentTab = -1;
+	
+	//private HashMap<String, String> mIdList = new HashMap<String, String>();
+	
+	@SuppressLint("UseSparseArrays")
+	private HashMap<Integer, HashMap<String, String>> mIdListMap = new HashMap<Integer, HashMap<String,String>>();
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_myfavorite);
+		setTitleText(R.string.mycenter_cell5);
+		mMainLayout.findViewById(R.id.ico_postedit).setVisibility(View.VISIBLE);
+		mMainLayout.findViewById(R.id.textview).setVisibility(View.VISIBLE);
+		
+		mTabNames = getResources().getStringArray(R.array.myfavorite);
+		mFragmentManager = getSupportFragmentManager();
+		mFragments = new Fragment[mTabNames.length];
+		
+		for(int i = 0; i < mTabNames.length; i++){
+			mIdListMap.put(i, new HashMap<String,String>());
+		}
+		
+		initTabBarView();
+	}
+	
+	public void onPostEditClick(View view){
+		mIsCompile = !mIsCompile;
+		
+		//mMainLayout.findViewById(R.id.ico).setVisibility(mIsCompile? View.GONE : View.VISIBLE);
+		//mMainLayout.findViewById(R.id.textview).setVisibility(mIsCompile? View.VISIBLE : View.GONE);
+		((TextView)mMainLayout.findViewById(R.id.textview)).setText(mIsCompile? getResources().getString(R.string.done) : getResources().getString(R.string.edit));
+		
+		mMainLayout.findViewById(R.id.buttom).setVisibility(mIsCompile? View.VISIBLE : View.GONE);
+		
+		for(int i = 0; i < mTabNames.length; i++){
+			if(mFragments[i] != null){
+				((MyFavoriteFragment)mFragments[i]).notifyChange(mIsCompile);
+			}
+		}
+	}
+	
+	private void initTabBarView(){
+		mTabBarView = (TabBarView) mMainLayout.findViewById(R.id.layout_tabbar);
+		mTabBarView.setAdapter(new TabBarAdapter() {
+			@Override
+			public View getSeletedView(int position, View convertView) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(MyFavoriteActivity.this, R.layout.tabbar_cell_myclassmate, null);
+				}
+				convertView.findViewById(R.id.line).setVisibility(View.VISIBLE);
+				((TextView)convertView.findViewById(R.id.textview)).setText(mTabNames[position]);
+				((TextView)convertView.findViewById(R.id.textview)).setTextColor(Color.argb(255, 222, 79, 81));
+				return convertView;
+			}
+			
+			@Override
+			public View getNOSeletedView(int position, View convertView) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(MyFavoriteActivity.this, R.layout.tabbar_cell_myclassmate, null);
+				}
+				convertView.findViewById(R.id.line).setVisibility(View.GONE);
+				((TextView)convertView.findViewById(R.id.textview)).setText(mTabNames[position]);
+				((TextView)convertView.findViewById(R.id.textview)).setTextColor(Color.argb(255, 127, 127, 127));
+				return convertView;
+			}
+			
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				return mTabNames.length;
+			}
+		});
+		
+		mTabBarView.setOnItemSelectedListener(new OnItemSelectedListeners() {
+			@Override
+			public void onItemSelected(int position) {
+				// TODO Auto-generated method stub
+				if(mCurrentTab != position){
+					mCurrentTab = position;
+					if(mFragments[mCurrentTab] == null){
+						mFragments[mCurrentTab] = new MyFavoriteFragment();
+						((MyFavoriteFragment)mFragments[mCurrentTab]).setType(mCurrentTab);
+						//((MyFavoriteFragment)mFragments[mCurrentTab]).setIdList(mIdList);
+						((MyFavoriteFragment)mFragments[mCurrentTab]).setIdList(mIdListMap.get(mCurrentTab));
+						((MyFavoriteFragment)mFragments[mCurrentTab]).setIsCompile(mIsCompile);
+						//((HobbyGroupListFragment)mFragments[mCurrentTab]).setIsAllList(mCurrentTab == 0? true : false);
+					}
+					mFragmentTransaction = mFragmentManager.beginTransaction();
+					mFragmentTransaction.replace(R.id.layout_group, mFragments[position]);
+					mFragmentTransaction.addToBackStack(null);
+					mFragmentTransaction.commitAllowingStateLoss();
+				}
+			}
+		});
+		
+		mTabBarView.selectItem(0);
+	}
+	
+	public void OnDeleteClick(View view){
+		HashMap<String, String> idList = mIdListMap.get(mCurrentTab);
+		if(idList == null || idList.size() == 0){
+			return;
+		}
+		
+		String ids = "";
+		String statuses = "";
+		String resourceType = "";
+		switch (mCurrentTab) {
+		case 0:
+			resourceType = "4";
+			break;
+		case 1:
+			resourceType = "3";
+			break;
+		case 2:
+			resourceType = "2";
+			break;
+		case 3:
+			resourceType = "9";
+			break;
+		case 4:
+			resourceType = "8";
+			break;
+		default:
+			break;
+		}
+		for(String id : idList.keySet()){
+			ids += id + ",";
+			statuses += "1,";
+		}
+		
+		if(ids.contains(",")){
+			ids = ids.substring(0, ids.length() - 1);
+		}
+		
+		if(statuses.contains(",")){
+			statuses = statuses.substring(0, statuses.length() - 1);
+		}
+		
+		showDialogCustom(DIALOG_CUSTOM);
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("resourceType", resourceType);
+		params.put("resourceIds", ids);
+		params.put("statuses", statuses);
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_FavoriteApply, params, MyFavoriteActivity.this);
+	}
+	
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		// TODO Auto-generated method stub
+		if(event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP){
+        	finish();
+            return true;
+        }
+		return super.dispatchKeyEvent(event);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		removeDialogCustom();
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(MyFavoriteActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_FavoriteApply:
+			if(mFragments[mCurrentTab] != null){
+				((MyFavoriteFragment)mFragments[mCurrentTab]).refreshCurrentPage();
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

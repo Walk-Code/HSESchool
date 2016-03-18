@@ -1,0 +1,103 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <ScrollView
+        android:id="@+id/layout_not_applyStatus"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFF"
+        android:visibility="gone"
+        android:scrollbars="none" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp" >
+
+            <LinearLayout
+                android:id="@+id/viewContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_submit"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/btn_red_button_selector"
+                android:onClick="onSubmitClick"
+                android:text="@string/commit"
+                android:textColor="#FFF" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/layout_is_applyStatus"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFF"
+        android:orientation="vertical"
+        android:visibility="visible" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/tv_sign_up_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableLeft="@drawable/option_no"
+                android:drawablePadding="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical" >
+
+                <Button
+                    android:id="@+id/btn_look_signup"
+                    android:layout_width="140dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/btn_orange_button_selector"
+                    android:onClick="onSubmitClick"
+                    android:text="@string/text_looksingn"
+                    android:textColor="#FFF" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/linear_give_money_layout"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:visibility="gone" >
+
+                <Button
+                    android:id="@+id/btn_give_money"
+                    android:layout_width="140dp"
+                    android:layout_height="42dp"
+                    android:background="@drawable/btn_red_button_selector"
+                    android:onClick="onSubmitClick"
+                    android:text="@string/text_online_give_money"
+                    android:textColor="#FFF" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

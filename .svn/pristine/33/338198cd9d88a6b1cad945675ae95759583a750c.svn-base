@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone">
+    
+    <FrameLayout
+        android:id="@+id/header_banner"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:layout_marginTop="-1dp"
+	    android:visibility="gone">
+	    <com.util.AutoGallery
+			android:id="@+id/gallery_banner"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:spacing="4dp"/>
+	    <RelativeLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="16dp"
+		    android:background="@android:color/transparent"
+		    android:layout_gravity="bottom">
+	        <com.util.PageGuide
+		        android:id="@+id/pageguide"
+		        android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:layout_marginRight="10dp"
+		    	android:layout_centerInParent="true"/>
+	    </RelativeLayout>
+	  </FrameLayout>  
+	      
+	  <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:orientation="horizontal"
+            android:id="@+id/store_today_special">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1.2"
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/store_modle_layout" >               
+              <ImageView
+		           android:id="@+id/store_modle_images1"
+		           android:layout_width="match_parent"
+		           android:layout_height="match_parent"
+		           android:src="@drawable/previewpic"
+		           android:scaleType="fitXY" />               
+            </LinearLayout>
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#E4E4E4" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:orientation="vertical"
+                android:id="@+id/store_order" >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1.9"
+                    android:orientation="horizontal"
+                    android:id="@+id/living_goods_layout" >                  
+                    <LinearLayout                      
+                        android:id="@+id/commdoity_goods_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="left|center_vertical"
+                        android:orientation="horizontal">
+                        <ImageView
+				           android:id="@+id/store_modle_images2"
+				           android:layout_width="match_parent"
+				           android:layout_height="match_parent"
+				           android:src="@drawable/previewpic"
+				           android:scaleType="fitCenter" />                    
+                    </LinearLayout>
+                </LinearLayout>
+                <View
+                     android:layout_width="match_parent"
+                     android:layout_height="1dp"
+                     android:background="#E4E4E4" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:id="@+id/sport_goods_layout" >
+						<ImageView
+				           android:id="@+id/store_modle_images3"
+				           android:layout_width="match_parent"
+				           android:layout_height="match_parent"
+				           android:src="@drawable/previewpic"
+				           android:scaleType="fitXY" />                     
+                    </LinearLayout>
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#E4E4E4" />
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:layout_gravity="top|left"
+                        android:id="@+id/study_goods_layout"> 
+                        <ImageView
+				           android:id="@+id/store_modle_images4"
+				           android:layout_width="match_parent"
+				           android:layout_height="match_parent"
+				           android:src="@drawable/previewpic"
+				           android:scaleType="fitXY" />                 
+					</LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+         <View 
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E4E4E4"/>	
+         <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="#EAEAEA" />
+          
+	    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:orientation="vertical" >            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:orientation="horizontal" >
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" >
+					<ImageView 
+					    android:layout_width="wrap_content"
+					    android:layout_height="16dp"
+					    android:src="@drawable/title_line"
+					    android:layout_margin="4dp"
+					    android:layout_alignParentLeft="true"
+					    android:id="@+id/title_line"
+					    android:layout_centerVertical="true"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:text="@string/stores"
+                        android:textColor="#E14A46"
+                        android:textSize="14dp"
+                        android:layout_toRightOf="@id/title_line" 
+                        android:layout_centerVertical="true"/>
+                    <ImageView 
+					    android:layout_width="wrap_content"
+					    android:layout_height="12dp"
+					    android:src="@drawable/arrow"
+					    android:layout_margin="4dp"
+                        android:layout_alignParentRight="true"
+                        android:id="@+id/more"
+                        android:layout_centerVertical="true"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:singleLine="true"
+                        android:text="@string/more"
+                        android:textColor="#9A9A9A"
+                        android:textSize="14dp" 
+                        android:id="@+id/store_more"
+                        android:layout_toLeftOf="@id/more"
+                        android:layout_centerVertical="true"/>                    
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/store_home_choose"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            </LinearLayout>
+        </LinearLayout>
+         <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E7E7E7" />
+            
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="#EFEFEF" />
+         <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E7E7E7" />
+          
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:orientation="vertical" >
+			         <RelativeLayout
+			              android:layout_width="match_parent"
+			              android:layout_height="wrap_content"
+			              android:layout_marginLeft="5dp"
+			              android:layout_marginTop="5dp"
+			              android:background="#FFFFFF" >
+			          	 <ImageView 
+						    android:layout_width="wrap_content"
+						    android:layout_height="16dp"
+						    android:src="@drawable/title_line"
+						    android:layout_alignParentLeft="true"
+						    android:id="@+id/title_lines"
+						    android:layout_centerVertical="true"
+						    android:layout_marginRight="4dp"
+						    android:layout_marginLeft="5dp"/>           
+			          	<TextView
+			                   android:layout_width="wrap_content"
+			                   android:layout_height="wrap_content"
+			                   android:gravity="center"
+			                   android:singleLine="true"
+			                   android:text="@string/guessyoulike"
+			                   android:textColor="#E14A46"
+			                   android:textSize="14dp"
+			                   android:layout_toRightOf="@id/title_lines"
+			                   android:layout_centerVertical="true" />
+			          </RelativeLayout>			      
+			      <GridView
+			            android:id="@+id/store_home_grid"
+			            android:layout_width="match_parent"
+			        	android:layout_height="match_parent"
+			        	android:layout_weight="1"
+			        	android:columnWidth="60dp"
+			        	android:gravity="center"
+			         	android:horizontalSpacing="10dp"
+			         	android:numColumns="2"
+			        	android:padding="5dp"
+			         	android:stretchMode="columnWidth"
+			         	android:verticalSpacing="1dp"
+			         	android:listSelector="@android:color/transparent"
+			         	android:background="#FFFFFF"
+			         	android:layout_marginLeft="5dp"
+			         	android:layout_marginRight="5dp"/>
+        </LinearLayout>
+</LinearLayout>

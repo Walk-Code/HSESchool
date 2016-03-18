@@ -1,0 +1,20 @@
+package com.model.data;
+public class GroupInfo extends BaseInfo{
+	private int deliverFee;
+	private String address;
+	public GroupInfo() {
+	}
+	public int getDeliverFee() {
+		return deliverFee;
+	}
+	public void setDeliverFee(int deliverFee) {
+		this.deliverFee = deliverFee;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}	
+	
+}

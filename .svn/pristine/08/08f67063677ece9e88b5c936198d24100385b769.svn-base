@@ -1,0 +1,80 @@
+package com.zhuochuang.hsej.store;
+
+import java.util.Calendar;
+import java.util.TimeZone;
+
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.util.Utils;
+import com.zhuochuang.hsej.R;
+
+public class CustomEvaluateLayout extends LinearLayout{
+	private TextView mComtent;
+	private TextView mComment_time;
+	private Context mContext;
+	private static final int EVALUATESTAR = 5;
+	private LinearLayout mEvaluateLayout;
+	public CustomEvaluateLayout(Context context) {
+		super(context);
+		mContext = context;
+		init();
+	}
+
+	public CustomEvaluateLayout(Context context,AttributeSet  attrs) {
+		super(context,attrs);
+		mContext = context;
+		init();
+		
+	}
+	private void init() {
+		LayoutInflater inflater=(LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		inflater.inflate(R.layout.store_assess_layout, this);
+		mComtent = (TextView) findViewById(R.id.evaluate);
+		mComment_time = (TextView) findViewById(R.id.comment_time);
+		mEvaluateLayout = (LinearLayout) findViewById(R.id.store_goods_evaluate_image_layout);
+	}
+	
+	public void setData(JSONObject obj){
+		if(obj == null){
+			return;
+		}
+	}
+
+	 public void setClient(String name) {  
+		 ((TextView) findViewById(R.id.client)).setText(name);
+	}	
+	 public void setComtent(String evaluate) {  
+		 mComtent.setText(evaluate);  
+    }  
+	 public void setComment_time(long millis){
+		 Calendar cal = Calendar.getInstance();
+		 cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+		 cal.setTimeInMillis(millis*1l);		  
+		 mComment_time.setText((cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-"
+		    + cal.get(Calendar.DAY_OF_MONTH) + " " + cal.get(Calendar.HOUR_OF_DAY) + ":"
+		            + cal.get(Calendar.MINUTE)));
+	 }
+	 public void setEvaluateStar(int length){
+		 ImageView [] evaluateStar = new ImageView[EVALUATESTAR];
+		 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(Utils.dipPx(mContext, 15),Utils.dipPx(mContext, 15),1);
+		 for(int i = 0;i < EVALUATESTAR; i++){
+			 evaluateStar[i] = new ImageView(mContext);
+			 if(i > length-1){
+				 evaluateStar[i].setImageResource(R.drawable.icon_grade_nor); 
+			 }else 
+			     evaluateStar[i].setImageResource(R.drawable.icon_grade_pre);			
+			 evaluateStar[i].setScaleType(ScaleType.CENTER_INSIDE);
+			 layoutParams.setMargins(Utils.dipPx(mContext, 5),Utils.dipPx(mContext, 1),0,Utils.dipPx(mContext, 2));
+			 evaluateStar[i].setLayoutParams(new LinearLayout.LayoutParams(1,1)); 
+			 mEvaluateLayout.addView(evaluateStar[i],layoutParams); 
+		 }
+	 }
+}

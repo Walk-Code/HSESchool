@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#E6E8E5" >
+    <View  android:layout_width="match_parent"
+           android:layout_height="2dp"
+           android:background="#C5DB98"/>
+    
+    <!-- <string name="spam">广告或垃圾信息</string>
+    <string name="harry">骚扰或人身攻击</string>
+    <string name="sax">色情、淫秽内容</string>
+    <string name="violation">违反法律法规</string>
+     <string name="other_report">其他</string> -->
+  <RadioGroup 
+            android:id="@+id/radioGroup" 
+            android:layout_width="match_parent" 
+            android:layout_height="wrap_content" 
+            android:orientation="vertical"
+            android:background="#FAF8FB"
+            >
+   <RelativeLayout android:layout_width="wrap_content"
+       			 android:layout_height="wrap_content">         
+    <TextView android:id="@+id/dialog_r"
+        	  android:layout_width="wrap_content"
+        	  android:layout_height="50dp"        	
+        	  android:textSize="16sp"
+        	  android:layout_marginLeft="8dp"
+        	  android:gravity="center_vertical"
+        	  android:text="..."
+        	  android:layout_alignParentLeft="true"
+              />
+            <RadioButton 
+                android:id="@+id/radioB" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 				
+                android:button="@null"                      
+                android:drawableRight="@android:drawable/btn_radio" 
+                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                />
+    </RelativeLayout>         
+		<View android:layout_width="match_parent"
+		      android:layout_height="1dp"
+		      android:background="#E6E8E5"
+		        />
+		<RelativeLayout android:layout_width="wrap_content"
+       			 android:layout_height="wrap_content">         
+    <TextView android:id="@+id/dialog_re"
+        	  android:layout_width="wrap_content"
+        	  android:layout_height="50dp"        	
+        	  android:textSize="16sp"
+        	  android:layout_marginLeft="8dp"
+        	  android:gravity="center_vertical"
+        	  android:text="..."
+        	  android:layout_alignParentLeft="true"
+              />
+            <RadioButton 
+                android:id="@+id/radioBt" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 				
+                android:button="@null"                      
+                android:drawableRight="@android:drawable/btn_radio" 
+                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                />
+    </RelativeLayout>         
+		<View android:layout_width="match_parent"
+		      android:layout_height="1dp"
+		      android:background="#E6E8E5"
+		        />
+		<RelativeLayout android:layout_width="wrap_content"
+       			 android:layout_height="wrap_content">         
+    <TextView android:id="@+id/dialog_rep"
+        	  android:layout_width="wrap_content"
+        	  android:layout_height="50dp"        	
+        	  android:textSize="16sp"
+        	  android:layout_marginLeft="8dp"
+        	  android:gravity="center_vertical"
+        	  android:text="..."
+        	  android:layout_alignParentLeft="true"
+              />
+            <RadioButton 
+                android:id="@+id/radioBtn" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 				
+                android:button="@null"                      
+                android:drawableRight="@android:drawable/btn_radio" 
+                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                />
+    </RelativeLayout>         
+		<View android:layout_width="match_parent"
+		      android:layout_height="1dp"
+		      android:background="#E6E8E5"
+		        />
+		<RelativeLayout android:layout_width="wrap_content"
+       			 android:layout_height="wrap_content">         
+    <TextView android:id="@+id/dialog_repo"
+        	  android:layout_width="wrap_content"
+        	  android:layout_height="50dp"        	
+        	  android:textSize="16sp"
+        	  android:layout_marginLeft="8dp"
+        	  android:gravity="center_vertical"
+        	  android:text="..."
+        	  android:layout_alignParentLeft="true"
+              />
+            <RadioButton 
+                android:id="@+id/radioBtns" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 				
+                android:button="@null"                      
+                android:drawableRight="@android:drawable/btn_radio" 
+                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                />
+    </RelativeLayout>         
+		<View android:layout_width="match_parent"
+		      android:layout_height="1dp"
+		      android:background="#E6E8E5"
+		        />
+		<RelativeLayout android:layout_width="wrap_content"
+       			 android:layout_height="wrap_content">         
+    <TextView android:id="@+id/dialog_repor"
+        	  android:layout_width="wrap_content"
+        	  android:layout_height="50dp"        	
+        	  android:textSize="16sp"
+        	  android:layout_marginLeft="8dp"
+        	  android:gravity="center_vertical"
+        	  android:text="..."
+        	  android:layout_alignParentLeft="true"
+              />
+            <RadioButton 
+                android:id="@+id/radioBtnsv" 
+                android:layout_width="wrap_content" 
+                android:layout_height="wrap_content" 				
+                android:button="@null"                      
+                android:drawableRight="@android:drawable/btn_radio" 
+                android:layout_alignParentRight="true"
+                android:gravity="center_vertical"
+                />
+    </RelativeLayout>         
+		<View android:layout_width="match_parent"
+		      android:layout_height="1dp"
+		      android:background="#E6E8E5"
+		        />
+
+		
+   </RadioGroup>
+		<LinearLayout 
+		    android:layout_width="match_parent"
+		    android:layout_height="wrap_content"
+		    android:orientation="horizontal"
+		    android:background="#FAF8FB"
+		    >
+		 <Button android:layout_width="0dp"
+		     	 android:layout_weight="1"
+		     	 android:layout_height="50dp"
+		     	 android:text="@string/cancle"
+		     	 android:background="#FAF8FB"
+		     	 android:textSize="16sp"/> 
+		 <View  android:layout_width="1dp"
+		     	android:layout_height="match_parent"
+		     	android:background="#E6E8E5"/>    	   
+		  <Button android:layout_width="0dp"
+		     	 android:layout_height="50dp"
+		     	 android:text="@string/comfirm"
+		     	 android:layout_weight="1"
+		     	 android:background="#FAF8FB"
+		     	 android:textSize="16sp"/>   
+		    
+		</LinearLayout>								
+</LinearLayout>

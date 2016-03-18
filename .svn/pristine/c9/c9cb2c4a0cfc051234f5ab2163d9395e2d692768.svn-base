@@ -1,0 +1,90 @@
+package com.zhuochuang.hsej.store;
+
+import org.json.JSONArray;
+
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.util.ContentAdapter;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+
+public class StoreOrderStatusActivity extends BaseActivity{
+	private PullToRefreshListView mListView;
+	private ContentAdapter mAdapter;
+	private JSONArray mDataArr;
+	private String mItem[];
+	private String status;
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		setContentView(R.layout.store_order_status);
+		mItem = getResources().getStringArray(R.array.store_order_status);
+		setTitleText(returnStatus(getIntent().getStringExtra("flag")));
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_OrdersListOrders,DataLoader.getInstance().getListOrdersTypeParams(getIntent().getStringExtra("orderNumber")), StoreOrderStatusActivity.this);			
+		initListView();
+	}
+
+	private void initListView() {
+		mListView = (PullToRefreshListView) findViewById(R.id.pullToListView_order);
+		mListView.setAdapter(mAdapter = new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				
+				return super.getCount();
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				return super.getView(position, convertView, parent);
+			}
+			
+		});
+		
+		mListView.setOnRefreshListener(new OnRefreshListener() {
+			
+			@Override
+			public void onRefresh() {
+				
+				
+			}
+		});
+		
+		mListView.startRefresh();
+		
+	}
+	
+	public String returnStatus(String status){
+		if(status != null){
+		int statusNumber = Integer.parseInt(status);		
+		return mItem[statusNumber];
+		}else{
+			return "null";
+		}
+	}
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		if(null != mListView){
+			mListView.complete();
+		}
+		
+		if (result == null) {
+			return;
+		}
+		if (result instanceof Error) {
+			Toast.makeText(StoreOrderStatusActivity.this,((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+	}
+}

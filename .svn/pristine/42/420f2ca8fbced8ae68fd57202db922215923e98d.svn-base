@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:orientation="vertical" >
+
+    <com.zhuochuang.hsej.store.StickyScrollView
+        android:id="@+id/details_scrollview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="9"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#FFFFFF"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/toplayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" >
+
+                <com.util.AutoGallery
+                    android:id="@+id/gallery_banner"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentTop="true"
+                    android:spacing="4dp" />
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="35dp"
+                    android:layout_alignParentBottom="true" >
+
+                    <com.util.PageGuide
+                        android:id="@+id/pageguide"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="10dp" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/viewGroups"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_alignTop="@id/gallery_banner"
+                    android:tag="sticky-hastransparancy-nonconstant" >
+
+                    <ImageView
+                        android:id="@+id/details_back"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="10dp"
+                        android:src="@drawable/nav_commodity_icon_back" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <ImageView
+                            android:id="@+id/details_share"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="5dp"
+                            android:src="@drawable/nav_commodity_icon_share" />
+
+                        <RelativeLayout
+                            android:layout_width="30dp"
+                            android:layout_height="40dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="20dp"
+                            android:layout_toLeftOf="@id/details_share" >
+
+                            <ImageView
+                                android:id="@+id/details_store_car"
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_centerVertical="true"
+                                android:src="@drawable/nav_commodity_icon_shopping" />
+
+                            <TextView
+                                android:id="@+id/details_goods_count"
+                                android:layout_width="10dp"
+                                android:layout_height="10dp"
+                                android:layout_alignParentRight="true"
+                                android:background="@drawable/store_car_count"
+                                android:gravity="center"
+                                android:textColor="#FFFFFF"
+                                android:textSize="7dp"
+                                android:visibility="gone" />
+                        </RelativeLayout>
+                    </RelativeLayout>
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/top_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:background="#FFFFFF"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:orientation="vertical" >
+
+                    <TextView
+                        android:id="@+id/details_goods"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/black"
+                        android:textSize="18sp" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp" >
+
+                    <TextView
+                        android:id="@+id/details_price"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:textColor="@android:color/holo_red_light"
+                        android:textSize="22dp" />
+
+                    <TextView
+                        android:id="@+id/details_mark"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginTop="3dp"
+                        android:layout_toRightOf="@id/details_price"
+                        android:textColor="#999999"
+                        android:textSize="18dp" />
+
+                    <TextView
+                        android:id="@+id/detail_stock"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="15dp"
+                        android:gravity="bottom"
+                        android:textColor="#9A9A9A"
+                        android:textSize="12sp" />
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#E7E7E7" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/group_deliver_0"
+                        android:layout_marginRight="50dp"
+                        android:orientation="horizontal" >
+
+                        <ImageView
+                            android:layout_width="19dp"
+                            android:layout_height="19dp"
+                            android:src="@drawable/icon_tick" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="20dp"
+                            android:layout_marginLeft="8dp"
+                            android:gravity="center_vertical"
+                            android:text="@string/package_delivery"
+                            android:textColor="#3D3D3D"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/group_deliver_1"
+                        android:orientation="horizontal" >
+                        <ImageView
+                            android:layout_width="19dp"
+                            android:layout_height="19dp"
+                            android:src="@drawable/icon_tick" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="20dp"
+                            android:layout_marginLeft="8dp"
+                            android:gravity="center_vertical"
+                            android:text="@string/take_their"
+                            android:textColor="#3D3D3D"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="#EFEFEF" />
+
+            <RelativeLayout
+                android:id="@+id/store_goods_choose"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_marginLeft="8dp" >
+
+                <TextView
+                    android:id="@+id/goods_choose"
+                    android:layout_width="wrap_content"
+                    android:layout_height="30dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center_vertical"
+                    android:text="@string/store_choose_size"
+                    android:textColor="#000000"
+                    android:textSize="16dp" />
+
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="12dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="5dp"
+                    android:background="@drawable/arrow" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="#EFEFEF" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/goods_evaluate"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/goods_estimate"
+                    android:textColor="#9A9A9A"
+                    android:textSize="15sp" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#EFEFEF" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/store_comment_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/store_comtent_null"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:text="@string/store_evaluate"
+                    android:textColor="#000000"
+                    android:textSize="15dp" />
+
+                <LinearLayout
+                    android:id="@+id/goods_comment_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#ffffff"
+                    android:orientation="vertical"
+                    android:visibility="gone" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp" >
+
+                <TextView
+                    android:id="@+id/store_check_evaluate"
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:background="@drawable/store_clean_bg"
+                    android:gravity="center"
+                    android:text="@string/goods_all_estimate"
+                    android:textColor="@android:color/holo_red_dark"
+                    android:textSize="12dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:background="#EFEFEF" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="5dp"
+                    android:text="商品展示"
+                    android:textSize="15sp" />
+
+                <WebView
+                    android:id="@+id/goods_show"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="5dp"
+                    android:background="#FFFFFF"
+                    android:focusable="false" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.zhuochuang.hsej.store.StickyScrollView>
+
+    <LinearLayout
+        android:id="@+id/layout_boom"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+        android:descendantFocusability="blocksDescendants"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:gravity="bottom"
+            android:orientation="horizontal" >
+
+            <RelativeLayout
+                android:id="@+id/details_go_store"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:layout_weight="1"
+                android:background="#F7F7F7"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true" >
+
+                <View
+                    android:id="@+id/view"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/nav_icon_homepage"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false" />
+
+                <TextView
+                    android:id="@+id/go_toshop"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/view"
+                    android:layout_centerHorizontal="true"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:singleLine="true"
+                    android:text="@string/goods_shop"
+                    android:textColor="#B0B0B0"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/goods_collection"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#F7F7F7" >
+
+                <View
+                    android:id="@+id/views"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/store_icon_collect" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/views"
+                    android:layout_centerHorizontal="true"
+                    android:layout_weight="1"
+                    android:background="#F7F7F7"
+                    android:singleLine="true"
+                    android:text="@string/goods_collection"
+                    android:textColor="#B0B0B0"
+                    android:textSize="12sp" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.9"
+            android:gravity="bottom"
+            android:orientation="horizontal" >
+
+            <TextView
+                android:id="@+id/details_add_car"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#DE504F"
+                android:clickable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:gravity="center"
+                android:singleLine="true"
+                android:text="@string/goods_pulled_car"
+                android:textColor="@android:color/white"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

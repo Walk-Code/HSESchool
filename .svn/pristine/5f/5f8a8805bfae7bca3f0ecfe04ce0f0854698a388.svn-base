@@ -1,0 +1,32 @@
+package com.zhuochuang.hsej;
+
+import android.view.View;
+import android.widget.AdapterView;
+
+public class VoteResultActivity extends ListViewActivity{
+
+	@Override
+	public void getHeaderView() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void getAdapter() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void getFooterView() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void OnItemClickListener(AdapterView<?> parent, View view, int position, long id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

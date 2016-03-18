@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <FrameLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="50dp"
+	    android:background="#de504f">
+	    
+	    <TextView 
+	   	    android:id="@+id/topnavbar_center_text"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="match_parent" 
+	   		android:textSize="18dp"
+	   		android:singleLine="true"
+	   		android:ellipsize="end"
+	   		android:gravity="center"
+	   		android:text="@string/channel_schoolyardservice"
+	   		android:layout_gravity="center"
+	   		android:textColor="#f9fffa"/>
+	    <FrameLayout
+	        android:id="@+id/topnavbar_rightlayout"
+		    android:layout_width="60dp"
+		    android:layout_height="match_parent"
+		    android:layout_gravity="right">
+	        <View
+	            android:id="@+id/ico"
+		        android:layout_width="25dp"
+		        android:layout_height="23dp"
+		        android:background="@drawable/navibar_edit"
+		        android:layout_gravity="center"/>
+	        <TextView 
+		   	    android:id="@+id/textview"
+		   	    android:layout_width="wrap_content"
+		   		android:layout_height="match_parent"
+		   		android:visibility="gone"
+		   		android:textSize="17dp"
+		   		android:gravity="center"
+		   		android:text="@string/done"
+		   		android:layout_gravity="center"
+		   		android:textColor="#f9fffa"/>
+	    </FrameLayout>
+	</FrameLayout>
+
+    <include
+	    layout="@layout/pulltolistview"
+	    android:id="@+id/pullto_listview"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"/>
+</LinearLayout>

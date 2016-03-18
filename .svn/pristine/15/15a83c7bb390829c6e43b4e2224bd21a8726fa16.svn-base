@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF" >
+     <ListView
+        android:id="@+id/store_choose_address_listview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="#F3F3F3"
+        android:dividerHeight="1dp"
+        android:background="#FFFFFF"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp" />
+     <LinearLayout 
+         android:layout_width="match_parent"
+         android:layout_height="40dp"
+         android:orientation="horizontal"
+         android:layout_alignParentBottom="true"
+         android:id="@+id/add_address"
+         android:gravity="center"
+         android:visibility="gone" >
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="25dp"
+            android:text="@string/adds_address"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:background="@drawable/shape_store_address_bg"
+            android:id="@+id/store_add_address"/>	 
+     </LinearLayout>
+     <View 
+         android:layout_width="match_parent"
+         android:layout_height="1dp"
+         android:layout_above="@id/add_address"
+         android:background="#EAEAEA"/>
+
+</RelativeLayout>

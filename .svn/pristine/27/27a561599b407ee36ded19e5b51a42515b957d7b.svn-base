@@ -1,0 +1,286 @@
+package com.layout.emoji;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.model.Configs;
+
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.text.Html;
+import android.text.Html.ImageGetter;
+
+public class EmojiUtils {
+	
+	private static String[] emojiArr;
+	private static Context context;
+	
+	public static void setContext(Context cxt){
+		context = cxt;
+	}
+	
+	/**
+	 * 将unicode表情替换成<img src=标签
+	 * @param str
+	 * @return
+	 */
+	public static String convertToTag(String str){
+		str = str.replaceAll("<", "&lt;");
+		str = str.replaceAll("\n", "<br/>");
+		
+		String[] arr = getEmojiArr();
+		for(int i = 0; i < arr.length; i++){
+			String code = getHexStr(arr[i]);
+			str = str.replaceAll((code.length() == 5 ? Configs.UnicodeTag: Configs.unicodeTag) + code, "<img src=\"emoji_" + code + "\"/>");
+		}
+		
+		return str;
+	}
+	
+	/**
+	 * 将表情替换成unicode提交
+	 * @param str
+	 * @return
+	 */
+	public static String convertToUnicode(String str){
+		str = str.replaceAll("&lt;", "<");
+		
+		String[] arr = getEmojiArr();
+		for(int i = 0; i < arr.length; i++){
+			String code = getHexStr(arr[i]);
+			if(str.contains(arr[i])){
+				str = str.replaceAll(arr[i], getUnicodeChar(code));
+			}
+		}
+		
+		return str;
+	}
+	
+	public static String convertToEmojiTag(String str){
+		str = str.replaceAll("<", "&lt;");
+		str = str.replaceAll("\n", "<br/>");
+		
+		String[] arr = getEmojiArr();
+		for(int i = 0; i < arr.length; i++){
+			String code = getHexStr(arr[i]);
+			str = str.replaceAll((code.length() == 5 ? Configs.UnicodeTag: Configs.unicodeTag) + code, "emoji_" + code);
+		}
+		
+		return str;
+	}
+	
+	public static String convertToEmojiCode(String str){
+		str = str.replaceAll("&lt;", "<");
+		String[] arr = getEmojiArr();
+		for(int i = 0; i < arr.length; i++){
+			String code = getHexStr(arr[i]);
+			str = str.replaceAll("<img src=\\\"emoji_" + code + "\\\"/>", "emoji_" + code);
+		}
+		return str;
+	}
+	
+	private static String getUnicodeChar(String str){
+		char[] char0 = Character.toChars(Integer.parseInt(str, 16));
+		return new String(char0);
+	}
+	
+	private static String getHexStr(String str){
+		if(str != null && str.length() > 0){
+			if(str.contains("_")){
+				return str.split("_")[1];
+			}
+		}
+		
+		return str;
+	}
+	
+	public static void replaceEmojiMarket(Object obj){
+		if(obj == null){
+			return;
+		}
+		
+		try {
+			if(obj instanceof JSONArray){
+				for(int i = 0; i < ((JSONArray)obj).length(); i++){
+					JSONObject objs = ((JSONArray)obj).optJSONObject(i);
+					objs.put("itemDesc", convertToTag(objs.optString("itemDesc")));
+				}
+			}
+			else if(obj instanceof JSONObject){
+				((JSONObject)obj).put("itemDesc", convertToTag(((JSONObject)obj).optString("itemDesc")));
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	public static void replaceEmoji(Object obj){
+		if(obj == null){
+			return;
+		}
+		
+		try {
+			if(obj instanceof JSONArray){
+				for(int i = 0; i < ((JSONArray)obj).length(); i++){
+					JSONObject objs = ((JSONArray)obj).optJSONObject(i);
+					objs.put("content", convertToTag(objs.optString("content")));
+				}
+			}
+			else if(obj instanceof JSONObject){
+				((JSONObject)obj).put("content", convertToTag(((JSONObject)obj).optString("content")));
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+	}
+	
+	public static void replaceEmojiIntro(Object obj){
+		if(obj == null){
+			return;
+		}
+		
+		try {
+			if(obj instanceof JSONArray){
+				for(int i = 0; i < ((JSONArray)obj).length(); i++){
+					JSONObject objs = ((JSONArray)obj).optJSONObject(i);
+					objs.put("intro", convertToTag(objs.optString("intro")));
+				}
+			}
+			else if(obj instanceof JSONObject){
+				((JSONObject)obj).put("intro", convertToTag(((JSONObject)obj).optString("intro")));
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+	}
+	
+	public static void replaceEmojiComment(Object obj){
+		if(obj == null){
+			return;
+		}
+		
+		try {
+			if(obj instanceof JSONArray){
+				for(int i = 0; i < ((JSONArray)obj).length(); i++){
+					JSONObject objs = ((JSONArray)obj).optJSONObject(i);
+					objs.put("comment", convertToTag(objs.optString("comment")));
+				}
+			}
+			else if(obj instanceof JSONObject){
+				((JSONObject)obj).put("comment", convertToTag(((JSONObject)obj).optString("comment")));
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+	
+	public static CharSequence getEmojiCharSequence(String str){
+		if(str == null || str.length() == 0){
+			return str;
+		}
+		return Html.fromHtml(str, emojiGetter, null);
+	}
+	
+	private static ImageGetter emojiGetter = new ImageGetter(){
+        public Drawable getDrawable(String source){
+            int id = context.getResources().getIdentifier(source, "drawable", context.getPackageName());
+            Drawable emoji = context.getResources().getDrawable(id);
+            int w = (int)(emoji.getIntrinsicWidth() * 0.8);
+            int h = (int)(emoji.getIntrinsicHeight() * 0.8);
+            emoji.setBounds(0, 0, w, h);
+            return emoji;
+        }
+    };	
+	
+	private static String[] getEmojiArr(){
+		if(emojiArr == null){
+			emojiArr = new String[]{
+				"emoji_1f600",
+				"emoji_1f601",
+				"emoji_1f602",
+				"emoji_1f603",
+				"emoji_1f604",
+				"emoji_1f605",
+				"emoji_1f606",
+				"emoji_1f607",
+				"emoji_1f608",
+				"emoji_1f609",
+				"emoji_1f610",
+				"emoji_1f611",
+				"emoji_1f612",
+				"emoji_1f613",
+				"emoji_1f614",
+				"emoji_1f615",
+				"emoji_1f616",
+				"emoji_1f617",
+				"emoji_1f618",
+				"emoji_1f619",
+				"emoji_1f620",
+				"emoji_1f621",
+				"emoji_1f622",
+				"emoji_1f623",
+				"emoji_1f624",
+				"emoji_1f625",
+				"emoji_1f626",
+				"emoji_1f627",
+				"emoji_1f628",
+				"emoji_1f629",
+				"emoji_1f630",
+				"emoji_1f631",
+				"emoji_1f632",
+				"emoji_1f633",
+				"emoji_1f634",
+				"emoji_1f635",
+				"emoji_1f636",
+				"emoji_1f637",
+				"emoji_263a",
+				"emoji_1f60a",
+				"emoji_1f60b",
+				"emoji_1f60c",
+				"emoji_1f60d",
+				"emoji_1f60e",
+				"emoji_1f60f",
+				"emoji_1f61a",
+				"emoji_1f61b",
+				"emoji_1f61c",
+				"emoji_1f61d",
+				"emoji_1f61e",
+				"emoji_1f61f",
+				"emoji_1f62a",
+				"emoji_1f62b",
+				"emoji_1f62c",
+				"emoji_1f62d",
+				"emoji_1f62e",
+				"emoji_1f62f",
+				"emoji_1f47d",
+				"emoji_1f47f",
+				"emoji_1f4aa",
+				"emoji_1f44a",
+				"emoji_1f44b",
+				"emoji_1f44c",
+				"emoji_1f44d",
+				"emoji_1f44e",
+				"emoji_1f44f",
+				"emoji_1f440",
+				"emoji_1f442",
+				"emoji_1f443",
+				"emoji_1f444",
+				"emoji_1f445",
+				"emoji_1f446",
+				"emoji_26c4",
+				"emoji_26c5",
+				"emoji_2600",
+				"emoji_2601",
+				"emoji_2614",
+				"emoji_2744",
+				"emoji_2668",
+				"emoji_2764"
+			};
+			
+		}
+		
+		return emojiArr;
+	}
+}

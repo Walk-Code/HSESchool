@@ -1,0 +1,80 @@
+package com.model;
+
+import android.content.Context;
+
+import com.nostra13.universalimageloader.cache.disc.impl.UnlimitedDiscCache;
+import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
+import com.nostra13.universalimageloader.core.display.RoundedBitmapDisplayer;
+import com.zhuochuang.hsej.R;
+
+public class ImageLoaderConfigs {
+
+	public static DisplayImageOptions displayImageOptions;
+	public static DisplayImageOptions displayImageOptionsBg;
+	public static DisplayImageOptions displayImageOptionsRound;
+	public static DisplayImageOptions displayImageOptionsPreRound;
+	public static DisplayImageOptions displayImageOptionsRoundCenter;
+	
+	@SuppressWarnings("deprecation")
+	public static void initImageLoader(Context context) {
+		// This configuration tuning is custom. You can tune every option, you may tune some of them,
+		// or you can create default configuration by
+		//  ImageLoaderConfiguration.createDefault(this);
+		// method.
+		ImageLoaderConfiguration.Builder config = new ImageLoaderConfiguration.Builder(context);
+		config.threadPriority(Thread.NORM_PRIORITY);
+		config.denyCacheImageMultipleSizesInMemory();
+		config.discCache(new UnlimitedDiscCache(CacheHandler.getImageCacheDir(context)));
+		config.diskCacheFileNameGenerator(new Md5FileNameGenerator());
+	//	config.diskCacheSize(50 * 1024 * 1024); // 50 MiB
+		config.tasksProcessingOrder(QueueProcessingType.LIFO);
+		config.writeDebugLogs(); // Remove for release app
+		
+		// Initialize ImageLoader with configuration.
+		ImageLoader.getInstance().init(config.build());
+		initDisplayImageOptions();
+	}
+	
+	@SuppressWarnings("deprecation")
+	public static void initDisplayImageOptions(){
+		displayImageOptions = new DisplayImageOptions.Builder()
+		.cacheInMemory(true)
+		.cacheOnDisc(true).build();
+		
+		displayImageOptionsBg = new DisplayImageOptions.Builder()
+		.showImageForEmptyUri(R.drawable.previewpic)
+		.showImageOnFail(R.drawable.previewpic)
+		.showImageOnLoading(R.drawable.previewpic)
+		//.showImageOnLoading(R.drawable.list_loadpicture)
+		.cacheInMemory(true)
+		.cacheOnDisc(true).build();
+		
+		displayImageOptionsPreRound = new DisplayImageOptions.Builder()
+		.showImageForEmptyUri(R.drawable.previewpic)
+		.showImageOnFail(R.drawable.previewpic)
+		.showImageOnLoading(R.drawable.previewpic)
+		.resetViewBeforeLoading(true)
+		.displayer(new RoundedBitmapDisplayer(150))
+		.cacheInMemory(true)
+		.cacheOnDisc(true).build();
+
+		displayImageOptionsRound = new DisplayImageOptions.Builder()
+		.showImageForEmptyUri(R.drawable.my_head)
+		.showImageOnFail(R.drawable.my_head)
+		.showImageOnLoading(R.drawable.my_head)
+		.resetViewBeforeLoading(true)
+		.displayer(new RoundedBitmapDisplayer(150))
+		.cacheInMemory(true)
+		.cacheOnDisc(true).build();
+		
+		displayImageOptionsRoundCenter = new DisplayImageOptions.Builder()
+		.resetViewBeforeLoading(true)
+		.displayer(new RoundedBitmapDisplayer(150))
+		.cacheInMemory(true)
+		.cacheOnDisc(true).build();
+	}
+}

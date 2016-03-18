@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginLeft="10dp"
+    android:layout_marginBottom="10dp"
+    android:descendantFocusability="blocksDescendants"  >
+	     <ImageView
+	           android:id="@+id/shop_images"
+	           android:layout_width="match_parent"
+	           android:layout_height="60dp"
+	           android:src="@drawable/previewpic"
+	           android:scaleType="fitXY" />
+	
+	     <TextView
+	          android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:layout_gravity="left"
+	          android:singleLine="true"
+	          android:id="@+id/shop_name"
+	          android:textColor="#9A9A9A"
+	          android:layout_marginTop="4dp"
+	          android:textSize="13dp" />  
+</LinearLayout>

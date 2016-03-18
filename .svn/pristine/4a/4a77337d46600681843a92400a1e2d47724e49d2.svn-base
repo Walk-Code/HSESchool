@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#636363"
+        android:text="@string/text_everyday_quota" />
+
+    <com.zhuochuang.hsej.view.FlowRadioGroup
+        android:id="@+id/flow_radiogroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" >
+
+            <RadioButton
+                android:id="@+id/rd_fifty"
+                android:layout_width="77dp"
+                android:layout_height="33dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/bg_radiobutton_selector"
+                android:button="@null"
+                android:checked="true"
+                android:gravity="center"
+                android:text="@string/text_fifty"
+                android:textColor="@drawable/color_radio_text_selector"
+                android:textSize="15sp" />
+
+            <RadioButton
+                android:id="@+id/rd_one_hundred"
+                android:layout_width="77dp"
+                android:layout_height="33dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/bg_radiobutton_selector"
+                android:button="@null"
+                android:gravity="center"
+                android:text="@string/text_one_hundred"
+                android:textColor="@drawable/color_radio_text_selector"
+                android:textSize="15sp" />
+
+            <RadioButton
+                android:id="@+id/rd_two_hundred"
+                android:layout_width="77dp"
+                android:layout_height="33dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/bg_radiobutton_selector"
+                android:button="@null"
+                android:gravity="center"
+                android:text="@string/text_two_hundred"
+                android:textColor="@drawable/color_radio_text_selector"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/rd_five_hundred"
+                android:layout_width="77dp"
+                android:layout_height="33dp"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_radiobutton_selector"
+                android:button="@null"
+                android:gravity="center"
+                android:text="@string/text_five_hundred"
+                android:textColor="@drawable/color_radio_text_selector"
+                android:textSize="15sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </LinearLayout>
+    </com.zhuochuang.hsej.view.FlowRadioGroup>
+
+</LinearLayout>

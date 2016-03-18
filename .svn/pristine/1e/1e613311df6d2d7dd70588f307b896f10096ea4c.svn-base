@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">华商E家</string>
+    <string name="app_dirsname">HSESchool</string>
+    
+    <string name="weixin_app_id">wxf3beacd0cfced80c</string>
+    <string name="weixin_app_secret">9f869bf1266ddcbb85d824521a2ac436</string>
+    
+    <string name="confirm">确定</string>
+    <string name="confirm_exit">退出</string>
+    <string name="confirm_or_not">是否退出?</string>
+    <string name="cancel">取消</string>
+    <string name="edit">编辑</string>
+    <string name="done">完成</string>
+    <string name="delete">删除</string>
+    <string name="notify">提示</string>
+    <string name="retry">重试</string>
+    <string name="add">添加</string>
+    <string name="more">更多</string>
+    <string name="all">全部</string>
+    <string name="search">搜索</string>
+    <string name="next">下一步</string>
+    <string name="open">打开</string>
+    <string name="publish">发表</string>
+    <string name="commit">提交</string>
+    <string name="load_fail">数据加载失败， 请重试！</string>
+    <string name="login_fail">登录失败， 请重新登录</string>
+    
+    <string name="crash_file_path">"/crash"</string>
+    <string name="crash_toast_message">程序出现异常,即将退出</string>
+    <string name="crash_write_error">文件写入时出现错误</string>
+    <string name="internet_avaiable_false">网络链接异常,请检查网络链接</string>
+    <string name="connection_timeout">请求超时</string>
+    <string name="connection_fail">连接失败！</string>
+    
+    <string name="pull_to_refresh_complete">最近更新: </string>
+    <string name="pull_to_refresh_pull_labels">下拉刷新</string>
+    <string name="pull_to_refresh_release_labels">松开刷新数据</string>
+    <string name="pull_to_refresh_refreshing_labels">正在加载...</string>
+    <string name="pull_to_refresh_footer_release_label">松开载入更多</string>
+    <string name="pull_to_refresh_footer_pull_label">上拉加载更多</string>
+    <string name="pull_to_refresh_footer_refreshing_label">正在加载...</string>
+    
+    <!-- 检测版本 -->
+    <string name="version_update">立即更新</string>
+    <string name="version_cancel">以后再说</string>
+    <string name="version_exit">退出</string>
+    <string name="version_title">版本提示</string>
+    <string name="version_title_update">发现新版本，请更新</string>
+    <string name="version_already_now">已是最新版本</string>
+    <string name="version_please_update">当前版本低于最低版本, 请先更新</string>
+    <string name="version_check_doing">检测版本\u2026</string>
+    <string name="version_check_new">检测到新版本V%1$s</string>
+    <string name="version_valid">链接无效</string>
+    
+    <string name="desc_shrinkup">收起</string>
+    <string name="desc_spread">更多</string>
+    
+    <string name="time_now">刚刚</string>
+    <string name="time_second">分钟前</string>
+    <string name="time_hour">小时前</string>
+    <string name="time_yestoday">昨天</string>
+    <string name="time_beforeyestoday">前天</string>
+    <string name="time_day">天前</string>
+    
+    <string name="publish_content_low">内容字数最少5个</string>
+    <string name="publish_content_up">内容字数最多300个</string>
+    <string name="publish_content_large">内容字数最多1000个</string>
+    <string name="publish_success">发表成功</string>
+    <string name="publish_pic_fail">图片上传失败，请重试！</string>
+    
+    <string name="time_format1">yyyy-MM-dd HH:mm</string>
+    <string name="time_format2">yyyy-MM-dd</string>
+    <string name="time_format3">MM-dd</string>
+    <string name="time_format4">MM-dd HH:mm</string>
+    <string name="time_format5">MM月dd日 HH:mm</string>
+    
+    <string name="channel_myschoolyard">我的校园</string>
+    <string name="channel_schoolyardservice">校园服务</string>
+    <string name="channel_myclassmate">我的同学</string>
+    <string name="channel_mycenter">个人中心</string>
+    
+    <string name="mycenter_cell1">我的消息</string>
+    <string name="mycenter_cell2">我的好友</string>
+    <string name="mycenter_cell3">我的帖子</string>
+    <string name="mycenter_cell4">我的积分</string>
+    <string name="mycenter_cell5">我的收藏</string>
+    <string name="mycenter_cell6">设置</string>
+    <string name="mycenter_cell7">关于我们</string>
+    <string name="mycenter_cell8">意见反馈</string>
+    <string name="mycenter_cell9">我的名片</string>
+    <string name="mycenter_cell10">修改密码</string>
+    <string name="mycenter_login">点击登录</string>
+    <string name="mycenter_login_notify">登录后体验更多功能</string>
+    <string name="mycenter_usermsg">%1$s&#160;&#160;&#160;|&#160;&#160;&#160;头衔&#160;:&#160;%2$s</string>
+    
+    <string name="source_name0">系统消息</string>
+    <string name="source_name3">活动</string>
+    <string name="source_name4">资讯</string>
+    <string name="source_name5">服务</string>
+    
+    <string name="login_notify">请先登录！</string>
+    <string name="login_title">登录</string>
+    <string name="login_forgetpass">忘记密码</string>
+    <string name="login_register">立即注册</string>
+    <string name="login_name">学号/昵称</string>
+    <string name="login_password">密码</string>
+    <string name="login_nickname">昵称</string>
+    <string name="login_studentnumber">学号</string>
+    
+    <string name="login_account_null">请输入昵称或学号</string>
+    <string name="login_password_null">请输入密码</string>
+    
+    <string name="login_register_title">注册</string>
+    <string name="login_register_nickname">昵称(必填,最多20个字)</string>
+    <string name="login_register_nickname_null">请输入昵称</string>
+    <string name="login_register_phone">手机号码(必填)</string>
+    <string name="login_register_email">Email</string>
+    <string name="login_register_password">密码(必填)</string>
+    <string name="login_register_password_null">请输入密码</string>
+    <string name="login_register_password_more">密码确认(必填)</string>
+    <string name="login_register_password_more_null">请重复密码</string>
+    <string name="login_register_phone_null">请输入手机号码</string>
+    <string name="login_register_phone_valid">请输入合法的11位手机号码</string>
+    <string name="login_register_password_more_same">重复密码不一致</string>
+    <string name="login_register_success">注册成功</string>
+    
+    <string name="login_welcome">欢迎使用</string>
+    <string name="login_welcome_hint1">请输入姓名</string>
+    <string name="login_welcome_hint2">身份证/学号</string>
+    <string name="login_welcome_hint2_null">请输入身份证/学号</string>
+    
+    <string name="passwordreset_title">密码重置</string>
+    <string name="passwordreset_hint1">请输入旧密码</string>
+    <string name="passwordreset_hint2">新密码</string>
+    <string name="passwordreset_hint3">新密码确认</string>
+    <string name="passwordreset_hint4">请输入新密码</string>
+    <string name="passwordreset_hint5">请重复密码</string>
+    <string name="passwordreset_hint6">重复密码不一致</string>
+    <string name="passwordreset_hint7">密码重置成功</string>
+    <string name="passwordauthcode_hint1">获取验证码</string>
+    <string name="passwordauthcode_hint2">请输入验证码</string>
+    <string name="passwordauthcode_hint3">您的手机号:&#160;&#160;%1$s</string>
+    <string name="passwordauthcode_hint4">请重新获取验证码</string>
+    <string name="passwordauthcode_hint5">验证码错误</string>
+    <string name="passwordauthcode_hint6">请获取验证码</string>
+    <string name="passwordfind_title">密码找回</string>
+    <string name="passwordfind_hint1">使用说明&#160;:</string>
+    <string name="passwordfind_hint2">按照提示，填写您的用户名或注册邮箱以及验证码，然后点击“下一步”。</string>
+    <string name="passwordfind_hint3">1、手机仅限用于免费接收系统发送的短信验证码。\n2、本应用承诺不会对外泄露您的手机号码及用于其他商业用途。</string>
+    <string name="passwordfind_hint4">请输入姓名</string>
+    <string name="passwordfind_hint5">请输入身份证或学号</string>
+    
+    <!-- 二维码 -->
+    <string name="qrscan_text">将二维码/条形码放入框内, 即可自动扫描</string>
+    <string name="qrscan_title">二维码扫描</string>
+    <string name="qrscan_result">扫描结果</string>
+    <string name="qrscan_result_hint">如需浏览，请长按网址复制后使用浏览器访问</string>
+    
+    <string name="photoalbum_picture">从相册选择</string>
+    <string name="photoalbum_camera">拍照</string>
+    <string name="photoalbum_title">相册</string>
+    <string name="photoalbum_phone_picture">从手机相册选择</string>
+    <string name="photoalbum_most_pic">最多选择%1$s张图片</string>
+    <string name="photoalbum_done">完成</string>
+    
+    <string name="postdetails_title">详情</string>
+    <string name="postdetails_owner">楼主</string>
+    <string name="postdetails_commenttitle">评论</string>
+    
+    <string name="customcomment_hint">说两句吧~</string>
+    
+    <string name="comment_reply">%1$s:&#160;&#160;%2$s</string>
+    <string name="comment_reply_more">%1$s回复%2$s:&#160;&#160;%3$s</string>
+    <string name="custom_reply_user">回复 %1$s:</string>
+    <string name="comment_detele">是否删除该评论?</string>
+    
+    <string name="activitydetails_addresstime">地点:&#160;&#160;%1$s\n时间:&#160;&#160;%2$s</string>
+    <string name="activitydetails_addresstimeend">地点:&#160;&#160;%1$s\n开始时间:&#160;&#160;%2$s\n结束时间:&#160;&#160;%3$s</string>
+    <string name="activitydetails_joincount">已有%1$s人参加</string>
+    <string name="activitydetails_joincount_max">最多允许%1$s人报名</string>
+    <string name="activitydetails_hint">活动介绍:</string>
+    <string name="activitydetails_join">我要参加</string>
+    <string name="activitydetails_unjoin">取消参加</string>
+    <string name="activitydetails_join_already">已报名</string>
+    <string name="activitydetails_join_partin">已参加</string>
+    <string name="activitydetails_refuse">已拒绝</string>
+    <string name="activitydetails_auditing">审核中/取消</string>
+    <string name="activitydetails_title">活动详情</string>
+    <string name="activitylist_title">活动列表</string>
+    <string name="activitylist_personcount">参加人数&#160;&#160;:&#160;&#160;%1$s/%2$s</string>
+    <string name="activitylist_finish">已结束</string>
+    <string name="activitylist_going">进行中</string>
+    <string name="activitylist_aborted">已中止</string>
+    <string name="activitylist_unstart">未开始</string>
+    
+    <string name="mypost_title">我的帖子</string>
+    <string name="mypost_imagecount">%1$s图</string>
+    <string name="mypost_date">时间:&#160;&#160;%1$s</string>
+    
+    <string name="hobbygroup_publish">发表话题</string>
+    <string name="hobbygroup_count">关注%1$s</string>
+    <string name="hobbygroup_attention">关注</string>
+    <string name="hobbygroup_attention_cancle">取消关注</string>
+    
+    <string name="publish_title">标题</string>
+    <string name="publish_content">内容</string>
+    <string name="publish_title_null">请输入标题</string>
+    <string name="publish_content_null">请输入内容</string>
+    <string name="publish_title_max">标题字数最多50个</string>
+    <string name="publish_content_max">内容字数最多2500个</string>
+    
+    <string name="mycard_identity">身份证:</string>
+    <string name="mycard_xh">学号:</string>
+    <string name="mycard_zkzh">准考证号:</string>
+    
+    <string name="service_more">更多服务</string>
+    <string name="service_add">服务添加</string>
+    
+     <string name="hobbygroup_group">%1$s&#160;&#160;(%2$s)</string>
+    
+    <string name="search_hint">请输入搜索关键字</string>
+    <string name="search_more">查看更多</string>
+    
+    <string name="announcement_title">新闻公告</string>
+    <string name="announcement_detils_title">通知详情</string>
+    
+    <string name="text_comment">条评论</string>
+    
+    <!-- 积分 -->
+    <string name="myintegral_all">我的积分 :</string>
+    <string name="myintegral_count">分值</string>
+    <string name="myintegral_sub">积分项</string>
+    
+    <string name="user_xb_nv">女</string>
+    <string name="user_xb_nan">男</string>
+    
+    <string name="favorite_already">已收藏</string>
+    
+    <string name="umeng_favorite">一键收藏</string>
+    <string name="umeng_favorite_success">收藏成功</string>
+    <string name="umeng_friend">应用内好友</string>
+    <string name="umeng_report">举报</string>
+    <string name="umeng_email">邮件</string>
+    <string name="umeng_friend_sharemsg">确定分享\"%1$s\"给好友%2$s？</string>
+    <string name="umeng_friend_share_success">分享成功</string>
+    <string name="umeng_email_share">请选择邮件发送内容</string>
+    <string name="umeng_email_share_null">未找到邮件APP，请先下载！</string>
+    <string name="umeng_sina_share_title">【%1$s】</string>
+    
+    <!-- 问卷调查 -->
+    <string name="survey_title">我的调查</string>
+    <string name="survey_result">调查结果</string>
+    <string name="survey_result_personnum">参与人数:&#160;&#160;%1$s</string>
+    <string name="survey_commit">确认提交</string>
+    <string name="survey_result_header">你已成功参与调查，调查结果如下...</string>
+    <string name="survey_option_max">最多可选%1$s项</string>
+    <string name="survey_option_min">选项\"%1$s\"最少选择%2$s项</string>
+    
+    <!-- 美丽华商 -->
+    
+    <string name="beauty_hs_title">美丽华商</string>
+    <string-array name="tabbar_name_beauty_hs">
+        <item>校园资讯</item>
+        <item>师资力量</item>
+        <item>优秀校友</item>
+    </string-array>
+    
+    <!-- 我的好友 -->
+    
+    <string name="my_friends_title">我的好友</string>
+    <string name="conform_friends_title">符合条件的好友</string>
+    <string name="verification_friends_title">好友验证</string>
+    <string name="verification_friends_doing">提交好友申请成功</string>
+    <string name="verification_friends_success">添加好友成功</string>
+    <string-array name="tabbar_name_my_firends">
+        <item>我的聊天</item>
+        <item>通讯录</item>
+    </string-array>
+    <string name="fail_to_add_friend">添加好友失败</string>
+    <string name="msg_null_msg">无聊天消息</string>
+    <string name="msg_null_contact">没有好友</string>
+    
+    <string name="chat_name_text">Lucy</string>
+    <string name="chat_time_text">上午12 : 00</string>
+    <string name="chat_num_text">3</string>
+    <string name="chat_content_text">what are you doing here?</string>
+    
+    <string name="new_friends_text">新的朋友</string>
+    
+    <string name="validatin_text_request">请求加为好友</string>
+    <string name="validatin_request_agree_text">同意</string>
+    <string name="validatin_agree_text">已同意</string>
+    <string name="validatin_name">Lucy</string>
+    
+    
+    <!-- 查询好友 -->
+    <string name="search_hint_text">姓名</string>
+    <string name="search_bottom_button_text">查询</string>
+    <string name="add_friends_title">添加朋友</string>
+    <string-array name="search_list_classes">
+      <item>地区</item>
+      <item>年级</item>
+      <item>专业</item>
+      <item>班级</item>
+      <item>兴趣</item>
+      <item>真实姓名</item>
+     </string-array>
+    <string-array name="search_list_text">
+      <item>请选择地区</item>
+      <item>请选择年级</item>
+      <item>请选择专业</item>
+      <item>请选择班级</item>
+      <item>请选择兴趣</item>
+     </string-array>
+    <string name="unlimited_setting_add_friend">不限</string>
+    <string name="no_friend">没有找到符合条件的用户</string>
+    <string name="select_professions">请选择专业</string>
+     
+    
+    <string-array name="channel_name">
+      <item>我的校园</item>
+      <item>校园生活</item>
+      <item>校园服务</item>
+      <item>我的同学</item>
+      <item>个人中心</item>
+     </string-array>
+     
+    <string-array name="channel_classmate">
+      <item>随便聊</item>
+      <item>社团</item>
+      <!-- <item>兴趣组</item> -->
+     </string-array>
+     
+    
+    <!-- 社团详情 -->
+    <string name="number_text_community">社团人数:</string>
+    <string name="request_button_text_community">申请加入</string>
+    <string name="audit_button_text_community">审核中/取消</string>
+    <!-- <string name="cancel_text_community">取消加入</string> -->
+    <string name="announcement_text_community">活动通告:</string>
+    <string name="pic_text_community">社团精彩图集</string>
+    <string name="community_join_already">已加入</string>
+     
+    <string-array name="hobbygroup_listtab">
+      <item>全部</item>
+      <item>我发布的</item>
+      <item>我回复的</item>
+      <item>最新回复</item>
+     </string-array>
+     
+    <string-array name="myfavorite">
+      <item>资讯</item>
+      <item>活动</item>
+      <item>社团</item>
+      <item>帖子</item>
+      <item>随便聊</item>
+      <!-- <item>兴趣组</item> -->
+     </string-array>
+     
+    <integer-array name="channel_icon_n">
+        <item>@drawable/tabbar_icon_home_normal</item>
+        <item>@drawable/icon_life_nor</item>
+        <item>@drawable/tabbar_icon_property_normal</item>
+        <item>@drawable/tabbar_icon_myclassmate_normal</item>
+        <item>@drawable/tabbar_icon_my_normal</item>
+    </integer-array>
+    
+    <integer-array name="channel_icon_p">
+        <item>@drawable/tabbar_icon_home_pre</item>
+        <item>@drawable/icon_life_pre</item>
+        <item>@drawable/tabbar_icon_property_pre</item>
+        <item>@drawable/tabbar_icon_myclassmate_pre</item>
+        <item>@drawable/tabbar_icon_my_pre</item>
+    </integer-array>
+    
+    
+    <!-- 个人中心主页 -->
+    <string name="personal_page_title">%1$s的个人主页</string>
+    <string name="personal_page_address">地址</string>
+    <string name="personal_page_signture">个性签名</string>
+    <string name="personal_page_signture2">自我介绍</string>
+    <string name="personal_page_photoalbum">个人相册</string>
+    <string name="personal_page_add_friend">申请添加好友</string>
+    <string name="personal_page_delete_friend">删除好友</string>
+    <string name="personal_page_accept_approve">通过验证</string>
+    <string name="personal_page_send_msg">发送消息</string>
+    <string name="personal_page_atten_friend">关注好友</string>
+    <string name="personal_page_cancel_atten">取消关注</string>
+    <string name="personal_page_save_success">保存成功！</string>
+    <string name="personal_page_tips1">请输入自我介绍</string>
+    <string name="personal_page_tips2">请输入我的特长</string>
+    <string name="personal_page_tips3">请输入交友宣言</string>
+    <string name="personal_page_nick_name">请输入昵称</string>
+    
+    <string name="personal_page_phone">手机</string>
+    <string name="personal_page_email">邮箱</string>
+    <string name="personal_page_null">不公开</string>
+    
+    <!-- 我的个人主页 -->
+    <string name="my_homepage_save">完成</string>
+    <string name="my_homepage_edit">编辑</string>
+    <string name="my_homepage_me">我</string>
+    <string name="my_homepage_name">姓名：%1$s</string>
+    <string name="my_homepage_gender">姓别：%1$s</string>
+    <string name="my_homepage_birth">出生年月：%1$s</string>
+    <string name="my_homepage_xh">学号：%1$s</string>
+    <string name="my_homepage_album">个人相册</string>
+    <string name="my_homepage_introduction">自我介绍</string>
+    <string name="my_homepage_nick_name">昵称</string>
+    <string name="my_homepage_nick_phone">手机号码</string>
+    <string name="my_homepage_input_tip_nickname">请输入文字(最多20个字)</string>
+    <string name="my_homepage_input_tip_phone">请输入文字</string>
+    <string name="my_homepage_input_tip">请输入文字</string>
+    <string name="my_homepage_specialty">我的特长</string>
+    <string name="my_homepage_declaration">交友宣言</string>
+    
+    <!-- 相册 -->
+    <string name="album_title">相册</string>
+    <string name="album_take_picture">拍照</string>
+    <string name="album_select_album">从相册选择</string>
+    <string name="album_cancel">取消</string>
+    
+    <!-- 我的消息 -->
+    <string name="message_title">我的消息</string>
+    <string name="message_null">没有消息</string>
+    <string name="message_sys_msg">系统消息</string>
+    <string name="message_commented_you">评论了你</string>
+    <string name="message_praised_yout">赞了你</string>
+    <string name="message_replied_yout">回复了你</string>
+    <string name="message_type0">你在贴子：{%1$s}有了新的回复</string>
+    
+    <string name="message_type1">你的好友%1$s更新了个人动态</string>
+    <string name="message_type2">你的好友发表了{%1$s}贴子</string>
+    <string name="message_type3">你的好友参与了{%1$s}活动</string>
+    <string name="message_type4">你所报名的活动{%1$s}审核已通过，记得准时参加哦！</string>
+    <string name="message_type5">你的在线咨询有管理员的新回复，请查看。</string>
+    <string name="message_type6">你有消息{%1$s}未查阅，请及时查阅！</string>
+    
+    <!-- 关于 -->
+    <string name="about_title">关于</string>
+    <string name="about_text">广州华商职业学院是经广东省人民政府批准成立，国家教育部备案，由太阳城集团投资创办的华商教育集团旗下的一所
+        全日制高等专科院校（华商教育集团由广东财经大学华商学院、广州华商职业学院和广东华商技工学校组成，是一个集本科、专科、中技教育等三个不同
+        层次育人内涵的教育集团。三院校独立办学，资源共享），学院面向省内外招收普通高等学历教育国家任务生，具有大学专科学历证书颁发权。
+        学院代码：14266。</string>
+    <string name="about_clause">服务条款</string>
+    <string name="about_statement">免责声明</string>
+    
+    <!-- 设置 -->
+    <string name="setting_title">设置</string>
+    <string name="setting_logout">注销</string>
+    <string name="setting_app_tips">应用升级</string>
+    <string name="setting_friend_tips">加为好友需要通过验证</string>
+    <string name="setting_search_tips">是否可通过搜索找到我</string>
+    <string name="setting_phone_tips">手机号码是否公开</string>
+    <string name="setting_email_tips">邮箱是否公开</string>
+    <string name="setting_stranger_tips">是否陌生人可关注我</string>
+    <string name="setting_save">保存</string>
+    <string name="setting_save_success">保存成功！</string>
+    <string name="setting_title_ys">隐私设置</string>
+    <string name="setting_title_share">分享设置</string>
+    <string name="setting_share_sina">新浪微博</string>
+    <string name="setting_share_logout_success">注销成功</string>
+    <string name="setting_share_logout_fail">注销失败</string>
+    
+    <!-- 修改密码 -->
+    <string name="changepass_old">原密码</string>
+    <string name="changepass_old_toast">请输入原密码</string>
+    <string name="changepass_new">新密码</string>
+    <string name="changepass_new_toast">请输入新密码</string>
+    <string name="changepass_new_re">重复密码</string>
+    <string name="changepass_new_re_toast">请重复密码</string>
+    <string name="changepass_new_unre_toast">新密码与重复密码不一致</string>
+    <string name="changepass_success">修改成功</string>
+    
+    <!-- 意见反馈 -->
+    <string name="feedback_title">意见反馈</string>
+    <string name="feedback_say_content">说两句吧~</string>
+    <string name="feedback_post">发送</string>
+    <string name="feedback_please_input">请输入内容</string>
+    
+    
+    <string name="can_not_get_time">无法取得时间</string>
+    
+    <string name="enter_school_title">入学办理</string>
+    <string name="enter_school_header_text1">完成进度：</string>
+    <string name="enter_school_header_text2">/</string>
+    <string name="enter_school_header_redview_text">%</string>
+    
+    <string name="enter_school_content_text1">完成</string>
+    <string name="enter_school_content_text2">未完成</string>
+    
+    <string name="question_online_button">在线咨询</string>
+    
+    <string name="online_consult_title">在线咨询</string>
+    <string-array name="online_question_text">
+        <item >常见问题</item>
+        <item >在线咨询</item>
+    </string-array>
+    
+    
+    <string name="nothing_chat">无聊天消息</string>
+    <string name="nothing_friend">没有好友</string>
+    
+    <string name="search_friend_xm">姓名:&#160;&#160;</string>
+    <string name="search_friend_nickname">昵称:&#160;&#160;</string>
+    
+    <!-- 课程表 -->
+    <string name="week_1">周一</string>
+    <string name="week_2">周二</string>
+    <string name="week_3">周三</string>
+    <string name="week_4">周四</string>
+    <string name="week_5">周五</string>
+    <string name="kcb_details_title">课程详情</string>
+    <string name="kcb_details_kc">课程</string>
+    <string name="kcb_details_jiaos">教室</string>
+    <string name="kcb_details_ls">老师</string>
+    <string name="kcb_details_jies">节数</string>
+    <string name="kcb_details_zs">周数</string>
+    <string name="kcb_djz">第%1$s周</string>
+    <string name="kcb_bz">(本周)</string>
+    <string name="kcb_xnxq">%1$s学年第%2$s学期</string>
+    <string name="kcb_xq1">一</string>
+    <string name="kcb_xq2">二</string>
+    <!-- 举报content -->
+    <string name="spam">广告或垃圾信息</string>
+    <string name="harry">骚扰或人身攻击</string>
+    <string name="sax">色情、淫秽内容</string>
+    <string name="violation">违反法律法规</string>
+     <string name="other_report">其他</string>
+     <string name="comfirm">确定</string>
+     <string name="cancle">取消</string>
+     
+      <string-array name="contents">
+      <item>广告或垃圾信息</item>
+      <item>骚扰或人身攻击</item>
+      <item >色情、淫秽内容</item>
+      <item>违反法律法规</item>
+      <item>其他</item>     
+      
+  </string-array>    
+  
+       <!-- PopupWindow 的Item -->
+     <string-array name="popupwindow">
+      <item >分享</item>
+       <item >举报</item>
+     </string-array>
+     
+     
+</resources>

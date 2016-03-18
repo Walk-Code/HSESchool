@@ -1,0 +1,25 @@
+package com.zhuochuang.hsej;
+
+import com.model.TaskType;
+
+import android.graphics.Color;
+import android.os.Bundle;
+import android.widget.FrameLayout;
+
+public class SchoolifeFragment extends BaseFragment{
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		mMainLayout = new FrameLayout(mActivity);
+		mMainLayout.setBackgroundColor(Color.GRAY);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+	}
+
+}

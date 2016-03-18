@@ -1,0 +1,115 @@
+package com.zhuochuang.hsej.store;
+
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+
+public class StoreAddAddressActivity extends BaseActivity{
+	private EditText contacter_name,contacter_phone,contacter_code,contacter_detail_address;
+	private String city ,province;
+	private CheckBox mAddDefaultAddress;
+	private String mark;
+		@Override
+		protected void onCreate(Bundle arg0) {
+			super.onCreate(arg0);
+			setContentView(R.layout.store_add_new_address);
+			setTitleText(getResources().getString(R.string.add_new_address));
+			initView();
+		}
+
+		private void initView() {
+			 mark = "1";
+			 contacter_name = (EditText) findViewById(R.id.address_contacter_name);
+			 contacter_phone = (EditText) findViewById(R.id.address_contacter_phone);
+			 //contacter_code = (TextView) findViewById(R.id.address_contacter_code);
+			 contacter_detail_address = (EditText) findViewById(R.id.address_contacter_detail_address);
+			 mAddDefaultAddress = (CheckBox) findViewById(R.id.address_check);
+			 mAddDefaultAddress.setChecked(true);
+			 mAddDefaultAddress.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+				
+				@Override
+				public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+					if(isChecked){
+						mark = "1";
+					}else{
+						mark = "0";
+					}				
+				}
+			});
+			/*findViewById(R.id.store_choose_address).setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View arg0) {
+					StoreAddAddressActivity.this.startActivityForResult(new Intent(StoreAddAddressActivity.this, StoreGetAddressActivity.class),0);
+					
+				}
+			});*/
+			
+			findViewById(R.id.store_save_address).setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View arg0) {
+					if(contacter_name.getText().toString().length() > 0 && contacter_phone.getText().toString().length() > 0 &&
+					    contacter_detail_address.getText().toString().length() >0){
+						DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserAddressSaveUserAddress,
+							DataLoader.getInstance().setSaveUserAddressTypeParams(contacter_name.getText().toString(),contacter_phone.getText().toString(),
+									contacter_detail_address.getText().toString(),mark),
+							StoreAddAddressActivity.this);
+						}
+						
+					}
+				});			
+		}
+		
+		@Override
+		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+			if(resultCode == Activity.RESULT_OK){
+			 city = data.getStringExtra("city").toString();
+			 province = data.getStringExtra("province").toString();
+			/*if(city != null && province != null){
+			((TextView)findViewById(R.id.store_address_area)).setText(province+" "+city+"");
+			}*/
+		}
+	}
+		@Override
+		public void taskFinished(TaskType type, Object result, boolean isHistory) {
+			super.taskFinished(type, result, isHistory);
+			if(result == null){
+				return;
+			}
+			
+			if(result instanceof Error){													
+				Toast.makeText(StoreAddAddressActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			switch (type) {
+			case TaskOrMethod_UserAddressSaveUserAddress:
+				if(result instanceof JSONObject){
+					if(((JSONObject)result).has("result")){
+						if("1".equals(((JSONObject)result).optString("result"))){
+							Toast.makeText(StoreAddAddressActivity.this, getResources().getString(R.string.personal_page_save_success), Toast.LENGTH_SHORT).show();
+							finish();
+						}
+					}
+				}				
+				break;
+			default:
+				break;
+			}			
+		}
+}

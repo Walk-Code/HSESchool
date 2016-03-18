@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffff" >
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="horizontal"
+	    android:id="@+id/assess_comment"
+	    android:layout_marginTop="5dp"
+	    android:gravity="center_vertical">
+          <TextView
+              android:id="@+id/client"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:textSize="17dp"
+              android:textColor="#1B4479"
+              android:layout_marginRight="7dp"/>
+          <LinearLayout 
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal"
+              android:gravity="center_vertical"
+              android:id="@+id/store_goods_evaluate_image_layout">
+              
+          </LinearLayout>
+            
+	</LinearLayout> 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textSize="14dp"
+        android:id="@+id/evaluate"
+        android:textColor="#000000" />
+    
+    <com.util.StaticGridView
+	     android:id="@+id/gridpic"        
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content"
+	     android:numColumns="5"
+	     android:listSelector="@color/transparent"
+	     android:layout_marginTop="5dp"
+	     android:layout_marginBottom="5dp"
+	     android:verticalSpacing="5dp" 
+	     android:horizontalSpacing="5dp"
+	     android:focusable="false"/>
+
+    <TextView
+        android:id="@+id/comment_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textSize="13dp"
+        android:layout_marginTop="5dp"
+        android:textColor="#9A9A9A" />
+    
+</LinearLayout>

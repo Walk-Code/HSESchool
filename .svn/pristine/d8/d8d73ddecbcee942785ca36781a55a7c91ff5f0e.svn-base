@@ -1,0 +1,350 @@
+package com.zhuochuang.hsej.store;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.util.Utils;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+
+public class StoreDetailActivity extends BaseActivity implements OnClickListener,OnItemClickListener{
+	public static Boolean isGridView = true;
+	private GridView mGridView;
+	private ListView mListView;
+	private ImageView mImageViewChange, back_;
+	private String [] items ;
+	private String [] [] itemsSub;
+	private JSONArray mItemArr;
+	private ServiceZoneAdapter mAdapter;
+	private int selectedPosition;
+	private PopupWindow mPopupWindow;
+	private LinearLayout popupLayout;
+	private ListView rootListView;
+	private ListView subListView;
+	private RootListViewAdapter adapter;
+	private SubListViewAdapter subAdapter;
+	private Boolean mLock = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		mMainLayout.removeAllViews();
+		setContentView(R.layout.store_details);	
+		showDialogCustom(DIALOG_CUSTOM);
+		new Handler().postDelayed(new Runnable() {			
+			@Override
+			public void run() {
+				removeDialogCustom();				
+			}
+		}, 500);
+		initView();	
+		
+		if( StoreGoodsCategoryActivity.STOREGOODS == getIntent().getIntExtra("storeGoods", 0)){
+			findViewById(R.id.details_list_layout).setVisibility(View.GONE);
+			findViewById(R.id.search_main).setVisibility(View.VISIBLE);			
+			((EditText)findViewById(R.id.search_result)).setText(getIntent().getStringExtra("StoreGoodsCategoryActivity"));
+			if(getIntent().getStringExtra("StoreGoodsCategoryActivity") != null)
+				((EditText)findViewById(R.id.search_result)).setSelection(getIntent().getStringExtra("StoreGoodsCategoryActivity").length());
+			String name = parseData(getIntent().getStringExtra("name"));
+			String shopId = parseData(getIntent().getStringExtra("shopId"));
+			String parentType = parseData(getIntent().getStringExtra("parentType"));
+			String subType = parseData(getIntent().getStringExtra("subType"));
+			String sort = parseData(getIntent().getStringExtra("sort"));
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_GoodsListGoods,
+					DataLoader.getInstance().setGoodsListGoodsTypeParams(name,shopId,parentType,subType,sort), this);
+		}else{
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_GoodsListGoods,
+					DataLoader.getInstance().setGoodsListGoodsTypeParams(getIntent().getStringExtra("SearchResult"),"","","",""), this);
+		}
+	}
+	
+	private void initView() {
+		//测试
+		itemsSub = new String [] []{new String[]{"全部","1","2","3"},new String[]{"全部","4","2","3"},new String[]{"全部","5","2","3"}
+		,new String[]{"全部","6","2","3"},new String[]{"全部","7","2","3"},new String[]{"全部","8","2","3"}};
+			
+		items = getResources().getStringArray(R.array.store_detail_title);
+		if(0 != getIntent().getIntExtra("num", 0)){
+			((TextView)findViewById(R.id.details_list)).setText(items[getIntent().getIntExtra("num", 0)]);
+			selectedPosition = getIntent().getIntExtra("num", 0);
+			
+		}else{
+			((TextView)findViewById(R.id.details_list)).setText(items[0]);
+			selectedPosition = 0;
+		}
+		((TextView) findViewById(R.id.tv_alls)).setTextColor(Color.RED);
+		mGridView = (GridView) findViewById(R.id.app_grid);
+		mListView = (ListView) findViewById(R.id.app_list);		
+		(mImageViewChange = (ImageView) findViewById(R.id.imagechange)).setOnClickListener(this);	
+		((TextView) findViewById(R.id.tv_alls)).setOnClickListener(this);
+		((TextView) findViewById(R.id.tv_saless)).setOnClickListener(this);
+		((TextView) findViewById(R.id.tv_news)).setOnClickListener(this);
+		((TextView) findViewById(R.id.tv_pricess)).setOnClickListener(this);
+		((TextView)findViewById(R.id.details_list)).setOnClickListener(this);
+		findViewById(R.id.search_result).setOnClickListener(this);
+		findViewById(R.id.main_left).setOnClickListener(this);		
+		mListView.setOnItemClickListener(this);
+		mGridView.setOnItemClickListener(this);
+	
+	}
+	
+	@Override
+	public void onClick(View v) {
+		//TODO
+		switch (v.getId()) {
+		case R.id.imagechange:
+			isGridView = !isGridView;
+			updateLayout();
+			break;
+		case R.id.tv_alls:
+			cleanColor();
+			((TextView) findViewById(R.id.tv_alls)).setTextColor(Color.RED);		
+			showDialogCustom(DIALOG_CUSTOM);
+			new Handler().postDelayed(new Runnable() {
+				
+				@Override
+				public void run() {
+					removeDialogCustom();					
+				}
+			}, 500);
+			break;
+		case R.id.tv_saless:
+			cleanColor();
+			((TextView) findViewById(R.id.tv_saless)).setTextColor(Color.RED);
+			showDialogCustom(DIALOG_CUSTOM);
+			new Handler().postDelayed(new Runnable() {
+				
+				@Override
+				public void run() {
+					removeDialogCustom();					
+				}
+			}, 500);
+			break;
+		case R.id.tv_news:
+			cleanColor();
+			((TextView) findViewById(R.id.tv_news)).setTextColor(Color.RED);
+			showDialogCustom(DIALOG_CUSTOM);
+			new Handler().postDelayed(new Runnable() {
+				
+				@Override
+				public void run() {
+					removeDialogCustom();						
+				}
+			}, 500);
+			break;	
+		case R.id.tv_pricess:
+			cleanColor();
+			((TextView) findViewById(R.id.tv_pricess)).setTextColor(Color.RED);
+			if(!mLock){
+				((ImageView)findViewById(R.id.store_price)).setImageResource(R.drawable.levelbar_priceicon_top);
+				mLock = true;
+			}else{
+				((ImageView)findViewById(R.id.store_price)).setImageResource(R.drawable.levelbar_priceicon_down);
+				mLock = false;
+			}
+			showDialogCustom(DIALOG_CUSTOM);					
+			new Handler().postDelayed(new Runnable() {				
+				@Override
+				public void run() {
+					removeDialogCustom();		
+				}
+			}, 500);
+			break;	
+		case R.id.details_list:
+			showPopupWindow(Utils.getScreenWidth(StoreDetailActivity.this), Utils.getScreenHeight(StoreDetailActivity.this));
+			break;
+		case R.id.search_result:
+			((EditText)findViewById(R.id.search_result)).setCursorVisible(true);
+			break;
+		case R.id.store_back:
+			finish();
+			break;
+		case R.id.main_left:
+			finish();
+			break;
+		default:
+			break;
+		}
+	}
+
+	@SuppressLint("ResourceAsColor")
+	public void cleanColor() {
+		((TextView) findViewById(R.id.tv_alls)).setTextColor(getResources().getColor(R.color.text));
+		((TextView) findViewById(R.id.tv_saless)).setTextColor(getResources().getColor(R.color.text));
+		((TextView) findViewById(R.id.tv_news)).setTextColor(getResources().getColor(R.color.text));
+		((TextView) findViewById(R.id.tv_pricess)).setTextColor(getResources().getColor(R.color.text));
+	}
+
+	public void updateLayout() {		
+		if (isGridView) {
+			if (mGridView == null) {
+				mGridView = (GridView) findViewById(R.id.app_grid);
+				mGridView.setOnItemClickListener(this);
+			}
+			if(null != mItemArr){
+				mGridView.setAdapter(mAdapter);
+				mGridView.setVisibility(View.VISIBLE);
+				mListView.setVisibility(View.GONE);
+				mGridView.setSelection(0);
+				mImageViewChange.setImageResource(R.drawable.nav_icon_gridview);
+			}
+			} else {
+			if (mListView == null) {
+				mListView = (ListView) findViewById(R.id.app_list);
+				mListView.setOnItemClickListener(this);
+			}
+			if(null != mItemArr){
+				mListView.setAdapter(mAdapter);
+				mListView.setVisibility(View.VISIBLE);
+				mGridView.setVisibility(View.GONE);
+				mListView.setSelection(0);
+				mImageViewChange.setImageResource(R.drawable.nav_icon_listview);
+			}
+		}
+
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+		JSONObject obj = mItemArr.optJSONObject(position);
+		Intent intent = new Intent(StoreDetailActivity.this, StoreMoreDetailsActivity.class);
+		intent.putExtra("shopId", obj.optString("id"));
+		startActivity(intent);
+	
+	}
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);		
+		removeDialogCustom();
+		if(result == null){	
+			new AlertDialog.Builder(StoreDetailActivity.this).setCancelable(false)
+			.setMessage(StoreDetailActivity.this.getResources().getString(R.string.load_fail))
+			.setPositiveButton(StoreDetailActivity.this.getResources()
+					.getString(R.string.load_again),new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(
+						DialogInterface dialog,int which) {
+					showDialogCustom(DIALOG_CUSTOM);
+					new Handler().postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							removeDialogCustom();
+							
+						}
+					}, 500);
+				}
+			}).setNegativeButton(StoreDetailActivity.this.getResources().getString(R.string.store_shopping_car_cancle),null).show();	
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_GoodsListGoods:
+			if(result instanceof JSONObject ){
+				if(((JSONObject)result).has("items")){
+					mItemArr = ((JSONObject)result).optJSONArray("items");			
+					if(null != mItemArr && 0 < mItemArr.length()){	
+						mAdapter = new ServiceZoneAdapter(mItemArr, StoreDetailActivity.this);				
+						mAdapter.notifyDataSetChanged();
+						updateLayout(); 
+					}
+				}			
+			}			
+			break;
+		default:
+			break;
+		}
+	}
+	public String parseData(String data){
+		if(null!= data){
+			return data;
+		}
+		return "";
+	}
+
+	private void showPopupWindow(int width,int heigh){
+		LayoutInflater inflater = LayoutInflater.from(StoreDetailActivity.this);
+		popupLayout = (LinearLayout) inflater.inflate(R.layout.store_detail_popupwindow, null, false);
+		rootListView = (ListView) popupLayout.findViewById(R.id.root_listview);
+	    adapter = new RootListViewAdapter(StoreDetailActivity.this);
+	    subAdapter = new SubListViewAdapter(StoreDetailActivity.this, itemsSub, selectedPosition,0);
+		adapter.setItems(items);
+		new Handler().post(new Runnable() {			
+			@Override
+			public void run() {
+				rootListView.setAdapter(adapter);
+				subListView.setAdapter(subAdapter);
+				
+			}
+		});
+		rootListView.setSelection(selectedPosition);
+		adapter.setSelectedPosition(selectedPosition);
+		subListView = (ListView) popupLayout.findViewById(R.id.sub_listview);
+		mPopupWindow = new PopupWindow(popupLayout, width,heigh, true);
+		mPopupWindow.setBackgroundDrawable(new BitmapDrawable());
+		mPopupWindow.showAsDropDown(findViewById(R.id.store_line));	
+		mPopupWindow.update();
+		
+		rootListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View view, int position,
+					long arg3) {
+				adapter.setSelectedPosition(position);
+				adapter.notifyDataSetInvalidated();
+				selectedPosition = position;
+				((TextView)findViewById(R.id.details_list)).setText(items[selectedPosition]);	
+				subAdapter.setSelectPosition(selectedPosition);
+				subAdapter.notifyDataSetChanged();
+				
+			}
+		});
+		
+		subListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1,
+					int position, long arg3) {
+				mPopupWindow.dismiss();
+				Toast.makeText(StoreDetailActivity.this,itemsSub[selectedPosition][position],Toast.LENGTH_SHORT).show();
+			}
+		});
+		popupLayout.findViewById(R.id.store_detail_view).getBackground().setAlpha(100);
+	}
+
+	 public void backgroundAlpha(float bgAlpha)  
+	    {  
+	        WindowManager.LayoutParams lp = getWindow().getAttributes();  
+	        lp.alpha = bgAlpha; //0.0-1.0  
+	        getWindow().setAttributes(lp);  
+	    }  
+}

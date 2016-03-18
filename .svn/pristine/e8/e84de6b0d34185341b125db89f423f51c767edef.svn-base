@@ -1,0 +1,59 @@
+package com.zhuochuang.hsej;
+
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+
+import com.layout.PullToRefreshListView;
+import com.util.ContentAdapter;
+
+public abstract class ListViewPullActivity extends BaseActivity {
+	
+	PullToRefreshListView mListView;
+	ContentAdapter mListAdapter;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		
+		setContentView(R.layout.pulltolistview);
+		init();
+	}
+	
+	public void init(){
+		mListView = (PullToRefreshListView) findViewById(R.id.puulto_listview);
+		mListView.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				OnRefreshListener();
+				//mListView.setRemoreable(true);
+			}
+		});
+		
+		getHeaderView();
+		getAdapter();
+		mListView.setAdapter(mListAdapter);
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				OnItemClickListener(parent, view, position, id);
+			}
+		});
+		mListView.setRemoreable(true);
+		mListView.setOnRemoreListener(new PullToRefreshListView.OnRemoreListener() {
+			@Override
+			public void onRemore() {
+				OnRemoreListener();
+			}
+		});
+	}
+	
+	public abstract void getHeaderView();
+	public abstract void getAdapter();
+	public abstract void OnItemClickListener(AdapterView<?> parent, View view, int position, long id);
+	public abstract void OnRefreshListener();
+	public abstract void OnRemoreListener();
+	
+}

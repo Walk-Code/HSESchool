@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:paddingTop="15dp"
+    android:background="#ffffff"
+    >
+    
+	<TextView 
+	    android:id="@+id/header_text_layout"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="@string/enter_school_header_text1"
+	    android:textSize="17dp"
+	    android:textColor="#262626"
+	    android:layout_marginRight="5dp"
+	    android:layout_marginLeft="10dp"
+	    android:layout_centerVertical="true"
+	    />
+	
+	<RelativeLayout 
+	    android:id="@+id/enter_school_header_layout"
+	    android:layout_height="18dp"
+	    android:layout_width="100dp"
+	    android:background="@drawable/bg_enter_school_header"
+	    android:layout_marginRight="5dp"
+	    android:layout_toRightOf="@+id/header_text_layout"
+	    android:layout_centerVertical="true"
+	    >
+	    <RelativeLayout
+	        android:id="@+id/header_view_red"
+	    	android:layout_width="wrap_content"
+	    	android:layout_height="match_parent"
+	    	android:background="@drawable/bg_header_red_view"
+	    	>
+	        
+	    </RelativeLayout>
+	    
+	</RelativeLayout>
+	
+	<TextView 
+	    android:id="@+id/header_text1"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+		android:textColor="#b0b0b0"	    
+		android:textSize="13dp"
+		android:layout_centerVertical="true"
+		android:layout_toRightOf="@+id/enter_school_header_layout"
+	    />
+	
+	<TextView 
+	    android:id="@+id/header_text2"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+	    android:text="@string/enter_school_header_text2"
+		android:textColor="#b0b0b0"	    
+		android:textSize="13dp"
+		android:layout_centerVertical="true"
+		android:layout_toRightOf="@+id/header_text1"
+	    />
+	<TextView 
+	    android:id="@+id/header_text3"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"
+		android:textColor="#b0b0b0"	    
+		android:textSize="13dp"
+		android:layout_centerVertical="true"
+		android:layout_toRightOf="@+id/header_text2"
+	    />
+	
+	<View 
+	    android:layout_width="match_parent"
+	    android:layout_height="0.5dp"
+	    android:background="#bababa"
+	    android:layout_below="@+id/enter_school_header_layout"
+	    android:layout_marginTop="15dp"
+	    />
+	
+</RelativeLayout>

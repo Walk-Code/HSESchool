@@ -1,0 +1,47 @@
+package com.model;
+
+public class Configs {
+
+	/***
+	 * 是否使用测试服务器
+	 */
+	public static final boolean isUseTestServer = false;
+	
+	//测试=====正式
+	public static final String ServerUrl = isUseTestServer ? "http://hseschool.app360.cn/app/" : "http://www.hsej.net/app/";
+	
+	//public static final String ServerUrl = isUseTestServer ? "http://10.38.178.220:8080/hseschool/app/" : "http://www.hsej.net/app/";
+	
+	//本地测试
+	//public static final String ServerUrl = "http://10.38.178.107:8080/hseschool/app/";
+	//public static final String ServerUrl = "http://10.38.178.211:8080/hseschool/app/";
+	//public static final String ServerUrl = "http://10.38.178.210:8080/hseschool/app/";
+	
+	//share targetUrl
+	public static final String ShareTargetUrl = ServerUrl + "share/show?";
+	
+	public static final int TimeOut = 30;
+	
+	public static final String EncryptConfuse = "jw134#%pqNLVfn";
+	public static final String LoginStateChange = "LoginStateChange";
+	public final static String AdvertiseImg = "advertise.jpg";
+	
+	/** default text show max lines */
+	public static final int COLLAPSIBLE_DEFAULT_MAX_LINE_COUNT = 5;
+	public static final int COLLAPSIBLE_STATE_NONE = 0;
+	public static final int COLLAPSIBLE_STATE_SHRINKUP = 1;
+	public static final int COLLAPSIBLE_STATE_SPREAD = 2;
+	
+	public static final int REQUESTCODE_IMAGE = 10010;
+	public static final int REQUESTCODE_CAMERA = 10011;
+	public static final int REQUESTCODE_Qrcode = 10012;
+	public static final int REQUESTCODE_Publish = 10013;
+	public static final int REQUESTCODE_CropResult = 10014;
+	
+	public static final String UnicodeTag=  "\\U000";
+	public static final String unicodeTag=  "\\u";
+	
+	public static final int DateFormatYMD = 100001;
+	public static final int DateFormatYMDHM = 100002;
+	public static final int DateFormatYMDHMS = 100003;
+}

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#fefcfa">
+    <FrameLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="50dp"
+	    android:background="#de504f">
+	    
+	    <FrameLayout
+	        android:id="@+id/topnavbar_qrcodelayout"
+		    android:layout_width="60dp"
+		    android:layout_height="match_parent">
+	        <View
+		        android:layout_width="26dp"
+		        android:layout_height="26dp"
+		        android:background="@drawable/home_scan"
+		        android:layout_gravity="center"/>
+	    </FrameLayout>
+	    
+	    <View
+	        android:layout_width="86dp"
+	        android:layout_height="38dp"
+	        android:layout_marginTop="2dp"
+	        android:background="@drawable/navibar_name"
+	        android:layout_gravity="top|center_horizontal"/>
+	    
+	    <FrameLayout
+	        android:id="@+id/topnavbar_searchlayout"
+		    android:layout_width="60dp"
+		    android:layout_height="match_parent"
+		    android:layout_gravity="right">
+	        <View
+		        android:layout_width="25dp"
+		        android:layout_height="25dp"
+		        android:background="@drawable/navibar_search"
+		        android:layout_gravity="center"/>
+	    </FrameLayout>
+	</FrameLayout>
+
+    <include
+	    layout="@layout/pulltolistview"
+	    android:id="@+id/pullto_listview"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"/>
+</LinearLayout>

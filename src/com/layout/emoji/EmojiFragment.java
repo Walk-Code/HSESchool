@@ -1,0 +1,238 @@
+package com.layout.emoji;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.text.Editable;
+import android.text.Spanned;
+import android.text.TextWatcher;
+import android.text.style.ImageSpan;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+import com.util.Utils;
+import com.zhuochuang.hsej.R;
+
+/**
+ * 内嵌Emoji表情标签
+ * 
+ */
+
+@SuppressLint("InflateParams")
+@SuppressWarnings("deprecation")
+public class EmojiFragment extends Fragment implements OnPageChangeListener  {
+	private List<EmojiBean> _eBeans;
+	private ViewPager _viewPager;
+	private ViewGroup _group;
+	private EditText _editText;
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		return inflater.inflate(R.layout.emoji_wallpaperdetail_fragment, null);
+	}
+
+	@Override
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
+		_eBeans = EmojiGetter.readXML(getActivity());
+
+		initViews(view);
+	}
+
+	private final void initViews(View rootView) {
+		_viewPager = (ViewPager) rootView.findViewById(R.id.viewpager);
+		_group = (ViewGroup) rootView.findViewById(R.id.navi_pointer);
+	}
+
+	/**
+	 * 必须要调用这个方法,将EditText传过来
+	 * 
+	 * @param edit
+	 *            要做出反应的EditText
+	 */
+	public void setEditTextHolder(EditText edit) {
+		_editText = edit;
+		init();
+	}
+
+	private void init() {
+		if (_eBeans != null && _editText != null) {
+			LinkedList<View> _views = new LinkedList<View>();
+			/*int pages;
+			if(_eBeans.size() % 20 > 0){
+				pages = _eBeans.size() / 20 + 1;
+			}
+			else{
+				pages = _eBeans.size() / 20;
+			}*/
+			//int pages = _eBeans.size() / 20 + 1;
+			int pages = _eBeans.size() / 20;
+			makeNaviPointer(pages);
+			final Activity activity = getActivity();
+			if (activity != null) {
+				for (int i = 0; i < pages; i++) {
+					// EmojiGrid layout
+					View expressionView = activity.getLayoutInflater().inflate(R.layout.emoji_layout, null);
+					final GridView gridView = (GridView) expressionView.findViewById(R.id.gridview);
+					final EmojiAdapter emojiAdapter = new EmojiAdapter(getExpressionPage(_eBeans, i), activity);
+					gridView.setAdapter(emojiAdapter);
+					gridView.setSelector(getResources().getDrawable(R.drawable.emojiclick_selector_gray));
+					gridView.setTag(i);
+					gridView.setOnItemClickListener(new OnItemClickListener() {
+						@Override
+						public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+							int lastIndex = gridView.getLastVisiblePosition();
+							if (position == lastIndex) {
+								setOnDeletaCilck();
+							} 
+							else {
+								EmojiBean item = emojiAdapter.getItem(position);
+								String name = item.getName();
+								int resId = item.getResId();
+
+								ImageSpan span = new ImageSpan(getExpressionDrawable(resId));
+								int startIndex = _editText.getSelectionStart();
+								int endIndex = startIndex + name.length();
+
+								Editable edit = _editText.getEditableText();
+								edit.insert(startIndex, name);
+								edit.setSpan(span, startIndex, endIndex, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+							}
+						}
+					});
+					_views.addLast(expressionView);
+				}
+				_viewPager.setAdapter(new EmojiPagerAdapter(_views));
+				_viewPager.setOnPageChangeListener(this);
+				
+				setCurrentPointPositon(0);
+			}
+			
+			_editText.addTextChangedListener(new TextWatcher() {
+				
+				@Override
+				public void onTextChanged(CharSequence s, int start, int before, int count) {
+					// TODO Auto-generated method stub
+				}
+				
+				@Override
+				public void beforeTextChanged(CharSequence s, int start, int count,
+						int after) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void afterTextChanged(Editable s) {
+					// TODO Auto-generated method stub
+				}
+			});
+		}
+	}
+
+	private final Drawable getExpressionDrawable(int resId) {
+		Bitmap bmp = BitmapFactory.decodeResource(getResources(), resId);
+		BitmapDrawable drawable = new BitmapDrawable(bmp);
+		drawable.setBounds(0, 0, Utils.dipToPixels(getActivity(), 22), Utils.dipToPixels(getActivity(), 22));
+		return drawable;
+	}
+
+	public static List<EmojiBean> getExpressionPage(List<EmojiBean> eBeans, int page) {
+
+		List<EmojiBean> beans = new ArrayList<EmojiBean>();
+
+		int size = eBeans.size();
+		int totalPage = size / 20 + 1;
+		if (page < totalPage - 1) {
+			for (int i = 0; i < 21; i++) {
+				if (i == 20) {
+					// 添加删除图标
+					beans.add(eBeans.get(size - 1));
+				} 
+				else {
+					beans.add(eBeans.get(i + page * 20));
+				}
+			}
+		} 
+		else {
+			// 填充最后一页
+			int index = size - page * 21;
+			for (int i = 0; i <= index; i++) {
+				if (i == index) {
+					beans.add(eBeans.get(size - 1));
+				} 
+				else {
+					beans.add(eBeans.get(i + page * 20));
+				}
+			}
+		}
+		return beans;
+	}
+
+	private final void makeNaviPointer(int pageCount) {
+		if(_group != null){
+			_group.removeAllViews();
+		}
+		
+		for (int index = 0; index < pageCount; index++) {
+			ImageView img = new ImageView(getActivity().getApplicationContext());
+			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(Utils.dipToPixels(getActivity(), 7), Utils.dipToPixels(getActivity(), 7));
+			layoutParams.weight = 1;
+			img.setLayoutParams(layoutParams);
+			_group.addView(img);
+		}
+	}
+
+	@Override
+	public void onPageScrollStateChanged(int arg0) {
+	}
+
+	@Override
+	public void onPageScrolled(int arg0, float arg1, int arg2) {
+	}
+
+	@Override
+	public void onPageSelected(int position) {
+		setCurrentPointPositon(position);
+	}
+
+	private void setOnDeletaCilck() {
+		if (_editText != null) {
+			final KeyEvent keyEventDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
+			_editText.onKeyDown(KeyEvent.KEYCODE_DEL, keyEventDown);
+		}
+	}
+
+	private void setCurrentPointPositon(int selectedPosition) {
+		if (_group != null) {
+			int childCount = _group.getChildCount();
+			for (int index = 0; index < childCount; index++) {
+				if (selectedPosition == index) {
+					((ImageView) _group.getChildAt(index)).setImageResource(R.drawable.point_select);
+				} 
+				else {
+					((ImageView) _group.getChildAt(index)).setImageResource(R.drawable.point_normal);
+				}
+			}
+		}
+	}
+}

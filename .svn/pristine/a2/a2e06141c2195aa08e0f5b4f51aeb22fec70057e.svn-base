@@ -1,0 +1,87 @@
+package com.zhuochuang.hsej;
+
+import android.content.Context;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.Gravity;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.TextView;
+
+import com.zhuochuang.hsej.entity.CommonServiceEntity;
+import com.zhuochuang.hsej.entity.CommonServiceEntity.CommItemsEntity;
+import com.zhuochuang.hsej.entity.CommonServiceEntity.CommItemsEntity.ItemEntity;
+
+public class CommonServiceResultActivity extends BaseActivity {
+	CommonServiceEntity mServiceEntity;
+
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_common_service_result);
+		mServiceEntity = (CommonServiceEntity) getIntent().getExtras()
+				.getSerializable("comm_entity");
+		setTitleText(mServiceEntity.getName());
+
+		initView();
+	}
+
+	private void initView() {
+		LinearLayout viewLayout = (LinearLayout) findViewById(R.id.mian_layout);
+		TextView textView;
+		for (CommItemsEntity itemsEntity : mServiceEntity.getItems()) {
+			textView = new TextView(this);
+			LayoutParams layoutParams = new LayoutParams(
+					LayoutParams.MATCH_PARENT, dip2px(this, 42));
+			layoutParams.setMargins(dip2px(this, 10), dip2px(this, 10),
+					dip2px(this, 10), dip2px(this, 10));
+			textView.setLayoutParams(layoutParams);
+			textView.setBackgroundResource(R.drawable.bg_activity_goods_release_title);
+			textView.setGravity(Gravity.CENTER_VERTICAL);
+			textView.setTextColor(Color.BLACK);
+			textView.setPadding(dip2px(this, 10), dip2px(this, 10),
+					dip2px(this, 10), dip2px(this, 10));
+			switch (itemsEntity.getType()) {
+			case 2:
+				layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT,
+						dip2px(this, 42 * itemsEntity.getRow()));
+				layoutParams.setMargins(dip2px(this, 10), dip2px(this, 10),
+						dip2px(this, 10), dip2px(this, 10));
+				if (itemsEntity.getRow() > 1) {
+					textView.setPadding(dip2px(this, 10), dip2px(this, 10),
+							dip2px(this, 10), dip2px(this, 10));
+					textView.setGravity(Gravity.TOP);
+				}
+				textView.setLayoutParams(layoutParams);
+				textView.setText(itemsEntity.getResult());
+				viewLayout.addView(textView);
+				break;
+			case 0:
+			case 1:
+			case 3:
+				String value = "";
+				for (ItemEntity itemEntity : itemsEntity.getItems()) {
+					if (itemEntity.isChecked())
+						value += itemEntity.getName() + ",";
+
+				}
+				if (!TextUtils.isEmpty(value)) {
+					value = value.substring(0, value.length() - 1);
+					textView.setText(value);
+					viewLayout.addView(textView);
+				}
+				break;
+
+			default:
+				break;
+			}
+
+		}
+	}
+
+	public static int dip2px(Context context, float dpValue) {
+		final float scale = context.getResources().getDisplayMetrics().density;
+		return (int) (dpValue * scale + 0.5f);
+	}
+}

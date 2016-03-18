@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <LinearLayout
+        android:id="@+id/store_childs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#F8F8F8"
+        android:focusable="false"
+	    android:clickable="false"
+	    android:focusableInTouchMode="false" >
+        <ImageView
+            android:id="@+id/product_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_margin="10dp"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:clickable="false"
+	        android:focusableInTouchMode="false"
+	        android:focusable="false" >
+
+            <TextView
+                android:id="@+id/product_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="16dp"
+                android:textColor="#565656"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:clickable="false"
+		        android:focusableInTouchMode="false"
+		        android:focusable="false" />
+  		
+            <RelativeLayout 
+		        android:layout_width="match_parent"
+		        android:layout_height="match_parent"
+		        android:layout_marginRight="14dp"
+		        android:orientation="horizontal">
+				 <TextView 
+				     android:id="@+id/store_my_order_confirm"
+				     android:layout_width="wrap_content"
+				     android:layout_height="wrap_content"
+				     android:text="@string/stores_goods_evaluates"
+				     android:layout_gravity="center_vertical"
+				     android:textColor="#DD514F"
+				     android:textSize="14dp"
+				     android:layout_alignParentRight="true"
+				     android:layout_alignParentBottom="true"
+				     android:background="@drawable/shape_store_car_pay_bg"
+				     android:layout_marginBottom="5dp"
+				     android:gravity="center" />				
+		    </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

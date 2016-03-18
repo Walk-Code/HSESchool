@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f0f0f0"
+    android:orientation="vertical"
+    tools:context=".MainActivity" >
+    <!-- <include 
+        layout="@layout/navbar_main"
+        android:layout_width="match_parent"
+    	android:layout_height="50dp"/> -->
+    <FrameLayout
+        android:id="@+id/layout_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:background="#f2f2f2" />
+    <View 
+        android:layout_width="match_parent"
+        android:layout_height="0.7dp"
+        android:background="#bab8b9"/>
+    <com.util.TabBarView
+        android:id="@+id/layout_tabbar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#fafafa" />
+
+</LinearLayout>

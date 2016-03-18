@@ -1,0 +1,114 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.Utils;
+/**
+ * 公告详情
+ * @author Dion
+ *
+ */
+public class AnnouncementDetailsActivity extends BaseActivity{
+
+	private JSONObject mDate = null;
+	private JSONArray mImageArray = null;
+	
+	private LinearLayout mGroup = null;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		
+		setTitleText(R.string.announcement_detils_title);
+		
+		setContentView(R.layout.activity_announcement_detils);
+		
+		showDialogCustom(DIALOG_CUSTOM);
+		
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("informationId", getIntent().getExtras().getLong("informationId"));
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_InformationGetInformation, params, AnnouncementDetailsActivity.this);
+	}
+	
+	private void initView(){
+		
+		if(mDate.has("name")){
+			((TextView)findViewById(R.id.title_announcement_detils)).setText(mDate.optString("name"));
+		}
+		
+		if(mDate.has("content")){
+			((TextView)findViewById(R.id.content_announcement_detils)).setText(mDate.optString("content"));
+		}
+		
+		if(mDate.has("createDate")){
+			((TextView)findViewById(R.id.time_announcement_detils)).setText(Utils.getAlmostTime(mDate.optLong("createDate")));
+		}
+		
+		//图集
+		mGroup = (LinearLayout)findViewById(R.id.images_announcement_detils);
+		if(mDate.has("images")){
+			mImageArray = mDate.optJSONArray("images");
+			
+			if(mImageArray != null && mImageArray.length() > 0){
+				for (int i = 0; i < mImageArray.length(); i++) {
+					ImageView view = new ImageView(this);
+					view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Utils.dipToPixels(AnnouncementDetailsActivity.this, 60)));
+					ImageLoader.getInstance().displayImage(mImageArray.optJSONObject(i).optString("path"),
+							view, ImageLoaderConfigs.displayImageOptionsBg);
+					mGroup.addView(view);
+				}
+			}
+		}
+		
+	}
+	
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		
+		removeDialogCustom();
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(AnnouncementDetailsActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_InformationGetInformation:
+			if(result instanceof JSONObject){
+				
+				if(((JSONObject) result).has("item")){
+					mDate = ((JSONObject) result).optJSONObject("item");
+					if(mDate != null ){
+						initView();
+					}
+				}
+				
+				
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF" >
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#FFFFFF"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/store_back"
+            android:layout_width="12dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:src="@drawable/navibar_icon_back" />
+
+        <LinearLayout
+            android:id="@+id/search_main"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_weight="8"
+            android:background="@drawable/shape_store_personal_bg"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:layout_marginRight="10dp">
+
+            <ImageView
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_gravity="center_vertical|left"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/nav_icon_search"
+                android:clickable="false"
+                android:focusable="false" />
+
+            <EditText
+                android:id="@+id/search_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|left"
+                android:layout_marginLeft="4dp"
+                android:gravity="center_vertical"
+                android:hint="@string/goods_search_product"               
+                android:textSize="15sp"
+                android:background="#FFFFFF"
+                android:layout_marginRight="4dp"
+                android:imeOptions="actionSearch"
+            	android:singleLine="true"
+            	android:textColorHint="#9e9e9e"
+            	android:textColor="#656565" />
+       </LinearLayout>
+
+       
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:id="@+id/store_line"
+        android:background="#F3F3F3"/>
+    <LinearLayout 
+        android:layout_width="match_parent"
+	    android:layout_height="0dp"
+	    android:layout_weight="9"
+	    android:orientation="horizontal">
+	     <FrameLayout
+	        android:id="@+id/root_popupwindow"
+	        android:layout_width="0dp"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:background="#FFFFFF" >
+
+	        <ListView
+	            android:id="@+id/root_listview"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent" 
+	            android:listSelector="@android:color/transparent"
+	            android:divider="#E7E7E7"
+	            android:dividerHeight="1dp"/>
+	       
+   		 </FrameLayout>
+
+	    <FrameLayout
+	        android:id="@+id/sub_popupwindow"
+	        android:layout_width="0dp"
+	        android:layout_height="match_parent"
+	        android:layout_weight="2.5"
+	        android:background="#00000000" >
+	
+	        <ListView
+	            android:id="@+id/sub_listview"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent" 
+	            android:divider="#E7E7E7"
+	            android:dividerHeight="1dp"/>
+	          <View 
+		        android:layout_width="match_parent"
+		        android:layout_height="1dp"
+		        android:background="#E7E7E7"/>
+       </FrameLayout>
+   </LinearLayout> 
+
+</LinearLayout>

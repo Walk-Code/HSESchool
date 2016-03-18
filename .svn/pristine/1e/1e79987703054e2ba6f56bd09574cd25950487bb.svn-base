@@ -1,0 +1,79 @@
+package com.layout;
+
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.zhuochuang.hsej.R;
+
+public class SurveyTopicCheckView extends LinearLayout{
+
+	private View mConvertView;
+	private int mType;
+	
+	public SurveyTopicCheckView(Context context) {
+		super(context);
+		// TODO Auto-generated constructor stub
+		initSurveyView(context);
+	}
+	
+	public SurveyTopicCheckView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		// TODO Auto-generated constructor stub
+		initSurveyView(context);
+	}
+
+	public void initSurveyView(Context context){
+		mConvertView = ViewGroup.inflate(context, R.layout.listcell_surveytopic_check, null);
+		this.addView(mConvertView);
+	}
+	
+	public void setData(JSONObject obj, int type, boolean isCheck){
+		if(obj == null || mConvertView == null){
+			return;
+		}
+		mType = type;
+		((TextView)mConvertView.findViewById(R.id.textview_name)).setText(obj.optString("options"));
+		mConvertView.findViewById(R.id.edittext).setVisibility(View.GONE);
+		mConvertView.findViewById(R.id.view_check).setVisibility(View.VISIBLE);
+		mConvertView.findViewById(R.id.textview_name).setVisibility(View.VISIBLE);
+		switch (type) {
+		case 0:
+			mConvertView.findViewById(R.id.view_check).setBackgroundResource(isCheck? R.drawable.radiotrue : R.drawable.radioflase);
+			break;
+		case 1:
+			mConvertView.findViewById(R.id.view_check).setBackgroundResource(isCheck? R.drawable.checktrue : R.drawable.checkflase);
+			break;
+		case 2:
+			mConvertView.findViewById(R.id.edittext).setVisibility(View.VISIBLE);
+			mConvertView.findViewById(R.id.view_check).setVisibility(View.GONE);
+			mConvertView.findViewById(R.id.textview_name).setVisibility(View.GONE);
+			
+			//mConvertView.findViewById(R.id.edittext).setEnabled(false);
+			break;
+		default:
+			break;
+		}
+		setCheckStatu(isCheck);
+	}
+	
+	public void setCheckStatu(boolean isCheck){
+		switch (mType) {
+		case 0:
+			mConvertView.findViewById(R.id.view_check).setBackgroundResource(isCheck? R.drawable.radiotrue : R.drawable.radioflase);
+			break;
+		case 1:
+			mConvertView.findViewById(R.id.view_check).setBackgroundResource(isCheck? R.drawable.checktrue : R.drawable.checkflase);
+			break;
+		case 2:
+			break;
+		default:
+			break;
+		}
+	}
+}

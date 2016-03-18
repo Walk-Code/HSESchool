@@ -1,0 +1,185 @@
+package com.zhuochuang.hsej.store;
+
+
+import java.util.Calendar;
+import java.util.TimeZone;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.util.Utils;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.HSESchoolApp;
+import com.zhuochuang.hsej.R;
+
+public class StoreGoodsCommentListActivity extends BaseActivity{
+	private PullToRefreshListView mListView;
+	private JSONArray mDataArr;
+	private ContentAdapter mAdapter;
+	private LinearLayout mHeaderView;
+	ImageView [] evaluateStar ;
+	ImageView [] evaluatePhoto ;
+	LinearLayout mCommentLayout;
+	/**
+	 * 
+	 * 评论星级写在XML
+	 */
+	@Override
+	protected void onCreate(Bundle arg0) {	
+		super.onCreate(arg0);
+		((HSESchoolApp)getApplication()).addActivityStore(this);
+		setContentView(R.layout.store_goods_comment);
+		setTitleText(R.string.stores_goods_comment);
+		
+		initView();		
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_Goods_GoodsEvaluate, 
+				DataLoader.getInstance().setGoodsEvaluateTypeParams(getIntent().getStringExtra("goodsId")), StoreGoodsCommentListActivity.this);
+	}
+	
+	private void initView() {
+		evaluateStar = new ImageView[5];
+		evaluatePhoto = new ImageView[3];
+		mListView = (PullToRefreshListView) findViewById(R.id.pullToListView_goods_comment);
+	
+		mListView.setAdapter(mAdapter = new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				return mDataArr != null ? mDataArr.length() : 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if(convertView == null){
+					convertView = LayoutInflater.from(StoreGoodsCommentListActivity.this).inflate(R.layout.store_goods_comment_item, null);				
+				}			
+							
+				mCommentLayout = (LinearLayout)convertView.findViewById(R.id.store_comment_layout);
+				mCommentLayout.removeAllViews();
+				
+				((TextView)convertView.findViewById(R.id.store_comment_author)).setText(mDataArr.optJSONObject(position).optString("xm"));
+				 int length = mDataArr.optJSONObject(position).optInt("evaluate");
+			 
+				 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(Utils.dipPx(StoreGoodsCommentListActivity.this, 18),Utils.dipPx(StoreGoodsCommentListActivity.this, 18),1);
+				 
+				 for(int i = 0;i < 5; i++){
+					 evaluateStar[i] = new ImageView(StoreGoodsCommentListActivity.this);
+					 if(i > length-1){
+						 evaluateStar[i].setImageResource(R.drawable.icon_grade_nor); 
+					 }else{
+					     evaluateStar[i].setImageResource(R.drawable.icon_grade_pre);
+					 }
+					 evaluateStar[i].setPadding(1, 5, 5,1);
+					 mCommentLayout.addView(evaluateStar[i],layoutParams); 
+				 }
+				  
+				 ((TextView)convertView.findViewById(R.id.store_goods_coommen)).setText(mDataArr.optJSONObject(position).optString("content"));
+				 ((TextView)convertView.findViewById(R.id.store_goods_coomment_creattime)).setText(getStringFromLong(mDataArr.optJSONObject(position).optLong("createDate"))+"");
+				 
+				 if(mDataArr.optJSONObject(position).has("image")){
+					 ((LinearLayout)convertView.findViewById(R.id.store_goods_coommen_photos)).removeAllViews();
+					 LinearLayout.LayoutParams layoutParam = new LinearLayout.LayoutParams(Utils.dipPx(StoreGoodsCommentListActivity.this,68),Utils.dipPx(StoreGoodsCommentListActivity.this, 68));
+					 for(int i = 0;i < 3; i++){
+						 evaluatePhoto[i] = new ImageView(StoreGoodsCommentListActivity.this);			 
+						 evaluatePhoto[i].setScaleType(ScaleType.CENTER_INSIDE);
+						 evaluatePhoto[i].setPadding(5,5,5,5);
+				
+						 ((LinearLayout)convertView.findViewById(R.id.store_goods_coommen_photos)).addView(evaluatePhoto[i],layoutParam);
+						 ImageLoader.getInstance().displayImage("", evaluatePhoto[i],ImageLoaderConfigs.displayImageOptionsBg);
+					 }
+				 }				
+				return convertView;
+			}
+			
+		});
+		
+		mListView.setOnRefreshListener(new OnRefreshListener() {
+			
+			@Override
+			public void onRefresh() {
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_Goods_GoodsEvaluate, 
+						DataLoader.getInstance().setGoodsEvaluateTypeParams(getIntent().getStringExtra("goodsId")), StoreGoodsCommentListActivity.this);;
+			}
+		});
+		mListView.startRefresh();
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+			}
+		});
+	}
+	
+	public static String getStringFromLong(long millis){	
+		Calendar cal = Calendar.getInstance();
+	    cal.setTimeZone(TimeZone.getTimeZone("GMT+8:00"));
+	    cal.setTimeInMillis(millis*1l);
+	    return (cal.get(Calendar.YEAR) + "-" + (cal.get(Calendar.MONTH) + 1) + "-"+ cal.get(Calendar.DAY_OF_MONTH) + " " + cal.get(Calendar.HOUR_OF_DAY) + ":"
+	            + cal.get(Calendar.MINUTE));
+	}  
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		if(mListView != null){
+			mListView.complete();
+		}
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(StoreGoodsCommentListActivity.this,((Error) result).getMessage(),Toast.LENGTH_SHORT).show();
+		}
+		
+		switch (type) {
+		case TaskOrMethod_Goods_GoodsEvaluate:
+			if(result instanceof JSONObject){
+				if(((JSONObject)result).has("items")){
+					mDataArr = ((JSONObject)result).optJSONArray("items");
+					
+					if(mDataArr.length() == 0){
+						setTitleText(R.string.stores_goods_comment);
+					}else{
+						setTitleText(getResources().getString(R.string.stores_goods_comment)+"("+((JSONObject)result).optString("total")+")");
+					}
+					
+					if(mAdapter != null){						
+						mAdapter.notifyDataSetChanged();
+					}
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		((HSESchoolApp)getApplication()).removeActivityStore(this);
+	}
+}

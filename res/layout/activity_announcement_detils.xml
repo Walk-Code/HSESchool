@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+      <RelativeLayout 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    
+    <LinearLayout 
+        android:id="@+id/layout_announcement_detils"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        >
+        
+        <TextView
+            android:id="@+id/title_announcement_detils"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="18dp"
+            android:textColor="#313131"
+            android:layout_gravity="left|center_vertical"
+            android:layout_marginTop="22dp"
+            />
+        
+        <TextView 
+            android:id="@+id/time_announcement_detils"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#878787"
+            android:textSize="16dp"
+            android:layout_gravity="left|center_vertical"
+            android:layout_marginTop="3dp"
+            />
+        <View 
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="#e0e0e0"
+            />
+        <LinearLayout 
+            android:id="@+id/images_announcement_detils"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            ></LinearLayout>
+        
+        <TextView 
+            android:id="@+id/content_announcement_detils"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="17dp"
+            android:textColor="#6f6f6f"
+            android:layout_marginTop="13dp"
+            />
+    </LinearLayout>
+
+</RelativeLayout>
+    
+</ScrollView>

@@ -1,0 +1,350 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.TaskType;
+import com.util.ContentAdapter;
+import com.util.Utils;
+
+@SuppressLint({ "InflateParams", "HandlerLeak" })
+public class CommunityActivitiesListActivity extends ListViewPullActivity{
+
+	private JSONArray mListArr;
+	private Handler mHandler;
+	
+	private int mPageNo = 1;
+	private boolean mIsReadMore = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		
+		setTitleText(R.string.activitylist_title);
+		mListView.setBackgroundColor(Color.TRANSPARENT);
+		mListView.startRefresh();
+		
+		EventManager.getInstance().setHandlerListenner(mHandler = new Handler(){
+
+			@Override
+			public void handleMessage(Message msg) {
+				// TODO Auto-generated method stub
+				super.handleMessage(msg);
+				switch (msg.what) {
+				case EventManager.EventType_VoteChange:
+				case EventManager.EventType_SurveyChange:
+					if(mListArr == null || mListArr.length() == 0){
+						return;
+					}
+					for(int i = 0; i < mListArr.length(); i++){
+						JSONObject obj = mListArr.optJSONObject(i);
+						try {
+							if(obj.optString("id").equalsIgnoreCase((String) ((Object[])msg.obj)[0])){
+								obj.put("favoriteStatus", "6");
+								break;
+							}
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+					}
+					if(mListAdapter != null){
+						mListAdapter.notifyDataSetChanged();
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+		});
+	}
+
+
+	@Override
+	public void getHeaderView() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void getAdapter() {
+		// TODO Auto-generated method stub
+		mListAdapter = new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				if(mListArr != null && mListArr.length() > 0){
+					return mListArr.length();
+				}
+				return 0;
+			}
+
+			@Override
+			public int getItemViewType(int position) {
+				// TODO Auto-generated method stub
+				JSONObject obj = mListArr.optJSONObject(position);
+				if(mListArr != null && obj.has("isSurveyTopic") && obj.optBoolean("isSurveyTopic")){
+					return 1;
+				}
+				if(mListArr != null && obj.has("isVoteTopic") && obj.optBoolean("isVoteTopic")){
+					return 1;
+				}
+				return 0;
+			}
+
+			@Override
+			public int getViewTypeCount() {
+				// TODO Auto-generated method stub
+				return 2;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				ViewHolderActivity holderActivity = null;
+				ViewHolderSurveyTopic holderSurvey = null;
+				int viewType = getItemViewType(position);
+				if (convertView == null) {
+					switch (viewType) {
+					case 0:
+						convertView = ViewGroup.inflate(CommunityActivitiesListActivity.this, R.layout.listcell_activities, null);
+						convertView.setLayoutParams(new AbsListView.LayoutParams(android.widget.AbsListView.LayoutParams.MATCH_PARENT, android.widget.AbsListView.LayoutParams.WRAP_CONTENT));
+						holderActivity = new ViewHolderActivity();
+						holderActivity.converView = convertView;
+						convertView.setTag(holderActivity);
+						break;
+					case 1:
+						convertView = LayoutInflater.from(CommunityActivitiesListActivity.this).inflate(R.layout.listcell_surveytopic, null);
+						holderSurvey = new ViewHolderSurveyTopic();
+						holderSurvey.converView = convertView;
+						convertView.setTag(holderSurvey);
+						break;
+					}
+				}
+				else{
+					switch (viewType) {
+		            case 0:  
+		            	holderActivity = (ViewHolderActivity) convertView.getTag();
+		                break;  
+		            case 1:
+		            	holderSurvey = (ViewHolderSurveyTopic) convertView.getTag();
+		            	break;
+		            }
+				}
+				
+				JSONObject obj = mListArr.optJSONObject(position);
+				if(obj != null){
+					switch (viewType) {
+		            case 0:  
+		            	((TextView)holderActivity.converView.findViewById(R.id.textview_title)).setText(obj.optString("name"));
+						((TextView)holderActivity.converView.findViewById(R.id.textview_addresstime)).setText(
+								String.format(getResources().getString(R.string.activitydetails_addresstime), obj.optString("address"), 
+										Utils.getTimeQuantum(CommunityActivitiesListActivity.this, obj.optLong("startTime", 0), obj.optLong("endTime", 0))));
+						((TextView)holderActivity.converView.findViewById(R.id.textview_date)).setText(Utils.getAlmostTimeDay(CommunityActivitiesListActivity.this, obj.optLong("createDate")));
+
+						String numStr = String.format(getResources().getString(R.string.activitylist_personcount), obj.optString("applicants", "0"), obj.optString("maxNumber", "0"));
+						
+						((TextView)holderActivity.converView.findViewById(R.id.textview_personcount)).setText(Utils.getActivityNum(numStr, obj.optString("applicants", "0")));
+		               
+						switch (obj.optInt("startStatus", 0)) {
+						case 0:
+							holderActivity.converView.findViewById(R.id.textview_statu).setBackgroundResource(R.drawable.bg_activity_statu_going);
+							((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setTextColor(Color.argb(255, 233, 78, 81));
+							((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitylist_unstart));
+							/*if(obj.has("favoriteStatus")){
+								if(obj.optString("favoriteStatus").equalsIgnoreCase("2")){
+									((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitydetails_auditing));
+								}
+								else if(obj.optString("favoriteStatus").equalsIgnoreCase("4")){
+									((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitydetails_unjoin));
+								}
+								else{
+									((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitydetails_join));
+								}
+							}*/
+							
+							break;
+						case 1:
+							holderActivity.converView.findViewById(R.id.textview_statu).setBackgroundResource(R.drawable.bg_activity_statu_going);
+							((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setTextColor(Color.argb(255, 233, 78, 81));
+							((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitylist_going));
+							break;
+						case 2:
+							holderActivity.converView.findViewById(R.id.textview_statu).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+							((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setTextColor(Color.argb(255, 190, 190, 190));
+							((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitylist_finish));
+							break;
+						case 8:
+							holderActivity.converView.findViewById(R.id.textview_statu).setBackgroundResource(R.drawable.bg_activity_statu_finish);
+							((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setTextColor(Color.argb(255, 190, 190, 190));
+							((TextView)holderActivity.converView.findViewById(R.id.textview_statu)).setText(getResources().getString(R.string.activitylist_aborted));
+							break;
+						default:
+							break;
+						}
+						
+						break;  
+		            case 1:
+		            	((TextView)holderSurvey.converView.findViewById(R.id.textview)).setText(obj.optString("description"));
+		            	break;
+		            }
+				}
+				return convertView;
+			}
+		};
+	}
+	
+	class ViewHolderActivity{
+		View converView;
+	}
+	
+	class ViewHolderSurveyTopic{
+		View converView;
+	}
+
+	@Override
+	public void OnItemClickListener(AdapterView<?> parent, View view,
+			int position, long id) {
+		// TODO Auto-generated method stub
+		JSONObject obj = mListArr.optJSONObject(position - 1);
+		if(obj != null){
+			Intent intent = null;
+			if(obj.has("isSurveyTopic") && obj.optBoolean("isSurveyTopic")){
+				if(!DataLoader.getInstance().isLogin()){
+					startActivity(new Intent(CommunityActivitiesListActivity.this, LoginActivity.class));
+					overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+					return;
+				}
+				if(obj.has("favoriteStatus") && obj.optString("favoriteStatus").equalsIgnoreCase("6")){
+					intent = new Intent(CommunityActivitiesListActivity.this, SurveyTopicResultActivity.class);
+				}
+				else{
+					intent = new Intent(CommunityActivitiesListActivity.this, SurveyTopicActivity.class);
+				}
+				intent.putExtra("id", obj.optString("id"));
+				intent.putExtra("resouceType", 3);
+				startActivity(intent);
+				return;
+			}
+			else if(obj.has("isVoteTopic") && obj.optBoolean("isVoteTopic")){
+				if(!DataLoader.getInstance().isLogin()){
+					startActivity(new Intent(CommunityActivitiesListActivity.this, LoginActivity.class));
+					overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+					return;
+				}
+				intent = new Intent(CommunityActivitiesListActivity.this, VoteActivity.class);
+				intent.putExtra("favoriteStatus", obj.optInt("favoriteStatus", 0));
+				intent.putExtra("id", obj.optString("id"));
+				intent.putExtra("resouceType", 3);
+				startActivity(intent);
+				return;
+			}
+			
+			intent = new Intent(CommunityActivitiesListActivity.this, ActivityDetailsActivity.class);
+			intent.putExtra("id", obj.optString("id"));
+			startActivity(intent);
+		}
+	}
+
+	@Override
+	public void OnRefreshListener() {
+		// TODO Auto-generated method stub
+		mPageNo = 1;
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("communityId", getIntent().getStringExtra("id"));
+		params.put("pageNo", mPageNo);
+		params.put("pageSize", 20);
+		params.put("name", "");
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ActivityListActivities, params, CommunityActivitiesListActivity.this);
+	}
+
+	@Override
+	public void OnRemoreListener() {
+		// TODO Auto-generated method stub
+		mPageNo++;
+		mIsReadMore = true;
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("communityId", getIntent().getStringExtra("id"));
+		params.put("pageNo", mPageNo);
+		params.put("pageSize", 20);
+		params.put("name", "");
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ActivityListActivities, params, CommunityActivitiesListActivity.this);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		EventManager.getInstance().removeHandlerListenner(mHandler);
+	}
+
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		
+		if(mListView != null){
+			mListView.complete();
+		}
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(CommunityActivitiesListActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_ActivityListActivities:
+			if(result instanceof JSONObject && ((JSONObject)result).has("items")){
+				JSONArray temp = ((JSONObject)result).optJSONArray("items");
+				if(temp != null && temp.length() > 10){
+					mListView.setRemoreable(true);
+				}
+				else{
+					mListView.setRemoreable(false);
+				}
+				if(mIsReadMore){
+					mIsReadMore = false;
+					mListArr = DataLoader.getInstance().joinJSONArray(mListArr, temp);
+				}
+				else{
+					mListArr = temp;
+				}
+			}
+			else{
+				mListView.setRemoreable(false);
+			}
+			if(mListAdapter != null){
+				mListAdapter.notifyDataSetChanged();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+}

@@ -1,0 +1,96 @@
+package com.zhuochuang.hsej.store;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+
+public class StoreGoodsEvaluateActivity extends BaseActivity{
+	private PullToRefreshListView mListView;
+	private ContentAdapter mAdapter;
+	private JSONArray mDataArr;
+		@Override
+		protected void onCreate(Bundle arg0) {
+			super.onCreate(arg0);
+			setContentView(R.layout.store_order_status);
+			setTitleText(getResources().getString(R.string.stores_goods_evaluate));
+			initView();
+			try {
+				mDataArr = new JSONArray(getIntent().getStringExtra("GoodsData"));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		private void initView() {
+			mListView = (PullToRefreshListView) findViewById(R.id.pullToListView_order);
+			mListView.setAdapter(mAdapter = new ContentAdapter(){
+
+				
+				@Override
+				public int getCount() {				
+					return null != mDataArr ? mDataArr.length() : 0;
+				}
+
+				@Override
+				public View getView(int position, View convertView,ViewGroup parent) {
+					if(null == convertView){
+						convertView = LayoutInflater.from(StoreGoodsEvaluateActivity.this).inflate(R.layout.store_evaluate_itme,null);
+					}
+					final JSONObject obj = mDataArr.optJSONObject(position);
+					((TextView)convertView.findViewById(R.id.product_name)).setText(obj.optString("goodsName"));
+					ImageLoader.getInstance().displayImage(obj.optString("goodsImage"),(ImageView)convertView.findViewById(R.id.product_image)
+								,ImageLoaderConfigs.displayImageOptionsBg);
+					
+					convertView.findViewById(R.id.store_my_order_confirm).setOnClickListener(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							Intent intent = new Intent(StoreGoodsEvaluateActivity.this, StorePublishEvaluateActivity.class);
+							intent.putExtra("goodId", obj.optString("id"));
+							intent.putExtra("goodsName", obj.optString("goodsName"));
+							intent.putExtra("img", obj.optString("goodsImage"));
+							startActivity(intent);
+						}
+					});
+					
+					return convertView;
+				}			
+			});
+			
+			mListView.setOnRefreshListener(new OnRefreshListener() {
+				
+				@Override
+				public void onRefresh() {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			
+			mListView.startRefresh();
+			if(null != mListView){
+				mListView.complete();
+			}
+		}
+			
+}

@@ -1,0 +1,364 @@
+package com.zhuochuang.hsej;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.CollapsibleTextView;
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.Utils;
+
+/**
+ * 社团详情
+ * 
+ * @author Dion modify kris
+ * 
+ */
+public class CommunitydetailsActivity extends BaseActivity {
+
+	private LinearLayout mAnnouncement1 = null;// 社团通告1
+	private LinearLayout mAnnouncement2 = null;// 社团通告2
+
+	private JSONObject mData;
+	private JSONArray mAnnoArra = null;
+	private JSONArray mImageArra = null;
+
+	private boolean isJoin = false;
+	private boolean isJoinOperate = false;
+
+	private int mScreenWidth;
+	private String communityId;
+
+	@SuppressWarnings("deprecation")
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+
+		mScreenWidth = getWindowManager().getDefaultDisplay().getWidth();
+		setContentView(R.layout.activity_community_details);
+
+		showDialogCustom(DIALOG_CUSTOM);
+
+		communityId = getIntent().getStringExtra("id");
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("communityId", communityId);
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_CommunityGetCommunity, params,
+				CommunitydetailsActivity.this);
+
+	}
+
+	public void onActivitiesClick(View view) {
+		Intent intent = new Intent(CommunitydetailsActivity.this,
+				CommunityActivitiesListActivity.class);
+		if (mData != null && mData.has("id")) {
+			intent.putExtra("id", mData.optString("id"));
+		}
+		startActivity(intent);
+	}
+
+	private void initView() {
+
+		if (mData == null) {
+			return;
+		}
+		// 申请按钮
+		((Button) findViewById(R.id.request_button_community))
+				.setOnClickListener(new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						if (!DataLoader.getInstance().isLogin()) {
+							startActivity(new Intent(
+									CommunitydetailsActivity.this,
+									LoginActivity.class));
+							overridePendingTransition(R.anim.push_bottom_in,
+									R.anim.push_bottom_out);
+							return;
+						}
+						Intent intent = new Intent(
+								CommunitydetailsActivity.this,
+								ApplyJoinCorporActivity.class);
+						intent.putExtra("comm_id", mData.optString("id"));
+						intent.putExtra("comm_cost", mData.optString("cost"));
+						startActivity(intent);
+						// ((Button)findViewById(R.id.request_button_community)).setClickable(false);
+						//
+						// /**
+						// * 2:申请加入
+						// 3:取消申请，退出（社团或活动）
+						// */
+						//
+						// isJoinOperate = true;
+						// showDialogCustom(DIALOG_CUSTOM);
+						//
+						// HashMap<String, Object> params = new HashMap<String,
+						// Object>();
+						// params.put("resourceType", "2");
+						// params.put("resourceIds", mData.optString("id"));
+						// if(isJoin){
+						// params.put("statuses", 3);
+						// }else{
+						// params.put("statuses", 2);
+						// }
+						// DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_FavoriteApply,
+						// params, CommunitydetailsActivity.this);
+						//
+						// new Handler().postDelayed(new Runnable() {
+						//
+						// @Override
+						// public void run() {
+						// // TODO Auto-generated method stub
+						// ((Button)findViewById(R.id.request_button_community)).setClickable(true);
+						// }
+						// }, 20);
+					}
+				});
+		findViewById(R.id.main_layout).setVisibility(View.VISIBLE);
+		setHeaderData();
+
+		LinearLayout mImageList = (LinearLayout) findViewById(R.id.imageList);
+		mImageList.removeAllViews();
+
+		if (mImageArra != null && mImageArra.length() > 0) {
+			for (int i = 0; i < mImageArra.length(); i++) {
+				ImageView imageView = new ImageView(this);
+				imageView.setScaleType(ScaleType.FIT_XY);
+				imageView.setLayoutParams(new LayoutParams(
+						LayoutParams.MATCH_PARENT, (mScreenWidth - Utils
+								.dipToPixels(this, 30)) / 2));
+				ImageLoader.getInstance().displayImage(
+						mImageArra.optJSONObject(i).optString("path"),
+						imageView, ImageLoaderConfigs.displayImageOptionsBg);
+				mImageList.addView(imageView);
+
+				View view = new View(this);
+				view.setLayoutParams(new LayoutParams(
+						LayoutParams.MATCH_PARENT, Utils.dipToPixels(this, 10)));
+				mImageList.addView(view);
+			}
+		}
+
+		findViewById(R.id.tv_btn_organize).setOnClickListener(
+				new OnClickListener() {
+
+					@Override
+					public void onClick(View v) {
+						Intent intent = new Intent(
+								CommunitydetailsActivity.this,
+								CommunityOrganizStructeActivity.class);
+						intent.putExtra("comm_id", mData.optString("id"));
+						startActivity(intent);
+					}
+				});
+	}
+
+	private void setHeaderData() {
+
+		if (mData == null) {
+			return;
+		}
+		// 社团图标
+		ImageLoader.getInstance().displayImage(mData.optString("image"),
+				(ImageView) findViewById(R.id.image_community),
+				ImageLoaderConfigs.displayImageOptionsBg);
+
+		// 社团名称
+		((TextView) findViewById(R.id.name_community)).setText(mData
+				.optString("name"));
+		setTitleText(mData.optString("name"));
+
+		// 社团人数
+		((TextView) findViewById(R.id.num_community)).setText(mData
+				.optString("applicants"));
+
+		((Button) findViewById(R.id.request_button_community))
+				.setClickable(true);
+		/*
+		 * if(mData.has("favoriteStatus")){ switch
+		 * (mData.optInt("favoriteStatus")) { case 2: //审核状态
+		 * ((Button)findViewById
+		 * (R.id.request_button_community)).setText(R.string
+		 * .audit_button_text_community);
+		 * ((Button)findViewById(R.id.request_button_community
+		 * )).setClickable(false); isJoin = true; break;
+		 * 
+		 * case 4:
+		 * ((Button)findViewById(R.id.request_button_community)).setText(
+		 * R.string.community_join_already);
+		 * ((Button)findViewById(R.id.request_button_community
+		 * )).setClickable(false);
+		 * ((Button)findViewById(R.id.request_button_community
+		 * )).setBackgroundResource(R.drawable.btn_gray_n); isJoin = true;
+		 * break;
+		 * 
+		 * default:
+		 * ((Button)findViewById(R.id.request_button_community)).setText
+		 * (R.string.request_button_text_community); isJoin = false; break; }
+		 * }else{
+		 * ((Button)findViewById(R.id.request_button_community)).setText(R
+		 * .string.request_button_text_community); isJoin = false; }
+		 */
+
+		((Button) findViewById(R.id.request_button_community))
+				.setText(R.string.request_button_text_community);
+		isJoin = false;
+		if (mData.has("applyStatus")) {
+			switch (mData.optInt("applyStatus", 0)) {
+			case 2:
+				((Button) findViewById(R.id.request_button_community))
+						.setText(R.string.audit_button_text_community);
+				((Button) findViewById(R.id.request_button_community))
+						.setClickable(true);
+				isJoin = true;
+				break;
+			case 3:
+				break;
+			case 4:
+				((Button) findViewById(R.id.request_button_community))
+						.setText(R.string.community_join_already);
+				((Button) findViewById(R.id.request_button_community))
+						.setClickable(false);
+				((Button) findViewById(R.id.request_button_community))
+						.setBackgroundResource(R.drawable.btn_gray_n);
+				isJoin = true;
+				break;
+			case 5:
+				((Button) findViewById(R.id.request_button_community))
+						.setText(R.string.activitydetails_refuse);
+				((Button) findViewById(R.id.request_button_community))
+						.setClickable(false);
+				((Button) findViewById(R.id.request_button_community))
+						.setBackgroundResource(R.drawable.btn_gray_n);
+				isJoin = true;
+				break;
+			}
+		}
+
+		// 社团介绍
+		((CollapsibleTextView) findViewById(R.id.content_community_details))
+				.setText(mData.optString("description"),
+						TextView.BufferType.NORMAL);
+		// 社团通告
+		mAnnouncement1 = (LinearLayout) findViewById(R.id.community_announcement_1);
+		mAnnouncement2 = (LinearLayout) findViewById(R.id.community_announcement_2);
+		if (mData.has("activities")) {
+			mAnnoArra = mData.optJSONArray("activities");
+			if (mAnnoArra != null && mAnnoArra.length() > 0) {
+				SimpleDateFormat timeFormat = new SimpleDateFormat(
+						getResources().getString(R.string.time_format5));
+				JSONObject obj1 = mAnnoArra.optJSONObject(0);
+				String str1 = timeFormat.format(new Date(obj1.optLong(
+						"startTime", 0))) + " " + obj1.optString("name");
+				if (mAnnoArra.length() == 1) {
+					mAnnouncement1.setVisibility(View.VISIBLE);
+					((TextView) findViewById(R.id.community_announcement_title_1))
+							.setText(str1);
+				} else {
+					JSONObject obj2 = mAnnoArra.optJSONObject(1);
+					mAnnouncement1.setVisibility(View.VISIBLE);
+					mAnnouncement2.setVisibility(View.VISIBLE);
+					((TextView) findViewById(R.id.community_announcement_title_1))
+							.setText(str1);
+					((TextView) findViewById(R.id.community_announcement_title_2))
+							.setText(timeFormat.format(new Date(obj2.optLong(
+									"startTime", 0)))
+									+ " "
+									+ obj2.optString("name"));
+				}
+			}
+		}
+
+		if (mData.has("images")) {
+			mImageArra = mData.optJSONArray("images");
+		}
+	}
+
+	@Override
+	public void taskStarted(TaskType type) {
+		super.taskStarted(type);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+
+		if (result == null) {
+			removeDialogCustom();
+			return;
+		}
+
+		if (result instanceof Error) {
+			removeDialogCustom();
+			Toast.makeText(CommunitydetailsActivity.this,
+					((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		switch (type) {
+		case TaskOrMethod_CommunityGetCommunity:
+			removeDialogCustom();
+			if (result instanceof JSONObject) {
+				if (((JSONObject) result).has("item")) {
+					mData = ((JSONObject) result).optJSONObject("item");
+					initView();
+				}
+
+				if (isJoinOperate) {
+					isJoinOperate = false;
+					setHeaderData();
+					if (mData != null && mData.has("applicants")) {
+						EventManager.getInstance().sendMessage(
+								EventManager.EventType_ClubAttention,
+								getIntent().getStringExtra("id"),
+								mData.optString("applicants"));
+					}
+				}
+			}
+			break;
+
+		case TaskOrMethod_FavoriteApply:
+			if (result instanceof JSONObject) {
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("communityId", getIntent().getStringExtra("id"));
+				DataLoader.getInstance().startTaskForResult(
+						TaskType.TaskOrMethod_CommunityGetCommunity, params,
+						CommunitydetailsActivity.this);
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("communityId", communityId);
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_CommunityGetCommunity, params,
+				CommunitydetailsActivity.this);
+	}
+
+}

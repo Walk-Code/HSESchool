@@ -1,0 +1,271 @@
+package com.zhuochuang.hsej.store;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.crypto.spec.PSource;
+
+import org.json.JSONArray;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Gallery;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+
+import com.umeng.message.proguard.S;
+import com.util.ContentAdapter;
+import com.util.Utils;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+/*
+ * 
+ * 清除ListView的头部和脚步有Bug
+ * 
+ */
+public class StoreSearchActivity extends BaseActivity{
+	private ListView mListView;
+	ArrayAdapter<String> mAdapter;
+	ArrayList<HashMap<String,String>> productList;
+	private PopupWindow popupWindow;
+	View mHeaderView,mFooterView;
+	private String [] mItem;
+	List<String> mStoreList = new  ArrayList<String>();
+	List<String> mProductList = new  ArrayList<String>();
+	private JSONArray jsonAry ;
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		mMainLayout.removeAllViews();
+		setContentView(R.layout.store_search_activity);
+		initView();
+		
+	}
+	private void initView() {	
+		jsonAry = new JSONArray();
+		mListView = (ListView) findViewById(R.id.search_listview);
+		mHeaderView = LayoutInflater.from(StoreSearchActivity.this).inflate(R.layout.store_search_header_item, null);
+		mFooterView = LayoutInflater.from(StoreSearchActivity.this).inflate(R.layout.store_search_footer_item, null);
+		mItem = getResources().getStringArray(R.array.store_search);
+		mListView.setAdapter(mAdapter = new ArrayAdapter<String>(StoreSearchActivity.this,
+				R.layout.store_search_item,R.id.store_search_item,chageListData()));
+		if(loadList(this,"ProductSearch","ProductSearch").size() > 0){
+			final List list = chageListData();
+			mListView.addHeaderView(mHeaderView,null,false);//添加头部
+			mListView.addFooterView(mFooterView,null,true);//添加头部			
+			findViewById(R.id.store_search_footer_item).setOnClickListener(new OnClickListener() {			
+				@Override
+				public void onClick(View v) {
+					list.clear();				
+					saveList(StoreSearchActivity.this,"ProductSearch",list,"ProductSearch");
+					mListView.setAdapter(mAdapter = new ArrayAdapter<String>(StoreSearchActivity.this,
+							R.layout.store_search_item,R.id.store_search_item,chageListData()));
+					
+					findViewById(R.id.head_item).setVisibility(View.GONE);
+					findViewById(R.id.foot_item).setVisibility(View.GONE);
+				}
+			});
+	    }
+		
+		
+		((EditText)findViewById(R.id.store_search_edittext)).addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {						
+					StoreSearchActivity.this.mAdapter.getFilter().filter(s);
+					if(((EditText)findViewById(R.id.store_search_edittext)).getText().toString().length() > 0){	
+						for(int i = 0;i < chageListData().size();i++){	
+							if(chageListData().get(i).equals(s+"")){								
+								findViewById(R.id.head_item).setVisibility(View.VISIBLE);
+								findViewById(R.id.foot_item).setVisibility(View.VISIBLE);
+								break;
+							}else{	
+								if(null != findViewById(R.id.head_item) && null != findViewById(R.id.foot_item)){
+									findViewById(R.id.head_item).setVisibility(View.GONE);
+									findViewById(R.id.foot_item).setVisibility(View.GONE);
+								}
+							}
+
+						}	
+					}else{
+						if(null != findViewById(R.id.head_item) && null != findViewById(R.id.foot_item)){
+							findViewById(R.id.head_item).setVisibility(View.VISIBLE);
+							findViewById(R.id.foot_item).setVisibility(View.VISIBLE);
+						}
+					}
+					mAdapter.notifyDataSetChanged();
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count,
+					int after) {								
+			}
+			
+			@Override
+			public void afterTextChanged(Editable s) {				
+			}
+		});
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,int position, long id) {
+				Intent intent;
+				if(((TextView)findViewById(R.id.search_product)).getText().toString().equals(mItem[0])){
+					intent = new Intent(StoreSearchActivity.this,StoreDetailActivity.class);
+				}else{
+					intent = new Intent(StoreSearchActivity.this,StoreCategoryActivity.class);
+				}
+				 intent.putExtra("SearchResult",chageListData().get(position-1));
+				 startActivity(intent);				
+			}
+		});
+		LayoutInflater inflater = (LayoutInflater) getSystemService(getApplicationContext().LAYOUT_INFLATER_SERVICE);
+		View contentview  = inflater.inflate(R.layout.store_popupwindow, null);
+	    popupWindow = new PopupWindow(contentview,Utils.getScreenWidth(getApplicationContext())/4,ViewGroup.LayoutParams.WRAP_CONTENT);
+	    popupWindow.setBackgroundDrawable(new BitmapDrawable());
+	    popupWindow.setOutsideTouchable(true);
+	    popupWindow.setFocusable(true);
+		ListView listView = (ListView) contentview.findViewById(R.id.store_popupwindow);
+		listView.setAdapter(new ArrayAdapter<String>(StoreSearchActivity.this,R.layout.store_product_popupwindow_item,R.id.store_popupwindowItem,getData()));
+		listView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				popupWindow.dismiss();
+				((TextView)findViewById(R.id.search_product)).setText(getData().get(position).toString());
+				if(chageListData().size() > 0){
+				mListView.setAdapter(mAdapter = new ArrayAdapter<String>(StoreSearchActivity.this,
+						R.layout.store_search_item,R.id.store_search_item,chageListData()));
+				}
+			}
+		});
+		findViewById(R.id.search_product).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				popupWindow.showAsDropDown(findViewById(R.id.store_search_title));				
+			}
+		});
+		//搜索
+		((EditText)findViewById(R.id.store_search_edittext)).setOnEditorActionListener(new OnEditorActionListener() {
+			
+			@Override
+			public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+				if(actionId ==EditorInfo.IME_ACTION_SEARCH){					
+					Intent intent = null;
+					if(((TextView)findViewById(R.id.search_product)).getText().toString().equals(mItem[0])){
+						mProductList.add(((EditText)findViewById(R.id.store_search_edittext)).getText().toString());
+						saveList(StoreSearchActivity.this,"ProductSearch",mProductList,"ProductSearch");
+						intent = new Intent(StoreSearchActivity.this,StoreDetailActivity.class);
+						
+					}else{
+						mStoreList.add(((EditText)findViewById(R.id.store_search_edittext)).getText().toString());
+						saveList(StoreSearchActivity.this,"StoreSearch",mStoreList,"StoreSearch");
+						intent = new Intent(StoreSearchActivity.this,StoreCategoryActivity.class);						
+					}
+					 intent.putExtra("SearchResult",((EditText)findViewById(R.id.store_search_edittext)).getText().toString());
+					 startActivity(intent);					
+					
+					 return true;
+				}
+				return false;
+			}
+		});
+		findViewById(R.id.store_cancle).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
+	}
+	private List<String> chageListData(){	
+		if(((TextView)findViewById(R.id.search_product)).getText().toString().equals(mItem[0])){
+			return loadList(this,"ProductSearch","ProductSearch");
+		}else{
+			return loadList(this,"StoreSearch","StoreSearch");
+				
+		}		
+	}
+	public List getData(){
+		return Arrays.asList(getResources().getStringArray(R.array.store_search));
+	}
+	@Override
+	protected void onResume() {
+		super.onResume();
+		if(null != mAdapter){
+			List list = chageListData();
+			if(list.size() > 0){
+				mListView.setAdapter(mAdapter = new ArrayAdapter<String>(StoreSearchActivity.this,
+						R.layout.store_search_item,R.id.store_search_item,chageListData()));
+				
+				findViewById(R.id.head_item).setVisibility(View.VISIBLE);
+				findViewById(R.id.foot_item).setVisibility(View.VISIBLE);
+			}
+		}
+	}
+	//保存输入
+	public static void saveList(Context ctx, String key, List<String> list,String fileName) {
+	    JSONArray jsonAry = new JSONArray();
+	    for(int i = 0; i < list.size(); i++) {
+	        jsonAry.put(list.get(i));
+	    }
+Log.d("StoreSearchjson", jsonAry.toString());	    
+	    SharedPreferences prefs = ctx.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+	    SharedPreferences.Editor editor = prefs.edit();
+	    editor.putString(key, jsonAry.toString());
+	    editor.apply();
+	    
+	    
+	}
+
+	//获取 
+	public static ArrayList<String> loadList(Context ctx, String key,String fileName) {
+	    ArrayList<String> list = new ArrayList<String>();
+	    SharedPreferences prefs = ctx.getSharedPreferences(fileName, Context.MODE_PRIVATE);
+	    String strJson = prefs.getString(key, ""); 
+	    if(!strJson.equals("")) {
+	        try {
+	            JSONArray jsonAry = new JSONArray(strJson);
+	            for(int i=0; i<jsonAry.length(); i++) {
+	                list.add(jsonAry.getString(i));
+	            }
+	        } catch(Exception ex) {
+	            ex.printStackTrace();
+	        }
+	    }
+	    return list;
+ }
+}

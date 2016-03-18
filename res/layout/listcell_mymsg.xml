@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" 
+    android:background="@drawable/masklayer_bg">
+    <FrameLayout
+        android:id="@+id/group_imageview"
+	    android:layout_width="50dp"
+		android:layout_height="50dp"
+		android:layout_margin="10dp">
+	    <ImageView
+		    android:id="@+id/imageview"
+		    android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:contentDescription="@string/app_name"
+			android:scaleType="centerCrop"/>
+		<!-- <View
+		    android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="@drawable/masklayer_bg"/> -->
+			<View
+		        android:id="@+id/view_unread"
+			    android:layout_width="7dp"
+			    android:layout_height="7dp"
+			    android:visibility="gone"
+			    android:layout_gravity="top|right"
+			    android:background="@drawable/red_unread"/>
+	</FrameLayout>
+	
+    <RelativeLayout
+        android:id="@+id/group_content"
+        android:layout_toRightOf="@id/group_imageview"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:minHeight="50dp"
+	    android:layout_marginTop="10dp"
+	    android:layout_marginRight="5dp">
+	   	
+        <!-- <TextView 
+	   	    android:id="@+id/textview_title"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content" 
+	   		android:layout_marginBottom="5dp"
+	   		android:textSize="15dp"
+	   		android:gravity="left|center_vertical"
+	   		android:textColor="#454545"/>
+        <TextView 
+	   	    android:id="@+id/textview_content"
+	   	    android:layout_below="@id/textview_title"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content" 
+	   		android:layout_marginBottom="5dp"
+	   		android:textSize="14dp"
+	   		android:gravity="left|center_vertical"
+	   		android:textColor="#565656"/> -->
+        
+        <com.layout.emoji.EmojiTextView
+         	android:id="@+id/textview_title"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content" 
+	   		android:layout_marginBottom="5dp"
+	   		android:textSize="15dp"
+	   		android:gravity="left|center_vertical"
+	   		android:textColor="#454545"/>
+        <com.layout.emoji.EmojiTextView
+         	android:id="@+id/textview_content"
+	   	    android:layout_below="@id/textview_title"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content" 
+	   		android:layout_marginBottom="5dp"
+	   		android:textSize="14dp"
+	   		android:gravity="left|center_vertical"
+	   		android:textColor="#565656"/>
+	    <TextView 
+	   	    android:id="@+id/textview_date"
+	   	    android:layout_below="@id/textview_content"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content" 
+	   		android:textSize="13dp"
+	   		android:gravity="center"
+	   		android:textColor="#a0a0a0"/>
+    </RelativeLayout>
+    
+    <View
+        android:layout_below="@id/group_content"
+	    android:layout_width="match_parent"
+		android:layout_height="0.5dp"
+		android:layout_marginTop="10dp"
+		android:background="#d2d2d2"/>
+
+</RelativeLayout>

@@ -1,0 +1,239 @@
+package com.zhuochuang.hsej.store;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+
+public class StoreCategoryActivity extends BaseActivity{
+	private String mCategoryList[];
+	private TextView toolsTextViews[];
+	private View views[];
+	private ScrollView scrollView;
+	private int scrllViewWidth = 0, scrollViewMiddle = 0;
+	private NoScrollViewPager shop_pager;
+	private int currentItem = 0;
+	private ShopAdapter shopAdapter;
+	private JSONArray array = null;
+	private JSONArray mItemArr;
+	private Map<String,Object> map;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		mMainLayout.removeAllViews();
+		setContentView(R.layout.store_category);
+		initView();
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_Shop_ListShopType, null, this);
+	}
+	
+	private void initView() {		
+		map = new HashMap<String, Object>();	
+		scrollView=(ScrollView) findViewById(R.id.tools_scrlllview);
+		shopAdapter = new ShopAdapter(getSupportFragmentManager());
+		((EditText)findViewById(R.id.search_result)).setCursorVisible(false);
+		(findViewById(R.id.search_result)).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				((EditText)findViewById(R.id.search_result)).setCursorVisible(true);
+				
+			}
+		});
+		
+		((EditText)findViewById(R.id.search_result)).setOnEditorActionListener(new OnEditorActionListener() {
+					
+					@Override
+					public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+						if(actionId ==EditorInfo.IME_ACTION_SEARCH){							
+							//跳转到商品列表界面 
+							 Intent intent = new Intent(StoreCategoryActivity.this,StoreDetailActivity.class);
+							 intent.putExtra("SearchResult",((EditText)findViewById(R.id.search_result)).getText().toString());
+							 startActivity(intent);							
+							 return true;
+						}
+						return false;
+					}
+				});
+		
+		 findViewById(R.id.store_back).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				finish();
+				
+			}
+		});		
+	}
+	private void showToolsView() {					
+		LinearLayout toolsLayout=(LinearLayout) findViewById(R.id.store_category_tools);
+		toolsTextViews = new TextView[mCategoryList.length];
+		views = new View [mCategoryList.length];
+
+		for (int i = 0; i < mCategoryList.length; i++) {
+			View view = LayoutInflater.from(StoreCategoryActivity.this).inflate(R.layout.store_category_lefe_item, null);
+			view.setId(i);
+			view.setOnClickListener(toolsItemListener);
+			TextView textView=(TextView) view.findViewById(R.id.store_category_title);
+			textView.setText(mCategoryList[i]);
+			toolsLayout.addView(view);
+			toolsTextViews[i] = textView;
+			views[i] = view;
+		}
+		changeTextColor(0);
+	}
+	
+	private View.OnClickListener toolsItemListener = new View.OnClickListener() {
+		@Override
+		public void onClick(View v) {		
+			shop_pager.setCurrentItem(v.getId());		
+		}
+	};	
+	/*
+     * 初始化ViewPager控件相关内容
+     */
+	private void initPager() {
+		shop_pager=(NoScrollViewPager)findViewById(R.id.goods_pager);
+		shop_pager.setNoScroll(true);
+		shop_pager.setAdapter(shopAdapter);	
+		shop_pager.setOffscreenPageLimit(1);
+		shop_pager.setOnPageChangeListener(onPageChangeListener);
+	}
+	
+	/*
+	 * 监听ViewPager选项卡变化事的事件
+	 */	
+	private OnPageChangeListener onPageChangeListener = new OnPageChangeListener() {
+		@Override
+		public void onPageSelected(int arg0) {
+			if(shop_pager.getCurrentItem() != arg0)shop_pager.setCurrentItem(arg0);
+			if(currentItem != arg0){
+				changeTextColor(arg0);
+				changeTextLocation(arg0);
+			}
+			currentItem = arg0;
+		}
+		@Override
+		public void onPageScrolled(int arg0, float arg1, int arg2) {
+		}
+		@Override
+		public void onPageScrollStateChanged(int arg0) {
+		}
+	};
+	/*
+	 * ViewPager 加载选项卡
+	 *
+	 */
+	private class ShopAdapter extends FragmentPagerAdapter {
+		public ShopAdapter(FragmentManager fm) {
+			super(fm);
+		}
+		@Override
+		public Fragment getItem(int arg0) {
+			Fragment  fragment = new StoreCategoryFragment();
+			Bundle bundle = new Bundle();		
+			bundle.putString("shoplist", (String) map.get(mCategoryList[arg0]));
+			bundle.putString("itemName",mCategoryList[arg0]);
+			fragment.setArguments(bundle);		
+			return fragment;
+		}
+		
+		@Override
+		public int getCount() {
+			return mCategoryList.length;
+		}
+	}	
+	/*
+	 * 改变textView的颜色
+	 */
+	private void changeTextColor(int id) {
+		for (int i = 0; i < toolsTextViews.length; i++) {
+			if(i!=id){
+			   toolsTextViews[i].setBackgroundResource(android.R.color.transparent);
+			   toolsTextViews[i].setTextColor(0xff000000);
+			}
+		}
+		toolsTextViews[id].setBackgroundResource(android.R.color.white);
+		toolsTextViews[id].setTextColor(0xffff5d5e);
+	}
+
+	private void changeTextLocation(int clickPosition) {
+		
+		int x = (views[clickPosition].getTop() - getScrollViewMiddle() + (getViewheight(views[clickPosition]) / 2));
+		scrollView.smoothScrollTo(0, x);
+	}
+	
+	private int getScrollViewMiddle() {
+		if (scrollViewMiddle == 0)
+			scrollViewMiddle = getScrollViewheight() / 2;
+		return scrollViewMiddle;
+	}
+	
+	private int getScrollViewheight() {
+		if (scrllViewWidth == 0)
+			scrllViewWidth = scrollView.getBottom() - scrollView.getTop();
+		return scrllViewWidth;
+	}
+		
+	private int getViewheight(View view) {
+		return view.getBottom() - view.getTop();
+	}
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(StoreCategoryActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(type == TaskType.TaskOrMethod_Shop_ListShopType){
+			if(result instanceof JSONObject){
+				if(((JSONObject)result).has("items")){
+					mItemArr = ((JSONObject)result).optJSONArray("items");
+					if(0 < mItemArr.length()){
+						mCategoryList  = new String[mItemArr.length()];
+						for(int i = 0;i < mItemArr.length();i++){
+							JSONObject object = mItemArr.optJSONObject(i);
+							mCategoryList[i] = object.optString("name");							
+							JSONArray shopList = object.optJSONArray("shopList");
+							map.put(mCategoryList[i], shopList.toString());	
+						}						
+						showToolsView();		
+						initPager();
+					}else{
+						
+					}
+				}
+			 }
+		}
+	}
+	
+}

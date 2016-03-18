@@ -1,0 +1,89 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.TaskType;
+
+public class PasswordFindActivity extends BaseActivity{
+
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		((HSESchoolApp)getApplication()).addActivity(PasswordFindActivity.this);
+		setContentView(R.layout.activity_passwordfind);
+		setTitleText(R.string.passwordfind_title);
+	}
+	
+	public void onTipBtnClick(View view){
+		switch (view.getId()) {
+		case R.id.textview_next:
+			String name = ((EditText) findViewById(R.id.editview_name)).getText().toString();
+			if(name == null || name.length() == 0 || name.replaceAll(" ", "").length() == 0){
+				Toast.makeText(PasswordFindActivity.this, getResources().getString(R.string.passwordfind_hint4), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			String card = ((EditText) findViewById(R.id.editview_card)).getText().toString();
+			if(card == null || card.length() == 0 || card.replaceAll(" ", "").length() == 0){
+				Toast.makeText(PasswordFindActivity.this, getResources().getString(R.string.passwordfind_hint5), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			showDialogCustom(DIALOG_CUSTOM);
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("name", name);
+			params.put("sfzh", card);
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserCheckName, params, PasswordFindActivity.this);
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		((HSESchoolApp)getApplication()).removeActivity(PasswordFindActivity.this);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		removeDialogCustom();
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(PasswordFindActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_UserCheckName:
+			if(result instanceof JSONObject){
+				Intent intent = new Intent(PasswordFindActivity.this, PasswordAuthCodeActivity.class);
+				intent.putExtra("data", ((JSONObject)result).toString());
+				startActivity(intent);
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

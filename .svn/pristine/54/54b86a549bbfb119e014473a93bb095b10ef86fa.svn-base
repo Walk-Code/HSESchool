@@ -1,0 +1,77 @@
+package com.zhuochuang.hsej.store;
+
+import java.text.DecimalFormat;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.layout.ListViewForScrollView;
+import com.model.ImageLoaderConfigs;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+
+public class StoreOrderDetailActivity extends BaseActivity{
+	private JSONObject mDataObj;
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		setContentView(R.layout.store_my_order_detail);
+		setTitleText(R.string.stores_my_order_detail);
+		try {
+			mDataObj = new JSONObject(getIntent().getStringExtra("OrderData"));			
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		initView();
+	}
+	private void initView() {
+		((TextView)findViewById(R.id.store_consignee)).setText(getResources().getString(R.string.goods_consignee)+
+				mDataObj.optJSONObject("orderDeliver").optString("name"));
+		((TextView)findViewById(R.id.store_consignee_phone)).setText(mDataObj.optJSONObject("orderDeliver").optString("phone"));
+		((TextView)findViewById(R.id.store_address)).setText(mDataObj.optJSONObject("orderDeliver").optString("address"));
+		ListViewForScrollView listView = (ListViewForScrollView) findViewById(R.id.order_goods_list);
+		((TextView)findViewById(R.id.store_my_order_count_sum)).setText(getResources().getString(R.string.money_sigh)+new DecimalFormat("#.00").format(mDataObj.optDouble("money")));
+		((TextView)findViewById(R.id.store_my_order_count)).setText(getResources().getString(R.string.sum_to)+mDataObj.optJSONArray("orderGoods").length()+"件");
+		((TextView)findViewById(R.id.store_my_order_sum)).setText(getResources().getString(R.string.money_sigh)+mDataObj.optString("deliverFee"));
+		if(mDataObj.optString("means").equals("0")){
+			((TextView)findViewById(R.id.store_shopping_delivery)).setText(getResources().getString(R.string.store_shopping_delivery));
+		}else{
+			((TextView)findViewById(R.id.store_shopping_delivery)).setText(getResources().getString(R.string.store_buyer_way));
+		}
+		listView.setAdapter(new ContentAdapter(){
+
+			@Override
+			public int getCount() {				
+				return mDataObj.optJSONArray("orderGoods").length() == 0 ? 0 : mDataObj.optJSONArray("orderGoods").length();
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if(null == convertView){
+					convertView = LayoutInflater.from(StoreOrderDetailActivity.this).inflate(R.layout.store_order_list_item, null);
+				}				
+				JSONObject goods = mDataObj.optJSONArray("orderGoods").optJSONObject(position);
+				ImageLoader.getInstance().displayImage(goods.optString("goodsImage"),
+						(ImageView)convertView.findViewById(R.id.store_my_order_goods_images),ImageLoaderConfigs.displayImageOptionsBg);
+				((TextView)convertView.findViewById(R.id.store_my_order_goods_name)).setText(goods.optString("goodsName"));
+				((TextView)convertView.findViewById(R.id.store_my_order_goods_price)).setText(getResources().getString(R.string.money_sigh)+new DecimalFormat("#.00").format(goods.optDouble("price")));
+				((TextView)convertView.findViewById(R.id.store_my_order_goods_sum)).setText("X"+goods.optString("number"));						
+				((TextView)convertView.findViewById(R.id.store_my_order_goods_color)).setText(getResources().getString(R.string.goods_color)+goods.optString("colour"));
+				((TextView)convertView.findViewById(R.id.store_my_order_goods_size)).setText(getResources().getString(R.string.goods_size)+goods.optString("spec"));				
+				return convertView;
+			}
+			
+		});
+		
+	}
+}

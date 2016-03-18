@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_white_gray_selector"
+     >
+    
+    <RelativeLayout 
+        android:id="@+id/head_firend"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        >
+        <ImageView
+            android:id="@+id/chat_firend_head_image"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_margin="7dp"
+            android:layout_centerInParent="true"
+            android:scaleType="centerCrop"
+            />
+        
+        <TextView 
+            android:id="@+id/chat_msg_num"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:text="@string/chat_num_text"
+            android:textColor="#ffffff"
+            android:textSize="11dp"
+			android:gravity="center"
+            android:background="@drawable/bg_chat_msg_num"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="7dp"
+            android:layout_marginRight="7dp"
+            android:visibility="gone"
+            />
+    </RelativeLayout>
+    
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:orientation="vertical"
+        android:layout_toRightOf="@+id/head_firend"
+        android:layout_marginLeft="5dp"
+        >
+        
+        <RelativeLayout 
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="11dp"
+            >
+            <TextView
+                android:id="@+id/chat_name_firend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18dp"
+                android:textColor="#2f2f2f"
+                android:layout_centerVertical="true"
+                android:clickable="true"
+                />
+            
+            <TextView
+                android:id="@+id/chat_time_firend"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="15dp"
+                android:textColor="#8e8e8e"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="13dp"
+                />
+        </RelativeLayout>
+        
+        <!-- <TextView 
+            android:id="@+id/chat_msg_firend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:layout_marginTop="4dp"
+            android:textColor="#838383"
+            /> -->
+        <com.layout.emoji.EmojiTextView
+         	android:id="@+id/chat_msg_firend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15dp"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:layout_marginTop="4dp"
+            android:textColor="#838383"/>
+    </LinearLayout>
+
+    <View 
+        android:layout_width="match_parent"
+        android:layout_height="0.3dp"
+        android:background="#D2D2D2"
+        android:layout_below="@+id/head_firend"
+        />
+</RelativeLayout>

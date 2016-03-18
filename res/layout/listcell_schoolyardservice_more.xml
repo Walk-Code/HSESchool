@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:background="@drawable/bg_white_gray_selector">
+    
+    <View
+        android:id="@+id/ico"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginRight="10dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:visibility="gone"
+        android:background="@drawable/list_option_no"/>
+
+    <ImageView
+	    android:id="@+id/imageview"
+	    android:layout_width="45dp"
+   		android:layout_height="45dp"
+   		android:layout_marginLeft="10dp"
+   		android:layout_marginRight="10dp"
+    	android:scaleType="centerCrop"
+    	android:layout_centerVertical="true"
+    	android:layout_alignParentLeft="true"
+    	android:contentDescription="@string/app_name"/>
+    
+    <LinearLayout
+        android:layout_toRightOf="@id/imageview"
+        android:layout_toLeftOf="@id/ico"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_centerVertical="true"
+	    android:orientation="vertical" >
+	    
+        <TextView 
+	   	    android:id="@+id/textview_title"
+	   	    android:layout_width="match_parent"
+	   		android:layout_height="wrap_content" 
+	   		android:textSize="17dp"
+	   		android:textColor="#717171"
+	   		android:singleLine="true"
+	   		android:ellipsize="end"
+	   		android:gravity="left|center_vertical"/>
+        <TextView 
+	   	    android:id="@+id/textview_desc"
+	   	    android:layout_width="match_parent"
+	   		android:layout_height="wrap_content" 
+	   		android:layout_marginTop="5dp"
+	   		android:textSize="14dp"
+	   		android:textColor="#aeaeae"
+	   		android:singleLine="true"
+	   		android:ellipsize="end"
+	   		android:gravity="left|center_vertical"/>
+	</LinearLayout>
+	
+    <View 
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_alignParentBottom="true"
+        android:background="#bfbfbf"/>
+</RelativeLayout>

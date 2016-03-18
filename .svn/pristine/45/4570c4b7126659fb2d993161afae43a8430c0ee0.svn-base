@@ -1,0 +1,500 @@
+package com.zhuochuang.hsej.store;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CheckBox;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.util.Utils;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.MainActivity;
+import com.zhuochuang.hsej.R;
+/*
+ * TODO删除功能存在BUG JSON数据解析出现问题  2015-11-30
+ */
+@SuppressLint("ResourceAsColor")
+public class StoreShoppingCarActivity extends BaseActivity  {
+	private ShoppingCarAdapter mAdapter; 
+	private ListView mListView;
+	private TextView mTotalPrice;
+	private TextView mGoodCount;
+	private boolean lock_edit = true;
+	private int index;
+	private JSONArray mItemsArr;
+	private PopupWindow popWindow;
+	private JSONObject mGoodsMessage;
+	private Map<String,Object> mStoreGoods;
+	private Boolean mLock;
+	private List<Map<String,Object>> mDatasCar;
+	private int mCheckNum;
+	private double mGoodsSum;
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		mMainLayout.removeAllViews();
+		setContentView(R.layout.store_shopping_car);
+		initView();
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ShoppingCarListShoppingCar,null, this);
+	}
+	
+	private void initView() {		
+		mListView = (ListView) findViewById(R.id.shopping_list);
+		mTotalPrice = (TextView) findViewById(R.id.total_price);		
+		mDatasCar = new ArrayList<Map<String,Object>>();
+		mGoodCount = (TextView)findViewById(R.id.but_pay);
+		mGoodCount.setText(getResources().getString(R.string.goods_pay));		
+		findViewById(R.id.but_pay).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {			
+				Iterator<Map<String, Object>> iterator = mDatasCar.iterator();
+				JSONArray arr = new JSONArray();
+				while (iterator.hasNext()) {
+                    Map<String, Object> temp = iterator.next();
+                    JSONObject storeMess = new JSONObject();
+                    JSONObject goodsMess = new JSONObject();
+                    if (temp.get("flag").equals("true")) {
+                    	try {
+                    		storeMess.put("shopId", temp.get("shopId"));
+                    		storeMess.put("shopName", temp.get("shopName"));
+                    		storeMess.put("deliverFee", temp.get("deliverFee"));
+                    		storeMess.put("deliverFee", temp.get("deliverFee"));
+                    		storeMess.put("goodsId", temp.get("goodsId"));
+                    		storeMess.put("image", temp.get("image"));
+                    		storeMess.put("goodsName", temp.get("goodsName"));
+                    		storeMess.put("colour", temp.get("colour"));
+                    		storeMess.put("spec", temp.get("spec"));
+                    		storeMess.put("price", temp.get("price"));
+                    		storeMess.put("number", temp.get("number"));
+                    		storeMess.put("shoppingCarId", temp.get("shoppingCarId"));
+                    		arr.put(storeMess);
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}		
+                   	
+                    }
+                
+                }
+				if(0 < arr.length()){
+					Intent intent = new Intent(StoreShoppingCarActivity.this,StoreCheckOrderActivity.class);
+					intent.putExtra("ShoppingCar", arr.toString());
+					intent.putExtra("money", mGoodsSum+"");			
+					startActivity(intent);
+				}
+			
+			}
+		});
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+					Toast.makeText(StoreShoppingCarActivity.this, "当前位置：" + position,Toast.LENGTH_SHORT);			
+					CheckBox productCheck = (CheckBox) view.findViewById(R.id.product_check);
+					CheckBox storeCheck = (CheckBox) view.findViewById(R.id.store_title);
+					productCheck.toggle();
+					storeCheck.toggle();
+					if (productCheck.isChecked() && storeCheck.isChecked()) {
+	                    mDatasCar.get(position).put("flag", "true");
+	                    mCheckNum++;
+	                } else {
+	                	mDatasCar.get(position).put("flag", "false");
+	                	mCheckNum--;
+	                }
+					mAdapter.notifyDataSetChanged();
+					if(mCheckNum == mDatasCar.size()){
+						((CheckBox)findViewById(R.id.select_all)).setChecked(true);
+					}else{
+						((CheckBox)findViewById(R.id.select_all)).setChecked(false);
+					}
+			}
+		});
+		findViewById(R.id.store_shopping_edit).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(lock_edit){
+					((TextView)findViewById(R.id.store_shopping_edit)).setText("完成");
+					((TextView)findViewById(R.id.store_shopping_edit)).setTextColor(Color.RED);
+					findViewById(R.id.store_count).setVisibility(View.GONE);
+					findViewById(R.id.but_pay).setVisibility(View.GONE);
+					findViewById(R.id.store_shopping_collection).setVisibility(View.VISIBLE);
+					findViewById(R.id.store_shopping_delete).setVisibility(View.VISIBLE);			
+					lock_edit = false;
+				}else{
+					((TextView)findViewById(R.id.store_shopping_edit)).setText("编辑");
+					((TextView)findViewById(R.id.store_shopping_edit)).setTextColor(Color.BLACK);
+					findViewById(R.id.store_count).setVisibility(View.VISIBLE);
+					findViewById(R.id.but_pay).setVisibility(View.VISIBLE);
+					findViewById(R.id.store_shopping_collection).setVisibility(View.GONE);
+					findViewById(R.id.store_shopping_delete).setVisibility(View.GONE);
+					lock_edit = true;				
+				}		
+				
+			}
+		});		
+		findViewById(R.id.shopping_car_left_back).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				finish();
+				
+			}
+		});
+		findViewById(R.id.store_shopping_delete).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {							
+				Iterator<Map<String, Object>> iterator = mDatasCar.iterator();
+				int  [] id = new int[mDatasCar.size()];
+				int i = 0;
+                while (iterator.hasNext()) {
+                    Map<String, Object> temp = iterator.next();
+                    if (temp.get("flag").equals("true")) {
+                    	id [i] = (int) temp.get("shoppingCarId");
+                    
+                        iterator.remove();
+                    }             
+                    i++;                                  
+                    if(mDatasCar.size() == 0){
+    					new AlertDialog.Builder(StoreShoppingCarActivity.this).setCancelable(false)
+    					.setMessage(StoreShoppingCarActivity.this.getResources().getString(R.string.store_shopping_car_null))
+    					.setPositiveButton(StoreShoppingCarActivity.this.getResources()
+    							.getString(R.string.store_shopping_car_go),new DialogInterface.OnClickListener() {
+    						@Override
+    						public void onClick(DialogInterface dialog,int which) {
+    							Intent intent = new Intent(StoreShoppingCarActivity.this,MainActivity.class);
+    							intent.putExtra("StorePayFinishActivity", 1);
+    							StoreShoppingCarActivity.this.startActivity(intent);
+    							((Activity) StoreShoppingCarActivity.this).overridePendingTransition(R.anim.push_bottom_in,R.anim.push_bottom_out);
+    						}
+    					}).setNegativeButton(StoreShoppingCarActivity.this.getResources().getString(R.string.store_shopping_car_cancle),null).show();
+    				} 
+                                                          
+                }
+            	DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ShoppingCarDelShoppingCar
+            			, DataLoader.getInstance().setDelShoppingCarTypeParams(Arrays.toString(id).replace("[", "").replace("]", "")), StoreShoppingCarActivity.this);
+                mCheckNum = 0;
+                mAdapter.notifyDataSetChanged();
+            }
+		
+		});
+		
+		findViewById(R.id.store_shopping_collection).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				showDialog(getResources().getString(R.string.collect_success));
+			}
+		});
+		((CheckBox)findViewById(R.id.select_all)).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+			 	boolean isCheck = ((CheckBox)findViewById(R.id.select_all)).isChecked();
+				if(0 < mDatasCar.size() && ((CheckBox)findViewById(R.id.select_all)).isChecked()){
+					for(int i = 0;i <  mDatasCar.size();i++){
+						mDatasCar.get(i).put("flag", "true");
+					}
+				}else{
+					for(int i = 0;i <  mDatasCar.size();i++){
+						mDatasCar.get(i).put("flag", "false");
+					}
+				}
+				if(mAdapter != null){
+					mAdapter.notifyDataSetChanged();
+					sumInCar(mDatasCar,isCheck);
+				}
+			}
+			
+		});
+	}
+	
+	//计算所有购物车中商品的价格
+	public void sumInCar(List<Map<String, Object>> datas ,boolean isChecked){	
+		double sum = 0;
+		if(isChecked){
+			for(int i =0;i < datas.size(); i++){
+					double price = (double)datas.get(i).get("price") * (int)datas.get(i).get("number");
+					sum += price;
+			  }
+		}
+		mTotalPrice.setText(sum + "");
+	}
+	
+
+	/*@Override
+	public void onClick(View v) {
+		Object tag = v.getTag();	
+		switch (v.getId()) {
+		case R.id.product_add:
+			if (tag != null && tag instanceof Integer) {
+			    int  positions = (Integer) tag;			    
+				int num = datas.get(positions).getNum();
+				num++;				
+				datas.get(positions).setNum(num);	
+				adapter.notifyDataSetChanged();
+			}
+			break;
+		case R.id.product_remove:
+			if (tag != null && tag instanceof Integer) {
+				int   positions = (Integer) tag;
+				// 更改集合的数据
+				int num = datas.get(positions).getNum();
+				if (num > 0) {
+					num--;
+					datas.get(positions).setNum(num); // 修改集合中商品数量
+					adapter.notifyDataSetChanged();
+				}
+			}
+			break;		
+		case R.id.pay_finish:
+			mShoppingCar = new ShoppingCar();
+			if(datas.size() > 0){
+			for(int i = 0;i < datas.size();i++){
+				if(adapter.mSelectedMap.get(i)){
+					 mShoppingCar.addGoods(datas.get(i));	
+				}
+			}	
+			if(mShoppingCar.goodList.size() > 0){
+				Intent intent = new Intent(StoreShoppingCarActivity.this,StoreCheckOrderActivity.class);
+				intent.putExtra("ShoppingCar", mShoppingCar);
+				intent.putExtra("money", sum+"");			
+				startActivity(intent);
+			}else{
+				Toast.makeText(StoreShoppingCarActivity.this,getResources().getString(R.string.choose_your_items),Toast.LENGTH_SHORT).show();
+			}
+		}else{
+			Toast.makeText(StoreShoppingCarActivity.this,getResources().getString(R.string.shopping_cart_is_empty),Toast.LENGTH_SHORT).show();
+	}
+			break;
+		case R.id.store_shopping_edit:
+			if(lock_edit){
+				((TextView)findViewById(R.id.store_shopping_edit)).setText("完成");
+				((TextView)findViewById(R.id.store_shopping_edit)).setTextColor(Color.RED);
+				findViewById(R.id.store_count).setVisibility(View.GONE);
+				findViewById(R.id.pay_finish).setVisibility(View.GONE);
+				findViewById(R.id.store_shopping_collection).setVisibility(View.VISIBLE);
+				findViewById(R.id.store_shopping_delete).setVisibility(View.VISIBLE);			
+				lock_edit = false;
+			}else{
+				((TextView)findViewById(R.id.store_shopping_edit)).setText("编辑");
+				((TextView)findViewById(R.id.store_shopping_edit)).setTextColor(Color.BLACK);
+				findViewById(R.id.store_count).setVisibility(View.VISIBLE);
+				findViewById(R.id.pay_finish).setVisibility(View.VISIBLE);
+				findViewById(R.id.store_shopping_collection).setVisibility(View.GONE);
+				findViewById(R.id.store_shopping_delete).setVisibility(View.GONE);
+				lock_edit = true;				
+			}			
+			break;
+			//删除
+		case R.id.store_shopping_delete:
+			isClick = true;
+			if(adapter.mSelectedMap.size() == 0 && datas.size() == 0){
+				new AlertDialog.Builder(StoreShoppingCarActivity.this).setCancelable(false)
+				.setMessage(StoreShoppingCarActivity.this.getResources().getString(R.string.store_shopping_car_null))
+				.setPositiveButton(StoreShoppingCarActivity.this.getResources()
+						.getString(R.string.store_shopping_car_go),new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(
+							DialogInterface dialog,int which) {
+						Intent intent = new Intent(StoreShoppingCarActivity.this,MainActivity.class);
+						intent.putExtra("StorePayFinishActivity", 1);
+						StoreShoppingCarActivity.this.startActivity(intent);
+						((Activity) StoreShoppingCarActivity.this).overridePendingTransition(R.anim.push_bottom_in,R.anim.push_bottom_out);
+					}
+				}).setNegativeButton(StoreShoppingCarActivity.this.getResources().getString(R.string.store_shopping_car_cancle),null).show();	
+				return;
+			}
+			String [] goodsId = new String [datas.size()];
+			if(datas.size() > 0){
+				for(int i = 0;i < datas.size();i++){				
+					if(adapter.mSelectedMap.get(i)){
+						goodsId [i] = datas.get(i).getId();					
+					}
+				}	
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ShoppingCarDelShoppingCar, 
+						DataLoader.getInstance().setDelShoppingCarTypeParams(goodsId), StoreShoppingCarActivity.this);
+			}
+			if(adapter.mSelectedMap.get(index) != null){	
+				if(datas.size() > 0 && adapter.mSelectedMap.size() > 0 && adapter.mSelectedMap.get(index)){				
+					adapter.mSelectedMap.remove(index);	
+					datas.remove(index);
+					adapter.notifyDataSetChanged();
+					}
+					((TextView)findViewById(R.id.pay_finish)).setText("结算("+datas.size()+")");
+					adapter.notifyDataSetChanged();
+				}			
+			if(((CheckBox)findViewById(R.id.select_all)).isChecked()){
+				adapter.mSelectedMap.clear();
+				datas.clear();
+				adapter.notifyDataSetChanged();
+			}
+			break;
+		case R.id.shopping_car_left_back:
+			StoreShoppingCarActivity.this.finish();
+			break;
+		case R.id.store_shopping_collection:
+			
+			showDialog(getResources().getString(R.string.collect_success));
+			
+			break;
+		}
+	}*/
+		
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if(mAdapter != null)
+			mAdapter.unregisterDataSetObserver(dataSetObserver);
+	}
+	//创建观察者
+	private DataSetObserver dataSetObserver = new DataSetObserver() {
+		@Override
+		public void onChanged() {
+			super.onChanged();
+		    mGoodsSum = 0;
+			int count = 0;
+			for(int i = 0;i < mDatasCar.size() ; i++){
+				double price = (double)mDatasCar.get(i).get("price") * (int)mDatasCar.get(i).get("number") ;
+				mGoodsSum += price;
+				count++;
+				
+			}
+			  mTotalPrice.setText(getResources().getString(R.string.money_sigh)+mGoodsSum);
+			  if(mCheckNum == 0){
+				  mGoodCount.setText(getResources().getString(R.string.pay));  
+			  }else{
+				  mGoodCount.setText("结算("+count+")");
+		      }
+			
+		}
+		@Override
+		public void onInvalidated() {
+			super.onInvalidated();
+		}
+		
+	};
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		if(result == null){
+			return;
+		}
+		if(result instanceof Error){
+			Toast.makeText(StoreShoppingCarActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_ShoppingCarListShoppingCar:
+			if(((JSONObject)result).has("items")){
+				mItemsArr = ((JSONObject)result).optJSONArray("items");
+				if(mItemsArr != null && mItemsArr.length() > 0){				
+					for(int i = 0;i < mItemsArr.length(); i++){										
+						JSONArray arr = mItemsArr.optJSONObject(i).optJSONArray("goods");
+						for(int j = 0; j < arr.length(); j++){
+						    mGoodsMessage = arr.optJSONObject(j);
+						    mStoreGoods = new HashMap<String, Object>();
+						    mStoreGoods.put("goodsName",mGoodsMessage.optString("goodsName"));
+						    mStoreGoods.put("goodsId",mGoodsMessage.optLong("goodsId")+"");						
+						    mStoreGoods.put("image",mGoodsMessage.optString("image"));
+						    mStoreGoods.put("colour",mGoodsMessage.optString("colour"));
+						    mStoreGoods.put("spec",mGoodsMessage.optString("spec"));
+						    mStoreGoods.put("price",mGoodsMessage.optDouble("price"));
+						    mStoreGoods.put("number",mGoodsMessage.optInt("number"));
+						    mStoreGoods.put("shoppingCarId",mGoodsMessage.optInt("shoppingCarId"));					
+						    mStoreGoods.put("shopName",mItemsArr.optJSONObject(i).optString("shopName"));
+						    mStoreGoods.put("shopId",mItemsArr.optJSONObject(i).optString("shopId")+"");
+						    mStoreGoods.put("flag", "false");
+						    mDatasCar.add(mStoreGoods);
+					   }
+					}					
+					mAdapter = new ShoppingCarAdapter(mDatasCar, StoreShoppingCarActivity.this);
+					mAdapter.registerDataSetObserver(dataSetObserver);//注册观察者
+					mListView.setAdapter(mAdapter);
+					mAdapter.setOnAddNum(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							int position = (int) v.getTag(); 
+							int num = (int) mDatasCar.get(position).get("number");
+							num++;				
+							mDatasCar.get(position).put("number", num);	
+							mAdapter.notifyDataSetChanged();
+						} 
+					});
+					mAdapter.setOnCutNum(new OnClickListener() {
+						
+						@Override
+						public void onClick(View v) {
+							int position = (int) v.getTag(); 
+							int num = (int) mDatasCar.get(position).get("number");
+							num--;				
+							mDatasCar.get(position).put("number", num);	
+							mAdapter.notifyDataSetChanged();
+							
+						}
+					});					
+			}
+				String size = "";
+				if(0 < mDatasCar.size()){
+					size = "("+mDatasCar.size()+")";			
+				}
+				((TextView)findViewById(R.id.shopping_car)).setText(getResources().getString(R.string.store_shopping_car)+size);
+		}
+			
+			break;
+		case TaskOrMethod_ShoppingCarDelShoppingCar:
+			if(((JSONObject)result).has("result")){
+				if("1".equals(((JSONObject)result).opt("result"))){
+					showDialog(getResources().getString(R.string.delete_success));
+				}
+			}
+			break;	
+		default:
+			break;
+		}
+	}
+	private void showDialog(String content){
+        View view = ((LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.store_car_hint, null);
+        view.findViewById(R.id.store_car_hints).getBackground().setAlpha(200);
+        ((TextView) view.findViewById(R.id.store_car_hint)).setText(content);
+        popWindow = new PopupWindow(view, Utils.getScreenWidth(this)/3*2, Utils.getScreenHeight(this)/5, true);  
+        popWindow.setBackgroundDrawable(new BitmapDrawable());
+        popWindow.setOutsideTouchable(true);
+        popWindow.showAtLocation(view.findViewById(R.id.store_car_hints),Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL, 0, 0);
+	}	
+}

@@ -1,0 +1,136 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFF"
+        android:orientation="vertical" >
+
+        <EditText
+            android:id="@+id/goods_name"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/bg_activity_goods_release_title"
+            android:ems="10"
+            android:hint="@string/activitygoodsrelease_edittext_price"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:singleLine="true"
+            android:textSize="16sp" />
+
+        <com.util.StaticGridView
+            android:id="@+id/public_gridView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:horizontalSpacing="10dp"
+            android:numColumns="4"
+            android:scrollbars="none"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10dp" />
+
+        <LinearLayout
+            android:id="@+id/goods_release_style_price"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginTop="15dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:visibility="visible" >
+
+            <Spinner
+                android:id="@+id/goods_spinner_mode"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginRight="4dp"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:background="@drawable/bg_activity_goods_release_title"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp" />
+
+            <EditText
+                android:id="@+id/goods_price"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_activity_goods_release_title"
+                android:ems="10"
+                android:hint="@string/goods_price"
+                android:numeric="decimal"
+                android:paddingLeft="10dp"
+                android:singleLine="true"
+                android:paddingRight="10dp"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+        <EditText
+            android:id="@+id/goods_detailed"
+            android:layout_width="match_parent"
+            android:layout_height="178dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_activity_goods_release_title"
+            android:ems="10"
+            android:gravity="top|left"
+            android:hint="@string/activitygoodsrelease_edittext_content"
+            android:padding="10dp"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/goods_contact"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:singleLine="true"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_activity_goods_release_title"
+            android:ems="10"
+            android:hint="@string/text_qsrlxr"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/goods_contact_phone"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="12dp"
+            android:singleLine="true"
+            android:background="@drawable/bg_activity_goods_release_title"
+            android:ems="10"
+            android:hint="@string/text_qsrlxfs"
+            android:inputType="phone"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/goods_btn_release"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/btn_red_button_selector"
+            android:onClick="onPublishClick"
+            android:text="@string/activitysecendhand_lost_title_right"
+            android:textColor="#FFF" />
+    </LinearLayout>
+
+</ScrollView>

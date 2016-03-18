@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:visibility="gone">
+    <FrameLayout
+        android:id="@+id/header_banner"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:visibility="gone">
+	    <com.util.AutoGallery
+			android:id="@+id/gallery_banner"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:spacing="4dp"/>
+	    <RelativeLayout
+		    android:layout_width="match_parent"
+		    android:layout_height="35dp"
+		    android:background="#b0000000"
+		    android:layout_gravity="bottom">
+	        <com.util.PageGuide
+		        android:id="@+id/pageguide"
+		        android:layout_width="wrap_content"
+		    	android:layout_height="wrap_content"
+		    	android:layout_marginRight="10dp"
+		    	android:layout_centerVertical="true"
+		    	android:layout_alignParentRight="true"/>
+	        <TextView
+	            android:id="@+id/text"
+	            android:layout_toLeftOf="@id/pageguide"
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:gravity="left|center_vertical"
+	            android:singleLine="true"
+	            android:ellipsize="end"
+	            android:paddingLeft="15dp"
+	            android:paddingRight="5dp"
+	            android:textColor="#ffffff"
+	            android:textSize="16dp"/>
+	    </RelativeLayout>
+	</FrameLayout>
+	
+    <com.util.StaticGridView
+        android:id="@+id/gridView"
+        android:layout_width="match_parent"  
+        android:layout_height="match_parent"
+        android:columnWidth="0dp"
+        android:numColumns="4"
+        android:scrollbars="none"
+        android:stretchMode="columnWidth"
+        android:gravity="center"/>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#d1d1ce"/>
+    
+    <com.util.AutoGallery
+		android:id="@+id/gallery_bulltin"
+		android:layout_width="match_parent"
+		android:layout_height="35dp"
+		android:spacing="4dp"/>
+    
+    <View
+        android:id="@+id/lines"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#d1d1ce"/>
+    
+    <View
+	    android:layout_width="match_parent"
+		android:layout_height="7dp"
+		android:background="#f0f0f0"/>
+</LinearLayout>

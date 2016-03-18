@@ -1,0 +1,41 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <LinearLayout
+            android:id="@+id/common_service_content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp" >
+            <TextView
+                android:id="@+id/common_service_tv_content"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#525252"
+                android:text="内容区域" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom" >
+
+        <Button
+            android:id="@+id/common_service_btn_join"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/btn_red_button_selector"
+            android:text="我要参加"
+            android:textColor="#FFF"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</FrameLayout>

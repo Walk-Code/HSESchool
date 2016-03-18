@@ -1,0 +1,78 @@
+package com.zhuochuang.hsej;
+
+import com.model.DataLoader;
+import com.model.SharedPreferenceHandler;
+import com.util.Utils;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+
+public class PublishProtocolActivity extends Activity{
+
+	WebView mWebView;
+	
+	boolean mIsCheck = false;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_publish_protocol);
+		findViewById(R.id.textview_continue).setEnabled(false);
+		
+		mWebView = (WebView) findViewById(R.id.webview);
+		WebSettings webSettings = mWebView.getSettings();
+		webSettings.setUseWideViewPort(false);
+		webSettings.setSupportZoom(false);
+		webSettings.setBuiltInZoomControls(false);
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setLoadWithOverviewMode(true);
+	    try {
+	        if(Utils.getAndroidSDKVersion() >= 11){
+	        	mWebView.setLayerType(View.LAYER_TYPE_SOFTWARE,null);
+	        }
+	    } 
+	    catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    mWebView.loadUrl("file:///android_asset/protocol.html");
+	}
+
+	public void onKeyClick(View view){
+		switch (view.getId()) {
+		case R.id.group_left:
+			finish();
+			break;
+
+		case R.id.group_check:
+			mIsCheck = !mIsCheck;
+			setBottomView();
+			break;
+			
+		case R.id.textview_continue:
+			SharedPreferenceHandler.savePublishProtocol(PublishProtocolActivity.this, DataLoader.getInstance().getUsetInfoKey("id"));
+			setResult(Activity.RESULT_OK);
+			PublishProtocolActivity.this.finish();
+			break;
+		default:
+			break;
+		}
+	}
+	
+	private void setBottomView(){
+		if(mIsCheck){
+			findViewById(R.id.view_check).setBackgroundResource(R.drawable.checktrue);
+			findViewById(R.id.textview_continue).setBackgroundResource(R.drawable.btn_red_button_selector);
+			findViewById(R.id.textview_continue).setEnabled(true);
+		}
+		else{
+			findViewById(R.id.view_check).setBackgroundResource(R.drawable.checkflase);
+			findViewById(R.id.textview_continue).setBackgroundResource(R.drawable.bg_publish_protocol_continue_false);
+			findViewById(R.id.textview_continue).setEnabled(false);
+		}
+	}
+}

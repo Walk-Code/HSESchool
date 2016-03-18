@@ -1,0 +1,272 @@
+package com.zhuochuang.hsej;
+
+import java.util.ArrayList;
+
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.res.TypedArray;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.view.KeyEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.model.DataLoader;
+import com.model.DefineHandler;
+import com.model.EventManager;
+import com.model.SharedPreferenceHandler;
+import com.umeng.message.PushAgent;
+import com.umeng.message.UmengRegistrar;
+import com.util.TabBarView;
+import com.util.TabBarView.OnItemSelectedListeners;
+import com.util.TabBarView.TabBarAdapter;
+import com.zhuochuang.hsej.store.SchoolifeFragment;
+
+@SuppressLint("Recycle")
+@SuppressWarnings("deprecation")
+public class MainActivity extends FragmentActivity{
+
+	private TabBarView mTabBarView;
+	private String[] mTabNames;
+	private TypedArray mTabRes, mTabResSelected;
+	
+	private FragmentTransaction mFragmentTransaction;
+	private FragmentManager mFragmentManager;
+	private Fragment[] mFragment;
+	public Fragment mCurrentFragment;
+	private ArrayList<Integer> mIdList = new ArrayList<Integer>();
+	private Handler mHandler;
+	
+	@SuppressLint("HandlerLeak")
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+		
+		PushAgent.getInstance(this).enable();
+		PushAgent.getInstance(this).onAppStart();
+		
+		String device_token = null;
+		try {
+			device_token = SharedPreferenceHandler.getUmengRegistrar(this);
+			if(device_token == null || device_token.length() == 0){
+				device_token = UmengRegistrar.getRegistrationId(this);
+				SharedPreferenceHandler.saveUmengRegistrar(this, device_token);
+				System.out.println("===9900===" + device_token);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		mTabNames = getResources().getStringArray(R.array.channel_name);
+		mTabRes = getResources().obtainTypedArray(R.array.channel_icon_n);
+		mTabResSelected = getResources().obtainTypedArray(R.array.channel_icon_p);
+		
+		mFragmentManager = getSupportFragmentManager();
+		mFragment = new Fragment[mTabNames.length];
+		if(mTabNames.length == 4){
+			mFragment[0] = new MySchoolyardFragment();
+			mFragment[1] = new SchoolyardServiceFragment();
+			mFragment[2] = new MyClassmateFragment();
+			mFragment[3] = new MyCenterFragment();
+		}
+		else{
+			mFragment = new Fragment[mTabNames.length];
+			mFragment[0] = new MySchoolyardFragment();
+			mFragment[1] = new SchoolifeFragment();
+			mFragment[2] = new SchoolyardServiceFragment();
+			mFragment[3] = new MyClassmateFragment();
+			mFragment[4] = new MyCenterFragment();
+		}
+		
+		initTabBarView();
+		if(getIntent().getIntExtra("StorePayFinishActivity", 0) != 0){
+			mTabBarView.selectItem(getIntent().getIntExtra("StorePayFinishActivity", 0));
+		}
+		EventManager.getInstance().setHandlerListenner(mHandler = new Handler(){
+
+			@Override
+			public void handleMessage(Message msg) {
+				// TODO Auto-generated method stub
+				super.handleMessage(msg);
+				switch (msg.what) {
+				case EventManager.EventType_MsgChange:
+					if(mTabBarView != null){
+						mTabBarView.notifyChange();
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+		});
+		
+		if(((HSESchoolApp)getApplication()).isLoginFailed){
+			((HSESchoolApp)getApplication()).isLoginFailed = false;
+			try {
+				SharedPreferenceHandler.removeAllSharedPreference(MainActivity.this);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			new AlertDialog.Builder(MainActivity.this) 
+			.setCancelable(false)
+		 	.setMessage(getResources().getString(R.string.login_fail))
+		 	.setPositiveButton(getResources().getString(R.string.confirm), new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					startActivity(new Intent(MainActivity.this, LoginActivity.class));
+					overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+				}
+			})
+		 	.setNegativeButton(getResources().getString(R.string.cancel), null)
+		 	.show();
+		}
+	}
+
+	private void initTabBarView(){
+		mTabBarView = (TabBarView) findViewById(R.id.layout_tabbar);
+		mTabBarView.setAdapter(new TabBarAdapter() {
+			
+			@Override
+			public View getSeletedView(int position, View convertView) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(MainActivity.this, R.layout.channel_item, null);
+				}
+				convertView.findViewById(R.id.view_tab).setBackgroundDrawable(mTabResSelected.getDrawable(position));
+				((TextView)convertView.findViewById(R.id.textview_tab)).setText(mTabNames[position]);
+				((TextView)convertView.findViewById(R.id.textview_tab)).setTextColor(Color.argb(255, 222, 80, 79));
+				if(position == getCount() - 1){
+					if(DefineHandler.getAllUnreadCount(MainActivity.this) != 0 && DataLoader.getInstance().isLogin()){
+						convertView.findViewById(R.id.icon_unread).setVisibility(View.VISIBLE);
+					}
+					else{
+						convertView.findViewById(R.id.icon_unread).setVisibility(View.GONE);
+					}
+				}
+				else{
+					convertView.findViewById(R.id.icon_unread).setVisibility(View.GONE);
+				}
+				return convertView;
+			}
+			
+			@Override
+			public View getNOSeletedView(int position, View convertView) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(MainActivity.this, R.layout.channel_item, null);
+				}
+				convertView.findViewById(R.id.view_tab).setBackgroundDrawable(mTabRes.getDrawable(position));
+				((TextView)convertView.findViewById(R.id.textview_tab)).setText(mTabNames[position]);
+				((TextView)convertView.findViewById(R.id.textview_tab)).setTextColor(Color.argb(255, 133, 133, 133));
+				if(position == getCount() - 1){
+					if(DefineHandler.getAllUnreadCount(MainActivity.this) != 0 && DataLoader.getInstance().isLogin()){
+						convertView.findViewById(R.id.icon_unread).setVisibility(View.VISIBLE);
+					}
+					else{
+						convertView.findViewById(R.id.icon_unread).setVisibility(View.GONE);
+					}
+				}
+				else{
+					convertView.findViewById(R.id.icon_unread).setVisibility(View.GONE);
+				}
+				return convertView;
+			}
+			
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				return mTabNames.length;
+			}
+		});
+		
+		mTabBarView.setOnItemSelectedListener(new OnItemSelectedListeners() {
+			@Override
+			public void onItemSelected(int position) {
+				// TODO Auto-generated method stub
+				mCurrentFragment = mFragment[position];
+				mFragmentTransaction = mFragmentManager.beginTransaction();
+
+				mFragmentTransaction.replace(R.id.layout_content, mFragment[position]);
+				if(!mIdList.contains(position)){
+					mIdList.add(position);
+					mFragmentTransaction.addToBackStack(null);
+				}
+				mFragmentTransaction.commitAllowingStateLoss();
+			}
+		});
+		
+		mTabBarView.selectItem(0);
+	}
+	
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		// TODO Auto-generated method stub
+		if(event.getKeyCode() == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
+        	showExitAlertDialog();
+            return true;
+        }
+		return super.dispatchKeyEvent(event);
+	}
+	
+	protected void showExitAlertDialog(){
+		new AlertDialog.Builder(MainActivity.this)
+        .setTitle(R.string.confirm_exit)
+        .setMessage(R.string.confirm_or_not)
+        .setNegativeButton(R.string.cancel, null)
+        .setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+            	try {
+					SharedPreferenceHandler.savePushMsg(MainActivity.this, null);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            	finish();
+            	System.exit(0);
+            }
+        }).show();
+	}
+
+	public void onMycenterClick(View v){
+		if(mTabNames.length == 4){
+			if(mFragment[3] != null){
+				((MyCenterFragment)mFragment[3]).onMycenterClick(v);
+			}
+		}
+		else{
+			if(mFragment[4] != null){
+				((MyCenterFragment)mFragment[4]).onMycenterClick(v);
+			}
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		EventManager.getInstance().removeHandlerListenner(mHandler);
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		//DataLoader.getInstance().isAppRunning = true;
+		DataLoader.getInstance().pushApplication(MainActivity.this);
+	}
+}

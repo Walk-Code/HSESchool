@@ -1,0 +1,30 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <WebView
+        android:id="@+id/webview_comm_server"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="#FFFFFF" >
+
+        <Button
+            android:id="@+id/common_service_btn_join"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/btn_red_button_selector"
+            android:text="@string/text_join"
+            android:textColor="#FFF"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</LinearLayout>

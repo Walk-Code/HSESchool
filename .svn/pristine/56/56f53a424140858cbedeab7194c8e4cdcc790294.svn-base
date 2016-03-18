@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+          xmlns:android="http://schemas.android.com/apk/res/android"
+   	      android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:orientation="vertical"
+          android:background="#FFFFFF" >
+      
+	<LinearLayout 
+	      	 android:layout_width="match_parent"
+	     	 android:layout_height="50dp"
+	     	 android:orientation="horizontal"
+	     	 android:background="#DD514F"
+	     	 android:id="@+id/store_search_title"  >
+	  <LinearLayout 
+	     	 android:layout_width="0dp"
+	    	 android:layout_height="match_parent"
+	      	 android:layout_weight="9"
+	         android:background="@drawable/shape_store_search_bg"
+	         android:layout_gravity="center_vertical"
+	         android:layout_margin="8dp"
+	         android:orientation="horizontal">
+
+	      <TextView
+	          android:layout_width="wrap_content"
+	          android:layout_height="wrap_content"
+	          android:layout_gravity="center_vertical"
+	          android:layout_margin="4dp"
+	          android:drawableRight="@drawable/search_pulldown_arrow"
+	          android:text="@string/goods_product"
+	          android:textColor="#808080"
+	          android:drawablePadding="4dp"
+	          android:id="@+id/search_product" />
+	      
+	      <EditText 
+	          android:layout_width="match_parent"
+	          android:layout_height="match_parent"
+	          android:hint="@string/goods_search_constant"
+	          android:layout_margin="4dp"
+	          android:textSize="15dp"
+	          android:background="@android:color/transparent"
+	          android:id="@+id/store_search_edittext"
+	          android:singleLine="true"
+	          android:imeOptions="actionSearch" />
+	      
+	  </LinearLayout>
+	  <TextView 
+	     	  android:layout_width="0dp"
+	      	  android:layout_height="50dp"
+	      	  android:layout_weight="1"
+	      	  android:text="@string/goods_search_cancle"
+	      	  android:layout_gravity="center_vertical"
+	      	  android:gravity="center"
+	      	  android:textColor="#FFFFFF"
+	      	  android:layout_marginRight="5dp"
+	      	  android:id="@+id/store_cancle"/>
+	    
+	</LinearLayout>
+	<ListView 
+	      	  android:layout_width="match_parent"
+	      	  android:layout_height="wrap_content"
+	      	  android:divider="@null"
+	      	  android:id="@+id/search_listview"
+	      	  android:listSelector="@android:color/transparent"
+	      	  android:padding="10dp"/>
+</LinearLayout>

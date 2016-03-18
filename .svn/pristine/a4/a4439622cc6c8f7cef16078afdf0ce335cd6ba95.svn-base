@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F3F3F3" >
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:id="@+id/contacter_name_layout"
+        android:layout_alignParentTop="true">
+        <!-- <TextView 
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/contacter_name"
+            android:gravity="center"
+            android:textSize="15dp"
+            android:layout_marginLeft="10dp"/> -->
+        <EditText 
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:textSize="16dp"
+	        android:gravity="center_vertical"
+	        android:id="@+id/address_contacter_name"
+	        android:singleLine="true"
+	        android:background="#FFFFFF"
+	        android:layout_marginLeft="10dp"
+	        android:hint="@string/contacter_name"/>
+        
+    </LinearLayout>
+    <View
+	    android:layout_width="match_parent"
+	    android:layout_height="1dp"
+	    android:background="#EAEAEA"
+	    android:id="@+id/line"
+	    android:layout_below="@id/contacter_name_layout"/>
+     <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:layout_below="@id/line"
+        android:id="@+id/contacter_phone_layout">
+        <!-- <TextView 
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/contacter_phone"
+            android:gravity="center"
+            android:textSize="15dp"
+            android:layout_marginLeft="10dp"/> -->
+        <EditText 
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:textSize="16dp"
+	        android:gravity="center_vertical"
+	        android:singleLine="true"
+	        android:background="#FFFFFF"
+	        android:layout_marginLeft="10dp"
+	        android:hint="@string/contacter_phone"
+	        android:id="@+id/address_contacter_phone"/>
+        
+    </LinearLayout>
+     <View
+	    android:layout_width="match_parent"
+	    android:layout_height="1dp"
+	    android:background="#EAEAEA"
+	    android:layout_below="@id/contacter_phone_layout"
+	    android:id="@+id/linss"/>
+    <!--  <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:layout_below="@id/linss"
+        android:id="@+id/contacter_code_layout">
+        <TextView 
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/contacter_code"
+            android:gravity="center"
+            android:textSize="15dp"
+            android:layout_marginLeft="10dp"/>
+        <EditText 
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:textSize="16dp"
+	        android:gravity="center_vertical"
+	        android:singleLine="true"
+	        android:background="#FFFFFF"
+	        android:layout_marginLeft="10dp"
+	        android:id="@+id/address_contacter_code"/>
+        
+    </LinearLayout> -->
+     <View
+	    android:layout_width="match_parent"
+	    android:layout_height="1dp"
+	    android:background="#EAEAEA"
+	    android:id="@+id/liness"
+	    android:layout_below="@+id/linss"/>
+     <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:id="@+id/contacter_detail_address_layout"
+        android:layout_below="@id/liness">
+        <!-- <TextView 
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/contacter_detail_address"
+            android:gravity="center"
+            android:textSize="15dp"
+            android:layout_marginLeft="10dp"/> -->
+        <EditText             
+	        android:id="@+id/address_contacter_detail_address"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:textSize="16dp"
+	        android:gravity="center_vertical"
+	        android:singleLine="true"
+	        android:background="#FFFFFF"
+	        android:layout_marginLeft="10dp"
+	        android:layout_marginTop="5dp"
+	        android:hint="@string/contacter_detail_address"/>
+    </LinearLayout>
+	<View
+	    android:layout_width="match_parent"
+	    android:layout_height="10dp"
+	    android:background="#F3F3F3"
+	    android:id="@+id/linesss"
+	    android:layout_below="@id/contacter_detail_address_layout"/>
+	 <View
+	    android:layout_width="match_parent"
+	    android:layout_height="1dp"
+	    android:background="#EAEAEA"
+	    android:id="@+id/linessss"
+	    android:layout_below="@id/linesss"/>
+	  <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:id="@+id/delete_address_layout"
+        android:layout_below="@id/linessss">
+		<TextView
+		    android:layout_width="match_parent"
+		    android:layout_height="50dp"
+		    android:textColor="#DD514F"
+		    android:text="@string/delete_address"
+		    android:textSize="16dp"
+		    android:background="#FFFFFF"
+		    android:gravity="center_vertical"
+		    android:layout_marginLeft="10dp"
+		    android:id="@+id/delete_address"/>
+	</LinearLayout>
+	
+	<LinearLayout 
+         android:layout_width="match_parent"
+         android:layout_height="40dp"
+         android:orientation="horizontal"
+         android:layout_alignParentBottom="true"
+         android:id="@+id/add_address"
+         android:gravity="center" >
+        <TextView
+            android:layout_width="100dp"
+            android:layout_height="25dp"
+            android:text="@string/set_default_address"
+            android:textColor="#FFFFFF"
+            android:gravity="center"
+            android:background="@drawable/shape_store_address_bg"
+            android:id="@+id/set_default_address"/>	 
+     </LinearLayout>
+     <View 
+         android:layout_width="match_parent"
+         android:layout_height="1dp"
+         android:layout_above="@id/add_address"
+         android:background="#EAEAEA"/>
+	
+</RelativeLayout>

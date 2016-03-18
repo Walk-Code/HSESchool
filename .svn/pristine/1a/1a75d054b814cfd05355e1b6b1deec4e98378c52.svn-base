@@ -1,0 +1,102 @@
+package com.zhuochuang.hsej.store;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.layout.PullToRefreshListView;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.AutoGallery;
+import com.util.ContentAdapter;
+import com.util.Utils;
+import com.zhuochuang.hsej.BaseFragment;
+import com.zhuochuang.hsej.R;
+
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup.LayoutParams;
+import android.view.ViewGroup;
+import android.widget.Gallery;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+public class SchoolifeFragment extends BaseFragment{
+	private PullToRefreshListView mPullToRefreshListView;
+	private LinearLayout mHeaderView;
+	private AutoGallery mBannerGallery;
+	private JSONArray mBannerArr;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		mMainLayout = (ViewGroup) ViewGroup.inflate(mActivity, R.layout.fragment_schoollife, null);
+		initListView();
+		mMainLayout.findViewById(R.id.search_main).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+			
+				
+			}
+		});
+		mMainLayout.findViewById(R.id.home_shopping).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				
+				
+			}
+		});
+		
+	}
+	public void initListView(){
+		initHeaderView();
+		mPullToRefreshListView = (PullToRefreshListView) mMainLayout.findViewById(R.id.pullto_listview);
+		mPullToRefreshListView.addHeaderView(mHeaderView);
+	}
+	
+	
+	
+	
+	
+	
+	
+	private void initHeaderView() {
+		mHeaderView = (LinearLayout) LayoutInflater.from(mActivity).inflate(R.layout.fragment_myschoolyard_header, null);
+		mBannerGallery = (AutoGallery) mHeaderView.findViewById(R.id.gallery_banner);
+		mBannerGallery.setAdapter(new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				if(mBannerArr == null || mBannerArr.length() == 0 ){
+					return 0 ;
+				}
+				return Integer.MAX_VALUE;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if (position >= mBannerArr.length()) {
+	                position = position % mBannerArr.length();
+	            }
+	//解析
+				if(convertView == null){
+					convertView = ViewGroup.inflate(mActivity, R.layout.listcell_myschoolyard_headercell, null);
+					//convertView.setLayoutParams(new Gallery.LayoutParams(LayoutParams.MATCH_PARENT, Utils.realHeight(mActivity, 398)));
+					convertView.setLayoutParams(new Gallery.LayoutParams(LayoutParams.MATCH_PARENT, Utils.realSchoolBannerHeight(mActivity)));
+				}
+				
+				return convertView;
+			}
+			
+		});
+	}
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+	}
+
+}

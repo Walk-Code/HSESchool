@@ -1,0 +1,775 @@
+package com.zhuochuang.hsej;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.provider.MediaStore;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.BaseAdapter;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.layout.PhotoAlbumDialog;
+import com.layout.photoalbum.Bimp;
+import com.layout.photoalbum.FileUtils;
+import com.layout.photoalbum.PhotoAlbumActivity;
+import com.layout.photoview.PhotoViewer;
+import com.model.CacheHandler;
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.TaskType;
+import com.util.StaticGridView;
+import com.util.Utils;
+import com.zhuochuang.hsej.adapter.GoodsReleaseEditGridViewAdapter;
+import com.zhuochuang.hsej.adapter.MSpinnerAdapter;
+import com.zhuochuang.hsej.entity.EditImageEntity;
+import com.zhuochuang.hsej.entity.SecondHandEntity.ItemsEntity;
+import com.zhuochuang.hsej.entity.SecondHandEntity.ItemsEntity.ImagesEntity;
+
+public class GoodsReleaseActivity extends BaseActivity {
+	private StaticGridView mStaticGridView;
+	private GridAdapter mAdapter;
+	private String mCameraPath;
+	private PhotoAlbumDialog mPhotoAlbumDialog;
+	@SuppressWarnings("unused")
+	private Handler mHandler;
+	private int nativeCode;
+	private int transMode = 0;// 交易模式
+	private int mUploadIndex = 0;
+	private ArrayList<String> mUpLoadPathList = new ArrayList<String>();
+	private final int DATA_CHANGE_CODE = 0x1002;
+	private final int DIALOG_LODING = 0x100;
+
+	private LinearLayout stylePriceLayout;// 送货方式和价格面板
+	private EditText etGoodsName;// 物品名称
+	private Spinner modeSpinner;// 交易方式
+	private EditText etGoodsPrice;// 交易价格
+	private EditText etGoodsDesc;// 物品描述
+	private EditText etContact;// 联系人
+	private EditText etContactPhone;// 联系方式
+	private boolean isEdit = false;//是否是编辑状态
+	private int mArticleId;//被编辑文章id
+	private ItemsEntity mItemsEntity;//文章实体
+	private List<EditImageEntity> mEditImageEntities;//被编辑文章图片存放list
+	private GoodsReleaseEditGridViewAdapter mEditAdapter;//编辑状态下的adapter
+	private List<String> editUpdateList;
+	private List<String> editImageID;
+	private int editUpdateIndex = 0;
+
+	private HashMap<String, Object> goodsParams = new HashMap<String, Object>();;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_goods_release);
+		InitView();
+		initData();
+	}
+
+	private void InitView() {
+		findViewById(R.id.textview_right_text).setVisibility(View.GONE);
+		stylePriceLayout = (LinearLayout) findViewById(R.id.goods_release_style_price);
+		etGoodsName = (EditText) findViewById(R.id.goods_name);
+		modeSpinner = (Spinner) findViewById(R.id.goods_spinner_mode);
+		etGoodsPrice = (EditText) findViewById(R.id.goods_price);
+		etGoodsDesc = (EditText) findViewById(R.id.goods_detailed);
+		etContact = (EditText) findViewById(R.id.goods_contact);
+		etContactPhone = (EditText) findViewById(R.id.goods_contact_phone);
+
+		nativeCode = getIntent().getIntExtra("type", 1);
+
+		mItemsEntity = (ItemsEntity) getIntent().getExtras().getSerializable(
+				"second_handand_entity");
+		if (mItemsEntity != null) {
+			isEdit = true;
+			mArticleId = mItemsEntity.getId();
+		}
+		if (isEdit) {
+			setTitleText(R.string.text_goods_edit);
+		} else {
+			setTitleText(R.string.activitygoodsrelease_title);
+		}
+		initStaticGridView();
+	}
+
+	private void initData() {
+
+		String[] modeNames = getResources().getStringArray(
+				R.array.goods_release_transaction_mode);
+		modeSpinner.setAdapter(new MSpinnerAdapter(this, modeNames));
+		if (nativeCode == 1)
+			stylePriceLayout.setVisibility(View.VISIBLE);
+		else
+			stylePriceLayout.setVisibility(View.GONE);
+
+		modeSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				if (nativeCode == 1)
+					transMode = position + 1;
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+
+			}
+		});
+
+	}
+
+	private void InflaterData() {
+		((EditText) findViewById(R.id.goods_name)).setText(mItemsEntity
+				.getName());
+		((EditText) findViewById(R.id.goods_price)).setText(mItemsEntity
+				.getPrice() + "");
+		((EditText) findViewById(R.id.goods_detailed)).setText(mItemsEntity
+				.getContent());
+		((EditText) findViewById(R.id.goods_contact)).setText(mItemsEntity
+				.getLinkMan());
+		((EditText) findViewById(R.id.goods_contact_phone))
+				.setText(mItemsEntity.getPhone());
+		modeSpinner.setSelection(mItemsEntity.getTradingType() - 1);
+		mEditImageEntities = new ArrayList<EditImageEntity>();
+		for (ImagesEntity mEntity : mItemsEntity.getImages()) {
+			mEditImageEntities.add(new EditImageEntity(mEntity.getId(), mEntity
+					.getPath(), true));
+		}
+		mEditAdapter.setData(mEditImageEntities);
+		mEditAdapter.Update();
+
+	}
+
+	public void onPublishClick(View view) {
+		Resources mRes=getResources();
+		String goodsName = etGoodsName.getText().toString();
+		if (TextUtils.isEmpty(goodsName)) {
+			Toast.makeText(this, mRes.getString(R.string.text_qsr)+mRes.getString(R.string.activitygoodsrelease_edittext_price), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		String goodsPrice = etGoodsPrice.getText().toString();
+		if (TextUtils.isEmpty(goodsPrice)) {
+			if (nativeCode == 1) {
+				Toast.makeText(this, mRes.getString(R.string.text_qsr)+mRes.getString(R.string.goods_price), Toast.LENGTH_SHORT).show();
+				return;
+			} else {
+				goodsPrice = "0.00";
+			}
+
+		}
+		String goodsDesc = etGoodsDesc.getText().toString();
+		if (TextUtils.isEmpty(goodsDesc)) {
+			Toast.makeText(this, mRes.getString(R.string.activitygoodsrelease_edittext_content), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		String goodsContact = etContact.getText().toString();
+		if (TextUtils.isEmpty(goodsContact)) {
+			Toast.makeText(this, mRes.getString(R.string.text_qsrlxr), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		String goodsContactPhone = etContactPhone.getText().toString();
+		if (TextUtils.isEmpty(goodsContactPhone)) {
+			Toast.makeText(this, mRes.getString(R.string.text_qsrlxfs), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if(!Utils.isMobileNO(goodsContactPhone)){
+			Toast.makeText(this, mRes.getString(R.string.text_qsrzqdsjhm), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		if ((Bimp.base64Arr == null || Bimp.base64Arr.size() < 1)
+				&& (mEditAdapter == null || mEditAdapter.tempImageEntities
+						.size() == 0)) {
+			Toast.makeText(this, mRes.getString(R.string.text_qzsxzyztp), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		goodsParams.put("name", goodsName);
+		if (nativeCode == 1) {
+			goodsParams.put("tradingType", transMode);
+		}
+		if (isEdit)
+			goodsParams.put("id", mArticleId);
+		goodsParams.put("price", goodsPrice);
+		goodsParams.put("content", goodsDesc);
+		goodsParams.put("linkMan", goodsContact);
+		goodsParams.put("phone", goodsContactPhone);
+		goodsParams.put("type", nativeCode);
+		showDialogCustom(DIALOG_LODING);
+		if (isEdit) {
+			editUpdateList = new ArrayList<String>();
+			editImageID = new ArrayList<String>();
+			for (EditImageEntity imageEntity : mEditAdapter.tempImageEntities) {
+				if (imageEntity.getId() < 0) {
+					editUpdateList.add(imageEntity.getPath());
+				} else {
+					editImageID.add(imageEntity.getId() + "");
+				}
+			}
+			if (editUpdateList.size() > 0) {
+				startEditUpload();
+			} else {
+				startSend();
+			}
+		} else {
+			if (Bimp.base64Arr != null && Bimp.base64Arr.size() > 0) {
+				startUpload();
+			} else {
+				startSend();
+			}
+		}
+	}
+
+	private void startEditUpload() {// 图片上传
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		try {
+			params.put("imgStr",
+					Bimp.getBase64(editUpdateList.get(editUpdateIndex++)));
+			params.put("resourceType", "9");
+			DataLoader.getInstance().startTaskForResult(
+					TaskType.TaskOrMethod_UserUploadPhoto, params, this);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void startUpload() {// 图片上传
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("imgStr", getPublishPath());
+		params.put("resourceType", "9");
+		mUploadIndex++;
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_UserUploadPhoto, params, this);
+	}
+
+	private void startSend() {// 文本上传
+		goodsParams.put("imageIds", getImgIds());
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_SecondHandandLostPublish, goodsParams,
+				GoodsReleaseActivity.this);
+	}
+
+	private String getPublishPath() {
+		if (mUpLoadPathList == null) {
+			mUpLoadPathList = new ArrayList<String>();
+		}
+		return Bimp.base64Arr.get(mUploadIndex);
+	}
+
+	private String getImgIds() {
+		String imgIds = "";
+		if ((editImageID == null || editImageID.size() == 0)
+				&& (mUpLoadPathList == null || mUpLoadPathList.size() == 0)) {
+			return "";
+		}
+		if (isEdit) {
+			for (String img : editImageID) {
+				imgIds += img + ",";
+			}
+
+		} else {
+			for (String img : mUpLoadPathList) {
+				imgIds += img + ",";
+			}
+		}
+		if (imgIds.contains(",")) {
+			imgIds = imgIds.substring(0, imgIds.length() - 1);
+		}
+
+		return imgIds;
+	}
+
+	private void initStaticGridView() {
+		mStaticGridView = (StaticGridView) findViewById(R.id.public_gridView);
+		if (isEdit) {
+			mEditAdapter = new GoodsReleaseEditGridViewAdapter(this);
+			mStaticGridView.setAdapter(mEditAdapter);
+			InflaterData();
+		} else {
+			mAdapter = new GridAdapter(this);
+			mAdapter.update();
+			mStaticGridView.setAdapter(mAdapter);
+		}
+		mStaticGridView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				if (isEdit) {
+					if (arg2 == mEditAdapter.tempImageEntities.size()) {
+						showImgDialog();
+					} else {
+						ArrayList<Object> objects = new ArrayList<Object>();
+						for (EditImageEntity iEntity : mEditAdapter.tempImageEntities) {
+							objects.add(iEntity.getPath());
+						}
+						PhotoViewer viewer = new PhotoViewer(
+								GoodsReleaseActivity.this, arg2);
+						viewer.setMixtureObj(objects);
+						HashMap<Integer, Boolean> map = new HashMap<Integer, Boolean>();
+						for (int i = 0; i < mEditAdapter.tempImageEntities
+								.size(); i++) {
+							map.put(i, false);
+						}
+						viewer.setInvertSelectionMap(map);
+						viewer.showPhotoViewer(arg1);
+
+					}
+				} else {
+					Bimp.imgMaxSize = 8;
+					if (Bimp.bmp.size() == Bimp.imgMaxSize) {
+						HashMap<Integer, Boolean> map = new HashMap<Integer, Boolean>();
+						for (int i = 0; i < Bimp.bmp.size(); i++) {
+							map.put(i, false);
+						}
+						PhotoViewer viewer = new PhotoViewer(
+								GoodsReleaseActivity.this, arg2);
+						viewer.setInvertSelectionMap(map);
+						viewer.showPhotoViewer(arg1);
+					} else {
+						if (arg2 == Bimp.bmp.size()) {
+							if (arg2 == Bimp.imgMaxSize) {
+								Toast.makeText(
+										GoodsReleaseActivity.this,
+										String.format(
+												getResources()
+														.getString(
+																R.string.photoalbum_most_pic),
+												Bimp.imgMaxSize + ""),
+										Toast.LENGTH_SHORT).show();
+							} else {
+								showImgDialog();
+							}
+						} else {
+							HashMap<Integer, Boolean> map = new HashMap<Integer, Boolean>();
+							for (int i = 0; i < Bimp.bmp.size(); i++) {
+								map.put(i, false);
+							}
+							PhotoViewer viewer = new PhotoViewer(
+									GoodsReleaseActivity.this, arg2);
+							viewer.setInvertSelectionMap(map);
+							viewer.showPhotoViewer(arg1);
+						}
+					}
+
+				}
+				Utils.removeSoftKeyboard(GoodsReleaseActivity.this);
+			}
+		});
+
+		EventManager.getInstance().setHandlerListenner(
+				mHandler = new Handler() {
+					@SuppressWarnings("unchecked")
+					@Override
+					public void handleMessage(Message msg) {
+						super.handleMessage(msg);
+						Object[] objs = (Object[]) msg.obj;
+						switch (msg.what) {
+						case EventManager.EventType_Photoalbum:
+							try {
+								if (objs != null && objs[0] != null
+										&& objs[0] instanceof HashMap<?, ?>) {
+									HashMap<Integer, Boolean> map = (HashMap<Integer, Boolean>) objs[0];
+									if (map == null || map.size() == 0) {
+										return;
+									}
+									if (isEdit) {
+										Iterator iter = map.entrySet()
+												.iterator();
+										while (iter.hasNext()) {
+											Map.Entry entry = (Map.Entry) iter
+													.next();
+											int key = (int) entry.getKey();
+											boolean val = (boolean) entry
+													.getValue();
+											mEditAdapter.tempImageEntities.get(
+													key).setCheck(
+													val ? false : true);
+											mEditAdapter.UpdateHandle();
+										}
+									} else {
+										List<Bitmap> bmp = new ArrayList<Bitmap>();
+										List<String> drr = new ArrayList<String>();
+										ArrayList<String> base64 = new ArrayList<String>();
+										int tag = 0, tagF = 0;
+										for (int i = 0; i < Bimp.bmp.size(); i++) {
+											if (!map.get(i)) {
+												tagF++;
+												bmp.add(Bimp.bmp.get(i));
+												drr.add(Bimp.drr.get(i));
+												base64.add(Bimp.base64Arr
+														.get(i));
+											} else {
+												tag++;
+											}
+										}
+
+										if (tag == Bimp.bmp.size()) {
+											if (Bimp.drr.size() != 0) {
+												Bimp.drr.clear();
+												Bimp.drr = new ArrayList<String>();
+											}
+											if (Bimp.bmp.size() != 0) {
+												Bimp.bmp.clear();
+												Bimp.bmp = new ArrayList<Bitmap>();
+											}
+											if (Bimp.base64Arr.size() != 0) {
+												Bimp.base64Arr.clear();
+												Bimp.base64Arr = new ArrayList<String>();
+											}
+											Bimp.max = 0;
+											mAdapter.update();
+										} else if (tagF == Bimp.bmp.size()) {
+
+										} else {
+											Bimp.bmp = bmp;
+											Bimp.drr = drr;
+											Bimp.base64Arr = base64;
+											Bimp.max = Bimp.bmp.size();
+											mAdapter.update();
+										}
+									}
+								}
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+							break;
+						}
+					}
+				});
+	}
+
+	public class GridAdapter extends BaseAdapter {
+		private LayoutInflater inflater;
+		private int selectedPosition = -1;
+		private int screenWidth;
+		private boolean shape;
+
+		public boolean isShape() {
+			return shape;
+		}
+
+		public void setShape(boolean shape) {
+			this.shape = shape;
+		}
+
+		@SuppressWarnings("deprecation")
+		public GridAdapter(Context context) {
+			inflater = LayoutInflater.from(context);
+			screenWidth = getWindowManager().getDefaultDisplay().getWidth();
+		}
+
+		public void update() {
+			loading();
+		}
+
+		@Override
+		public int getCount() {
+			if (Bimp.bmp.size() == Bimp.imgMaxSize) {
+				return Bimp.bmp.size();
+			}
+			return (Bimp.bmp.size() + 1);
+		}
+
+		@Override
+		public Object getItem(int arg0) {
+			return null;
+		}
+
+		@Override
+		public long getItemId(int arg0) {
+			return 0;
+		}
+
+		public void setSelectedPosition(int position) {
+			selectedPosition = position;
+		}
+
+		public int getSelectedPosition() {
+			return selectedPosition;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder holder = null;
+			if (convertView == null) {
+				convertView = inflater.inflate(
+						R.layout.photoalbumitem_published_grid, parent, false);
+				int width = (screenWidth - Utils.dipToPixels(
+						GoodsReleaseActivity.this, 50)) / 4;
+				AbsListView.LayoutParams lp = new AbsListView.LayoutParams(
+						width, width);
+				convertView.setLayoutParams(lp);
+				holder = new ViewHolder();
+				holder.image = (ImageView) convertView.findViewById(R.id.image);
+				convertView.setTag(holder);
+			} else {
+				holder = (ViewHolder) convertView.getTag();
+			}
+
+			if (Bimp.bmp.size() == Bimp.imgMaxSize) {
+				holder.image.setImageBitmap(Bimp.bmp.get(position));
+			} else {
+				if (position == Bimp.bmp.size()) {
+					holder.image.setImageBitmap(null);
+					holder.image
+							.setBackgroundResource(R.drawable.btn_addpicture);
+				} else {
+					holder.image.setImageBitmap(Bimp.bmp.get(position));
+				}
+			}
+			return convertView;
+		}
+
+		public class ViewHolder {
+			public ImageView image;
+		}
+
+		Handler handler = new Handler() {
+			@Override
+			public void handleMessage(Message msg) {
+				switch (msg.what) {
+				case 1:
+					mAdapter.notifyDataSetChanged();
+					break;
+				}
+				super.handleMessage(msg);
+			}
+		};
+
+		public void loading() {
+			// Bimp.base64Arr.clear();
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
+						if (Bimp.max == Bimp.drr.size()) {
+							Message message = new Message();
+							message.what = 1;
+							handler.sendMessage(message);
+							break;
+						} else {
+							try {
+								String path = Bimp.drr.get(Bimp.max);
+								Bitmap bm = Bimp.revitionImageSize(path,
+										path.equalsIgnoreCase(mCameraPath));
+								Bimp.bmp.add(bm);
+								String newStr = path.substring(
+										path.lastIndexOf("/") + 1,
+										path.lastIndexOf("."));
+								FileUtils.saveBitmap(bm, "" + newStr);
+								Bimp.max += 1;
+								Message message = new Message();
+								message.what = 1;
+								handler.sendMessage(message);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			}).start();
+		}
+	}
+
+	private void showImgDialog() {
+		if (mPhotoAlbumDialog == null) {
+			mPhotoAlbumDialog = new PhotoAlbumDialog(GoodsReleaseActivity.this);
+			mPhotoAlbumDialog
+					.setItemSelectListener(new PhotoAlbumDialog.OnItemSelectListener() {
+						@Override
+						public void onItemClick(int position) {
+							switch (position) {
+							case R.id.dialog_item1:
+								File file = CacheHandler
+										.getCameraImgPath(GoodsReleaseActivity.this);
+								mCameraPath = file.getAbsolutePath();
+								Intent intentFromCapture = new Intent(
+										MediaStore.ACTION_IMAGE_CAPTURE);
+								intentFromCapture.putExtra(
+										MediaStore.EXTRA_OUTPUT,
+										Uri.fromFile(file));
+								startActivityForResult(intentFromCapture,
+										Configs.REQUESTCODE_CAMERA);
+								break;
+							case R.id.dialog_item2:
+								Intent intent = new Intent(
+										GoodsReleaseActivity.this,
+										PhotoAlbumActivity.class);
+								startActivityForResult(intent,
+										Configs.REQUESTCODE_IMAGE);
+								break;
+							case R.id.dialog_item3:
+								mPhotoAlbumDialog.cancel();
+								break;
+							}
+						}
+					});
+		}
+		mPhotoAlbumDialog.show();
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == Activity.RESULT_OK
+				&& resultCode != Activity.RESULT_CANCELED) {
+			switch (requestCode) {
+			case Configs.REQUESTCODE_IMAGE:
+				if (isEdit) {
+					mEditAdapter.Update();
+				} else {
+					mAdapter.update();
+				}
+				break;
+			case Configs.REQUESTCODE_CAMERA:
+				if (Bimp.drr.size() < 9 && resultCode == -1) {
+					Bimp.drr.add(mCameraPath);
+				}
+				if (isEdit) {
+					mEditAdapter.Update();
+				} else {
+					mAdapter.update();
+				}
+				break;
+			}
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (Bimp.drr.size() != 0) {
+			Bimp.drr.clear();
+			Bimp.drr = new ArrayList<String>();
+		}
+		if (Bimp.bmp.size() != 0) {
+			Bimp.bmp.clear();
+			Bimp.bmp = new ArrayList<Bitmap>();
+		}
+		if (Bimp.base64Arr.size() != 0) {
+			Bimp.base64Arr.clear();
+			Bimp.base64Arr = new ArrayList<String>();
+		}
+		Bimp.max = 0;
+		Bimp.imgMaxSize = 9;
+		FileUtils.deleteDir();
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		if (result == null) {
+			removeDialogCustom();
+			return;
+		}
+
+		if (result instanceof Error) {
+			removeDialogCustom();
+			if (type == TaskType.TaskOrMethod_UserUploadPhoto) {
+				new AlertDialog.Builder(GoodsReleaseActivity.this)
+						.setMessage(R.string.publish_pic_fail)
+						.setNegativeButton(R.string.cancel,
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										mUpLoadPathList.clear();
+										mUploadIndex = 0;
+									}
+								})
+						.setPositiveButton(R.string.retry,
+								new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog,
+											int whichButton) {
+										showDialogCustom(DIALOG_CUSTOM);
+										mUploadIndex--;
+										startUpload();
+									}
+								}).show();
+			} else {
+				mUpLoadPathList.clear();
+				mUploadIndex = 0;
+				Toast.makeText(GoodsReleaseActivity.this,
+						((Error) result).getMessage(), Toast.LENGTH_SHORT)
+						.show();
+			}
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_UserUploadPhoto:
+			if (result instanceof JSONObject
+					&& ((JSONObject) result).has("item")) {
+				JSONObject item = ((JSONObject) result).optJSONObject("item");
+				if (isEdit) {
+					editImageID.add(item.optString("id"));
+					if (editUpdateIndex == editUpdateList.size()) {
+						startSend();
+					} else {
+						startEditUpload();
+					}
+				} else {
+					if (mUpLoadPathList == null) {
+						mUpLoadPathList = new ArrayList<String>();
+					}
+					mUpLoadPathList.add(item.optString("id"));
+					if (mUploadIndex == Bimp.base64Arr.size()) {
+						startSend();
+					} else {
+						startUpload();
+					}
+				}
+			}
+			break;
+		case TaskOrMethod_SecondHandandLostPublish:
+			removeDialogCustom();
+			if (result instanceof JSONObject) {
+				EventManager.getInstance().sendMessage(DATA_CHANGE_CODE, "");
+				Utils.removeSoftKeyboard(GoodsReleaseActivity.this);
+				Toast.makeText(GoodsReleaseActivity.this,
+						getResources().getString(R.string.publish_success),
+						Toast.LENGTH_SHORT).show();
+				new Handler().postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						setResult(Activity.RESULT_OK);
+						GoodsReleaseActivity.this.finish();
+					}
+				}, 800);
+			} else {
+				Toast.makeText(GoodsReleaseActivity.this,
+						R.string.publish_fail, Toast.LENGTH_SHORT).show();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+}

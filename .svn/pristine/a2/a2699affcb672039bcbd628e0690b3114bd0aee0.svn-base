@@ -1,0 +1,368 @@
+package com.zhuochuang.hsej.store;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ImageView.ScaleType;
+import android.widget.EditText;
+import android.widget.Gallery;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
+import android.widget.Toast;
+
+import com.layout.ListViewForScrollView;
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.AutoGallery;
+import com.util.ContentAdapter;
+import com.util.PageGuide;
+import com.util.Utils;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+
+public class StorePersonActivity extends BaseActivity{
+	private ListViewForScrollView  mListView;
+	private LinearLayout mLinearLayout;
+	private AutoGallery mAutoGallery;
+	private PageGuide mPageGuide;
+	private ContentAdapter mContentAdapter;
+	private boolean lock = true;
+	private JSONArray mDynameArr;
+	private JSONArray mFocusArr;
+	private JSONArray mGoodsArr;
+	private JSONObject mStoreDetail;
+	private PopupWindow mPopupWindow;
+	private LinearLayout popupLayout;
+	private String [] items ;
+	private String mGoodsType;
+	private static final int EVALUATESTAR = 5;
+		
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		mMainLayout.removeAllViews();
+		setContentView(R.layout.store_persion);	
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ShopShopData, 
+		DataLoader.getInstance().getShopShopDataTypeParams(getIntent().getStringExtra("shopId")),this);
+		init();
+	}
+
+	private void init() {	
+		mListView = (ListViewForScrollView ) findViewById(R.id.store_hot_goods);
+		mLinearLayout = (LinearLayout) findViewById(R.id.store_evaluate);		
+		mAutoGallery = (AutoGallery) findViewById(R.id.gallery_banner);
+		mPageGuide = (PageGuide) findViewById(R.id.pageguide);
+		
+		mAutoGallery.setAdapter(mContentAdapter = new ContentAdapter(){
+			@Override
+			public int getCount() {
+				if(mFocusArr == null){
+					return 0;
+				}
+				//判断图片的数量
+				return Integer.MAX_VALUE;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				//TODO判断并获取图片的链接数
+				if(position >= mFocusArr.length()){
+					position = position % mFocusArr.length();
+				}
+				if(convertView == null){
+					convertView = LayoutInflater.from(StorePersonActivity.this).inflate(R.layout.store_page_item, null);
+					convertView.setLayoutParams(new Gallery.LayoutParams(LayoutParams.MATCH_PARENT, Utils.realSchoolBannerHeight(StorePersonActivity.this)));					
+				}
+				JSONObject object = mFocusArr.optJSONObject(position);
+				ImageLoader.getInstance().displayImage(object.optString("image"), ((ImageView)convertView.findViewById(R.id.images)), ImageLoaderConfigs.displayImageOptionsBg);
+				return convertView;
+			}						
+		});
+		
+		mAutoGallery.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				//TODO 判断图片的个数并设置圆点的数目
+				if(position >= mFocusArr.length()){
+					position = position % mFocusArr.length();
+				}
+				mPageGuide.setSelect(position);
+				
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				
+			}
+		});
+		
+		mAutoGallery.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				//TODO 判断图片的个数并赋值position
+				//Toast.makeText(StorePersionActivity.this, "跳转到图片全屏的界面", Toast.LENGTH_SHORT).show();
+				
+			}			
+		});				
+
+		findViewById(R.id.store_collection).setOnClickListener(new OnClickListener() {
+			@SuppressLint("NewApi")
+			@Override
+			public void onClick(View v) {
+				if(lock){
+				((ImageView)findViewById(R.id.store_collection)).setImageResource(R.drawable.icon_collect_pre);
+				lock = false;
+		     	}else{
+		     	((ImageView)findViewById(R.id.store_collection)).setImageResource(R.drawable.icon_collect_nor);	
+		     	}
+			}
+		});
+		
+		findViewById(R.id.store_back).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				StorePersonActivity.this.finish();				
+			}
+		});
+		
+		findViewById(R.id.store_title_image).setLayoutParams(
+				new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT ,Utils.realServiceStoreImageHeight(StorePersonActivity.this)));
+		if(null != mStoreDetail){
+			ImageLoader.getInstance().displayImage(mStoreDetail.optString("image"),
+			((ImageView)findViewById(R.id.store_title_image)) ,ImageLoaderConfigs.displayImageOptionsBg);				
+			((CustomImageView)findViewById(R.id.store_logo)).setType(CustomImageView.TYPE_ROUND);
+			((CustomImageView)findViewById(R.id.store_logo)).setRoundBorderRadius(10);
+			ImageLoader.getInstance().displayImage(mStoreDetail.optString("logo"),
+			((CustomImageView)findViewById(R.id.store_logo)) ,ImageLoaderConfigs.displayImageOptionsBg);
+			((TextView)findViewById(R.id.store_name)).setText(mStoreDetail.optString("name"));
+		}
+		//搜索框		
+		
+		((EditText)findViewById(R.id.search_result)).setCursorVisible(false);
+		findViewById(R.id.search_result).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				((EditText)findViewById(R.id.search_result)).setCursorVisible(true);
+				
+			}
+		});
+		
+		((EditText)findViewById(R.id.search_result)).setOnEditorActionListener(new OnEditorActionListener() {
+					
+					@Override
+					public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+						if(actionId ==EditorInfo.IME_ACTION_SEARCH){							
+							//跳转到商品列表界面 
+							 Intent intent = new Intent(StorePersonActivity.this,StoreDetailActivity.class);
+							 intent.putExtra("SearchResult",((EditText)findViewById(R.id.search_result)).getText().toString());
+							 startActivity(intent);
+							
+							 return true;
+						}
+						return false;
+					}
+				});
+			
+		//回滚在顶部
+		((StickyScrollView)findViewById(R.id.store_scrollview)).smoothScrollTo(0, 0);
+		
+		mListView.setAdapter(new ContentAdapter(){
+			@Override
+			public int getCount() {
+				if(mGoodsArr != null && mGoodsArr.length()>0){
+					return mGoodsArr.length();
+				}
+				return 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				ViewHolder viewHolder = null;
+				if(convertView == null ){
+					viewHolder = new ViewHolder();
+					convertView = LayoutInflater.from(StorePersonActivity.this).inflate(R.layout.store_list_layout, null);
+					viewHolder.imageview =  (ImageView)convertView.findViewById(R.id.good_image);
+					viewHolder.name = (TextView) convertView.findViewById(R.id.tv_details);
+					viewHolder.price = ((TextView)convertView.findViewById(R.id.tv_price));
+					convertView.setTag(viewHolder);
+				}
+				JSONObject obj = mGoodsArr.optJSONObject(position);
+				viewHolder = (ViewHolder) convertView.getTag();
+				viewHolder.imageview.setLayoutParams(new LinearLayout.LayoutParams((Utils.getScreenWidth(getApplicationContext())-viewHolder.imageview.getWidth())/4
+						,(Utils.getScreenWidth(getApplicationContext())-viewHolder.imageview.getWidth())/4));
+				
+				ImageLoader.getInstance().displayImage(obj.optString("image"), viewHolder.imageview,
+				ImageLoaderConfigs.displayImageOptionsBg);
+				viewHolder.name.setText(obj.optString("name"));
+				viewHolder.price.setText("￥"+obj.optString("price"));
+				//((TextView)convertView.findViewById(R.id.tv_stock)).setText(goods.getStock()+"");*/
+				return convertView;
+			}
+			class ViewHolder{
+				ImageView imageview;
+				TextView name;
+				TextView price;
+			}
+		});
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int position,
+					long arg3) {
+			JSONObject obj = mGoodsArr.optJSONObject(position);
+			Intent intent = new Intent(StorePersonActivity.this,StoreMoreDetailsActivity.class);
+			intent.putExtra("shopId", obj.optLong("id")+"");
+			startActivity(intent);
+			}
+		});
+		
+		findViewById(R.id.store_persion_all).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(0 < mGoodsType.length()){
+					Intent intent = new Intent(StorePersonActivity.this,StoreDetailActivity.class);									
+					intent.putExtra("shopId", getIntent().getStringExtra("shopId"));
+					intent.putExtra("storeGoods", 1);
+					intent.putExtra("sort", "all");
+					startActivity(intent);
+			}else{
+				Toast.makeText(StorePersonActivity.this,getResources().getString(R.string.get_data_failed) , Toast.LENGTH_SHORT).show();
+			  }
+		   }
+		});
+		
+		findViewById(R.id.store_persion_catagory).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(0 < mGoodsType.length()){
+						Intent intent = new Intent(StorePersonActivity.this,StoreGoodsCategoryActivity.class);									
+						intent.putExtra("category", items);
+						intent.putExtra("shopId", getIntent().getStringExtra("shopId"));
+						intent.putExtra("goodsType", mGoodsType);
+						startActivity(intent);
+				}else{
+					Toast.makeText(StorePersonActivity.this,getResources().getString(R.string.get_data_failed) , Toast.LENGTH_SHORT).show();
+				}
+				
+			
+			}
+		});
+		/*
+		 * test
+		 */
+		setEvaluateStar(7);
+	}
+	public void setEvaluateStar(int length){
+		 int show = length/2;//显示全部星
+		 int t = length%2;//显示半星
+		 ImageView [] evaluateStar = new ImageView[EVALUATESTAR];
+		 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(Utils.dipPx(this, 15),Utils.dipPx(this, 15),1);
+		 for(int i = 0;i < length; i++){
+			 if(i > EVALUATESTAR-1) break;
+			 	evaluateStar[i] = new ImageView(StorePersonActivity.this);				 				
+				if(i < show-1){
+					 evaluateStar[i].setImageResource(R.drawable.icon_grade_pre);  
+				 }else{
+					 evaluateStar[i].setImageResource(R.drawable.icon_grade_nor); 
+				//if(t != 0) 	 
+			 }			 
+			 evaluateStar[i].setScaleType(ScaleType.CENTER_INSIDE);
+			 layoutParams.setMargins(Utils.dipPx(this, 4),Utils.dipPx(this, 1),0,Utils.dipPx(this, 2));
+			 evaluateStar[i].setLayoutParams(new LinearLayout.LayoutParams(1,1)); 
+			 mLinearLayout.addView(evaluateStar[i],layoutParams); 
+		 }
+	 }
+		
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		if(result == null){
+			return;
+		}
+		if(result instanceof Error){
+			Toast.makeText(StorePersonActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch(type){
+		case TaskOrMethod_ShopShopData :
+			if(result instanceof JSONObject ){
+				if(((JSONObject)result).has("dynamic")){
+				mDynameArr = ((JSONObject)result).optJSONArray("dynamic");
+				 for(int i = 0; i < mDynameArr.length(); i++){
+					 JSONObject dyname = mDynameArr.optJSONObject(i);
+					 ((TextView)findViewById(R.id.store_rctivitv_news)).setText(dyname.optString("name")); 
+				 }
+				}
+				if(((JSONObject)result).has("items")){
+					mStoreDetail = ((JSONObject)result).optJSONObject("items");	
+					if(mStoreDetail.optString("favoriteStatus").equals("0")){
+						((ImageView)findViewById(R.id.store_collection)).setImageResource(R.drawable.icon_collect_pre);
+					}else if(mStoreDetail.optString("favoriteStatus").equals("1")){
+						((ImageView)findViewById(R.id.store_collection)).setImageResource(R.drawable.icon_collect_nor);
+					}
+				}
+				//图片广告
+				if(((JSONObject)result).has("focus")){
+					mFocusArr = ((JSONObject)result).optJSONArray("focus");	
+				  if(mFocusArr !=null && mFocusArr.length()>0){	
+					mPageGuide.setParams(mFocusArr.length(), Utils.dipToPixels(StorePersonActivity.this, 7), Utils.dipToPixels(StorePersonActivity.this, 7));
+					mAutoGallery.setSelection(mFocusArr.length() * 1000000);
+					mAutoGallery.setLength(mFocusArr.length());
+					mAutoGallery.setDuration(4000);
+					mAutoGallery.setAutoScroll();
+					if(mAutoGallery != null && mAutoGallery.getAdapter() != null){
+						((ContentAdapter)mAutoGallery.getAdapter()).notifyDataSetChanged();
+					}
+				  }
+				}
+				if(((JSONObject)result).has("goods")){
+				
+					mGoodsArr = ((JSONObject)result).optJSONArray("goods");				
+				}
+				
+				if(((JSONObject)result).has("goodsType")){
+					JSONArray goodsType = ((JSONObject)result).optJSONArray("goodsType");
+					items = new String [goodsType.length()];
+					mGoodsType = goodsType.toString();	
+					for(int i = 0;i < goodsType.length();i++){
+						JSONObject obj = goodsType.optJSONObject(i);
+						items[i] = obj.optString("name");
+					}
+				}
+				
+			}
+			
+			break;
+		}
+		
+	}
+	
+}

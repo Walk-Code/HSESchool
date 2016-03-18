@@ -1,0 +1,250 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.layout.PullToRefreshListView.OnRemoreListener;
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.util.Utils;
+
+@SuppressLint("InflateParams")
+public class SchoolyardServiceMoreFragment extends BaseFragment{
+
+	private PullToRefreshListView mListView;
+	private ContentAdapter mListViewAdapter;
+	private JSONArray mDataArr;
+	private String mTypeId;
+	private int mCurrentPage = 1;
+	private boolean mIsReadMore = false;
+	private boolean mIsTypeAdd = false;
+	private HashMap<String, Boolean> mIdList;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		mMainLayout = (ViewGroup) LayoutInflater.from(mActivity).inflate(R.layout.fragment_schoolyardservice_more, null);
+		initListView();
+	}
+	
+	public void setTypeId(String id){
+		mTypeId = id;
+	}
+	
+	public void setIsTypeAdd(boolean isTypeAdd){
+		mIsTypeAdd = isTypeAdd;
+	}
+	
+	public void setIdList(HashMap<String, Boolean> idList){
+		mIdList = idList;
+	}
+	
+	private void initListView(){
+		mListView = (PullToRefreshListView) mMainLayout.findViewById(R.id.pullto_listview);
+		mListView.setAdapter(mListViewAdapter = new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				if(mDataArr != null && mDataArr.length() > 0){
+					return mDataArr.length();
+				}
+				return 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(mActivity, R.layout.listcell_schoolyardservice_more, null);
+					convertView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, Utils.dipToPixels(mActivity, 80)));
+				}
+				JSONObject obj = mDataArr.optJSONObject(position);
+				if(obj != null){
+					((TextView)convertView.findViewById(R.id.textview_title)).setText(obj.optString("name"));
+					((TextView)convertView.findViewById(R.id.textview_desc)).setText(obj.optString("description"));
+					ImageLoader.getInstance().displayImage(obj.optString("image"), ((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsBg);
+				
+					convertView.findViewById(R.id.ico).setVisibility(mIsTypeAdd? View.VISIBLE : View.GONE);
+					if(mIsTypeAdd && mIdList != null){
+						if(obj.has("favoriteStatus") && obj.optString("favoriteStatus").equalsIgnoreCase("0")){
+							if(!mIdList.containsKey(obj.optString("id"))){
+								mIdList.put(obj.optString("id"), true);
+								convertView.findViewById(R.id.ico).setBackgroundResource(R.drawable.list_option_tick);
+							}
+							else{
+								if(mIdList.get(obj.optString("id"))){
+									convertView.findViewById(R.id.ico).setBackgroundResource(R.drawable.list_option_tick);
+								}
+								else{
+									convertView.findViewById(R.id.ico).setBackgroundResource(R.drawable.list_option_no);
+								}
+							}
+						}
+						else{
+							if(mIdList.containsKey(obj.optString("id")) && mIdList.get(obj.optString("id"))){
+								convertView.findViewById(R.id.ico).setBackgroundResource(R.drawable.list_option_tick);
+							}
+							else{
+								convertView.findViewById(R.id.ico).setBackgroundResource(R.drawable.list_option_no);
+							}
+						}
+					}
+				}
+				return convertView;
+			}
+		});
+		mListView.setOnRefreshListener(new OnRefreshListener() {
+			
+			@Override
+			public void onRefresh() {
+				// TODO Auto-generated method stub
+				mCurrentPage = 1;
+				mIsReadMore = false;
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				//params.put("userId", "");
+				params.put("pageNo", mCurrentPage);
+				params.put("pageSize", 20);
+				params.put("typeId", mTypeId);
+				//params.put("contains", mIsTypeAdd ? "0" : "1");
+				params.put("contains", "1");
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_CampusListServers, params, SchoolyardServiceMoreFragment.this);
+			}
+		});
+		mListView.setRemoreable(true);
+		mListView.setOnRemoreListener(new OnRemoreListener() {
+			
+			@Override
+			public void onRemore() {
+				// TODO Auto-generated method stub
+				mCurrentPage++;
+				mIsReadMore = true;
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				//params.put("userId", "");
+				params.put("pageNo", mCurrentPage);
+				params.put("pageSize", 20);
+				params.put("typeId", mTypeId);
+				params.put("contains", mIsTypeAdd ? "0" : "1");
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_CampusListServers, params, SchoolyardServiceMoreFragment.this);
+			}
+		});
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				JSONObject obj = mDataArr.optJSONObject(position - 1);
+				if(obj != null){
+					if(!mIsTypeAdd){
+						DataLoader.getInstance().openNativeOrThirdWeb(mActivity, obj, false);
+						return;
+					}
+					if(mIdList == null){
+						mIdList = new HashMap<String, Boolean>();
+					}
+					if(mIdList.containsKey(obj.optString("id"))){
+						if(mIdList.get(obj.optString("id"))){
+							mIdList.put(obj.optString("id"), false);
+						}
+						else{
+							mIdList.put(obj.optString("id"), true);
+						}
+					}
+					else{
+						mIdList.put(obj.optString("id"), true);
+					}
+					mListViewAdapter.notifyDataSetChanged();
+					((SchoolyardServiceAddActivity)mActivity).changeIdList();
+					//EventManager.getInstance().sendMessage(EventManager.EventType_ServicesAdd, obj);
+				}
+			}
+		});
+		
+		mListView.startRefresh();
+	}
+	
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(mListViewAdapter != null){
+			mListViewAdapter.notifyDataSetChanged();
+		}
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		
+		if(mListView != null){
+			mListView.complete();
+		}
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			try {
+				Toast.makeText(mActivity, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_CampusListServers:
+			if(result instanceof JSONObject && ((JSONObject)result).has("items")){
+				JSONArray temp = ((JSONObject)result).optJSONArray("items");
+				if(temp != null && temp.length() > 10){
+					mListView.setRemoreable(true);
+				}
+				else{
+					mListView.setRemoreable(false);
+				}
+				if(mIsReadMore){
+					mIsReadMore = false;
+					mDataArr = DataLoader.getInstance().joinJSONArray(mDataArr, temp);
+				}
+				else{
+					mDataArr = temp;
+				}
+			}
+			else{
+				mListView.setRemoreable(false);
+			}
+			if(mListViewAdapter != null){
+				mListViewAdapter.notifyDataSetChanged();
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

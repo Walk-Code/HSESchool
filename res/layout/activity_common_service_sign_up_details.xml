@@ -1,0 +1,62 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/tv_sign_up_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/option_no"
+            android:textColor="#555555"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/btn_look_signup"
+                android:layout_width="140dp"
+                android:layout_height="42dp"
+                android:background="@drawable/btn_orange_button_selector"
+                android:onClick="onSubmitClick"
+                android:text="@string/text_looksingn"
+                android:textColor="#FFF" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linear_give_money_layout"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <Button
+                android:id="@+id/btn_give_money"
+                android:layout_width="140dp"
+                android:layout_height="42dp"
+                android:background="@drawable/btn_red_button_selector"
+                android:onClick="onSubmitClick"
+                android:text="@string/text_online_give_money"
+                android:textColor="#FFF" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

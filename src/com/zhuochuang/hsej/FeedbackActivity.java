@@ -1,0 +1,291 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.layout.CustomCommentView;
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.layout.emoji.EmojiUtils;
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.util.Utils;
+/**
+ * 意见反馈
+ * @author sam
+ *modify kris 
+ *
+ */
+public class FeedbackActivity extends BaseActivity{
+	private PullToRefreshListView mListView;
+	private ChatMsgViewAdapter mListAdapter;
+	private JSONArray mDataArr;
+	private JSONObject mFriendInfo;
+	private int mPageSize = 20, mPageNo = 1;
+	private long mFriendId;
+	
+	private CustomCommentView mCustomCommentView;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		//启动activity时不自动弹出软键盘
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN); 
+        
+		setContentView(R.layout.activity_feedback);
+		
+		if(getIntent().hasExtra("isFeedback") && getIntent().getBooleanExtra("isFeedback", false)){
+			setTitleText(getString(R.string.feedback_title));
+		}
+		if(getIntent().hasExtra("data")){
+			try {
+				mFriendInfo = new JSONObject(getIntent().getStringExtra("data"));
+				if(mFriendInfo != null){
+					if(mFriendInfo.has("fromUser")){
+						JSONObject fromUser = mFriendInfo.optJSONObject("fromUser");
+						setTitleText(fromUser.optString("nickName"));
+						mFriendId = fromUser.optLong("id");
+					}else {
+						setTitleText(mFriendInfo.optString("nickName"));
+						mFriendId = mFriendInfo.optLong("id");
+					}
+				}
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		initView();
+		mCustomCommentView = (CustomCommentView) findViewById(R.id.custom_commentview);
+	}
+	
+	protected void initView(){
+		mListView = (PullToRefreshListView)findViewById(R.id.listView);
+		mListView.setOnRefreshListener(new OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				if(mFriendInfo != null){
+					HashMap<String, Object> params = new HashMap<String, Object>();
+					params.put("fromId", mFriendId);
+					params.put("pageSize", mPageSize);
+					params.put("pageNo", mPageNo);
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MessageListChat, params, FeedbackActivity.this);
+				}else {
+					HashMap<String, Object> params = new HashMap<String, Object>();
+					params.put("pageSize", mPageSize);
+					params.put("pageNo", mPageNo);
+					params.put("resourceType", "14");
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MessageListAdminMsgs, params, FeedbackActivity.this);
+				}
+			}
+		});
+		JSONObject userInfo = DataLoader.getInstance().getUserInfoObj();
+		
+		String fromId = "";
+		String fromHeader = "";
+		if(userInfo != null){
+			fromId = userInfo.optString("id");
+			fromHeader = userInfo.optString("headImage");
+		}
+		mListAdapter = new ChatMsgViewAdapter(this, fromId, fromHeader);
+		if(mFriendInfo != null){
+			mListAdapter.setMsgType(0);
+		}
+		else{
+			mListAdapter.setMsgType(14);
+		}
+		mListView.setAdapter(mListAdapter);
+		mListView.startRefresh();
+		
+	}
+	
+	public void onSendClick(View v){
+		if(!Utils.isInternetAvaiable(FeedbackActivity.this)){
+			Toast.makeText(FeedbackActivity.this, getResources().getString(R.string.internet_avaiable_false), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		String sendMsg = mCustomCommentView.getEditView().getText().toString();
+		if(sendMsg == null || sendMsg.length() == 0 || sendMsg.replaceAll(" ", "").length() == 0){
+			Toast.makeText(this, getString(R.string.feedback_please_input), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		showDialogCustom(DIALOG_CUSTOM);
+			
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		if(mFriendInfo != null){//向好友发送信息
+			params.put("toResource", "1");
+			params.put("toId", mFriendId);
+		}else {
+			params.put("toResource", "14");
+		}
+		params.put("content", EmojiUtils.convertToUnicode(sendMsg));
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MessageSendMsg, params, FeedbackActivity.this);
+	}
+	
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		if(ev.getAction() == MotionEvent.ACTION_DOWN){
+			View view = getCurrentFocus();
+			if(isShouldHideInput(view, ev)){
+				InputMethodManager manager = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+				if(view != null && manager != null){
+					manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+				}
+			}
+		}
+		return super.dispatchTouchEvent(ev);
+	}
+	
+	private  boolean isShouldHideInput(View v, MotionEvent event) {  
+		
+        if (v != null && (v instanceof EditText)) {  
+        	View parent = (View)v.getParent();//获取EditText所在父控件
+            int[] leftTop = { 0, 0 };  
+            //当前的location位置  
+            parent.getLocationInWindow(leftTop);  
+            int left = leftTop[0];  
+            int top = leftTop[1];  
+            int bottom = top + parent.getHeight();  
+            int right = left + parent.getWidth();  
+            if (event.getX() > left && event.getX() < right  
+                    && event.getY() > top && event.getY() < bottom) {  
+                // 点击的是parent区域，保留点击EditText的事件  
+                return false;  
+            }
+        }  
+        return true;  
+    }
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		
+		if(mListView != null){
+			mListView.onRefreshComplete();
+		}
+		removeDialogCustom();
+       
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		switch (type) {
+		case TaskOrMethod_MessageListChat:
+			if(result instanceof JSONObject && ((JSONObject) result).has("items")){
+				if(mPageNo == 1){
+					mDataArr = null;
+				}
+				JSONArray newArr = ((JSONObject) result).optJSONArray("items"); 
+				if(newArr != null && newArr.length() > 0){
+					EmojiUtils.replaceEmoji(newArr);
+					int lastIndex = newArr.length();
+					mDataArr = DataLoader.getInstance().joinJSONArray(newArr, mDataArr);
+					
+					mListAdapter.setData(mDataArr);
+					mListAdapter.notifyDataSetChanged();
+					
+					if(mPageNo == 1){
+						mListView.setSelection(mDataArr.length() - 1);
+					}else {
+						mListView.setSelection(lastIndex - 1);
+					}
+
+					mPageNo ++;
+				}
+			}
+			
+			break;
+		case TaskOrMethod_MessageListAdminMsgs:
+			if(result instanceof JSONObject && ((JSONObject) result).has("items")){
+				
+				if(mPageNo == 1){
+					mDataArr = null;
+				}
+				JSONArray newArr = ((JSONObject) result).optJSONArray("items"); 
+				if(newArr != null && newArr.length() > 0){
+					EmojiUtils.replaceEmoji(newArr);
+					int lastIndex = newArr.length();
+					mDataArr = DataLoader.getInstance().joinJSONArray(newArr, mDataArr);
+					
+					mListAdapter.setData(mDataArr);
+					mListAdapter.notifyDataSetChanged();
+					
+					if(mPageNo == 1){
+						mListView.setSelection(mDataArr.length() - 1);
+					}else {
+						mListView.setSelection(lastIndex - 1);
+					}
+
+					mPageNo ++;
+				}
+			}
+			break;
+		case TaskOrMethod_MessageSendMsg:
+			if(result instanceof JSONObject && ((JSONObject) result).has("item")){
+				
+				if(mCustomCommentView != null){
+					mCustomCommentView.resetCustomEditview(FeedbackActivity.this);
+				}
+				//Utils.removeSoftKeyboard(this);
+				JSONObject tempObj = ((JSONObject) result).optJSONObject("item");
+				
+				if(tempObj != null){
+					EmojiUtils.replaceEmoji(tempObj);
+					JSONObject newMsg = new JSONObject();
+					try {
+						newMsg.put("id", tempObj.optString("id"));
+						newMsg.put("createDate", tempObj.optString("createDate"));
+						newMsg.put("content", tempObj.optString("content"));
+						
+						String fromId = "";
+						String fromName = "";
+						JSONObject userInfo = DataLoader.getInstance().getUserInfoObj();
+						if(userInfo != null){
+							fromId = userInfo.optString("id");
+							fromName = userInfo.optString("headImage");
+						}
+						JSONObject fromUser = new JSONObject();
+						fromUser.put("id", fromId);
+						fromUser.put("nickName", fromName);
+						newMsg.put("fromUser", fromUser);
+						
+						if(mDataArr == null){
+							mDataArr = new JSONArray();
+						}
+						mDataArr.put(newMsg);
+						mListAdapter.setData(mDataArr);
+						mListAdapter.notifyDataSetChanged();
+						mListView.setSelection(mDataArr.length() - 1);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			break;
+		
+			default:
+				break;
+		}
+	}
+}

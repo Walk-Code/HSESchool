@@ -1,0 +1,263 @@
+package com.model;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Color;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+/**
+ * 自定义通用类型，
+ * @author kris
+ *
+ */
+@SuppressLint({ "DefaultLocale", "UseSparseArrays" })
+public class DefineHandler {
+
+	/**
+	 * native service code
+	 * 服务类型
+	 */
+	static final HashMap<String, NativeType> mNativeTypeMap = new HashMap<String, NativeType>(){
+		private static final long serialVersionUID = 1L;
+        {
+        	put("service_mlhs", NativeType.Type_BeautyHs);
+        	put("service_rxbl", NativeType.Type_RXBL);
+        	put("service_kcb", NativeType.Type_KCB);
+        	put("service_ykt", NativeType.Type_YKT);
+        	put("service_slj", NativeType.Type_SLJ);
+        	put("service_essc", NativeType.Type_ESSC);
+        	put("service_swzl", NativeType.Type_SWZL);
+        	put("service_zpfw", NativeType.Type_ZPFW);
+        	put("service_tyfw", NativeType.Type_TYFW);
+        }
+	};
+	
+	public static NativeType getNativeType(String typeStr){
+		if(typeStr == null || typeStr.length() == 0){
+			return NativeType.Type_Unknown;
+		}
+		
+		if(mNativeTypeMap.containsKey(typeStr.toLowerCase())){
+			return mNativeTypeMap.get(typeStr.toLowerCase());
+		}
+		
+		return NativeType.Type_Unknown;
+	}
+	
+	/**
+	 * 资源类型
+	 * 
+	 */
+	static final HashMap<Integer, ResourceType> mResouceTypeMap = new HashMap<Integer, ResourceType>(){
+		private static final long serialVersionUID = 1L;
+        {
+        	put(0, ResourceType.Type_AdminUserEntity);
+        	put(1, ResourceType.Type_UserEntity);
+        	put(2, ResourceType.Type_CommunityEntity);
+        	put(3, ResourceType.Type_ActivityEntity);
+        	put(4, ResourceType.Type_InformationEntity);
+        	put(5, ResourceType.Type_CampusServersEntity);
+        	put(6, ResourceType.Type_DiscussionEntity);
+        	put(7, ResourceType.Type_PicturewallsEntity);
+        	put(8, ResourceType.Type_HobbyGroupEntity);
+        	put(9, ResourceType.Type_PostEntity);
+        	put(10, ResourceType.Type_MessageEntity);
+        	put(13, ResourceType.Type_ConsultationEntity);
+        	put(14, ResourceType.Type_FeedbackEntity);
+        }
+	};
+	
+	public static ResourceType getResourceType(int resourceType){
+		if(mResouceTypeMap.containsKey(resourceType)){
+			return mResouceTypeMap.get(resourceType);
+		}
+		
+		return ResourceType.Type_Unknown;
+	}
+	
+	/**
+	 * mResouceTypeMap
+	 * 
+	 * AdminUserEntity
+		0	系统
+	UserEntity
+		1	用户
+	CommunityEntity
+		2	社团
+	ActivityEntity
+		3	活动
+	InformationEntity
+		4	资讯
+	CampusServersEntity
+		5	服务
+	DiscussionEntity
+		6	评论
+	PicturewallsEntity
+		7	图片墙
+	HobbyGroupEntity
+		8	兴趣组
+	PostEntity
+		9	帖子
+	MessageEntity
+		10	消息
+	ConsultationEntity
+		13	在线咨询
+	FeedbackEntity
+		14	意见反馈
+	 */
+	
+	
+	/**
+	 * 1.蓝   #6cd0f7  
+		2.红   #f47a5d  #de504f
+		3.绿   #7cc007
+		4.紫   #9996c9
+		5.灰   #6e7da6
+		6.橘   #6e7da6
+		7.粉   #ea6a8d
+		8.青   #2dbfbc
+	 */
+	
+	static final HashMap<Integer, String> mSurveyColorMap = new HashMap<Integer, String>(){
+		private static final long serialVersionUID = 1L;
+        {
+        	put(0, "#6cd0f7");
+        	put(1, "#de504f");
+        	put(2, "#7cc007");
+        	put(3, "#9996c9");
+        	put(4, "#6e7da6");
+        	put(5, "#6e7da6");
+        	put(6, "#ea6a8d");
+        	put(7, "#2dbfbc");
+        }
+	};
+	
+	public static int getSurveyColor(int position){
+		return Color.parseColor(mSurveyColorMap.get(position % 8));
+	}
+	
+	
+	/**
+	 * 获取未读消息通知数字典
+	 * @param context
+	 * @return
+	 */
+	
+	public static JSONObject getMsgNotifyObj(Context context){
+		try {
+			String msgNotify = SharedPreferenceHandler.getMsgNotify(context);
+			return new JSONObject(msgNotify);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return null;
+	}
+	
+	public static final String MsgType_Msg = "msg";
+	public static final String MsgType_FriendContact = "friend";
+	public static final String MsgType_FriendChat = "chat";
+	public static final String MsgType_Integral = "integral";
+	
+	/**
+	 * 根据类型获取未读消息数
+	 * @param context
+	 * @param type
+	 * @return
+	 */
+	public static int getMsgNotifyType(Context context, String type){
+		if(type == null || type.length() == 0){
+			return 0;
+		}
+		
+		JSONObject obj = getMsgNotifyObj(context);
+		if(obj == null || !obj.has(type)){
+			return 0;
+		}
+		
+		return obj.optInt(type);
+	}
+	
+	/**
+	 * 更新某类型的未读通知数
+	 * @param context
+	 * @param type
+	 * @param isClear 是否清空
+	 */
+	public static void updateMsgNotify(Context context, String type){
+		JSONObject obj = getMsgNotifyObj(context);
+		if(obj == null){
+			obj = new JSONObject();
+		}
+		try {
+			obj.put(type, 0);
+			SharedPreferenceHandler.saveMsgNotify(context, obj.toString());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 是否显示我的好友红点
+	 * @param context
+	 * @return
+	 */
+	public static boolean isMsgMyfriendVisible(Context context){
+		JSONObject obj = getMsgNotifyObj(context);
+		if(obj == null){
+			return false;
+		}
+		
+		if(!obj.has("friend") && !obj.has("chat")){
+			return false;
+		}
+		if(obj.optInt("friend", 0) == 0 && obj.optInt("chat", 0) == 0){
+			return false;
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * 判断个人中心tabbar是否显示红点
+	 * @param context
+	 * @return
+	 */
+	public static int getAllUnreadCount(Context context){
+		JSONObject obj = getMsgNotifyObj(context);
+		if(obj == null){
+			return 0;
+		}
+		if(!obj.has("msg") && !obj.has("friend") && !obj.has("chat")){
+			return 0;
+		}
+		
+		if(obj.optInt("msg", 0) == 0 && obj.optInt("friend", 0) == 0 && obj.optInt("chat", 0) == 0){
+			return 0;
+		}
+		
+		return 1;
+	}
+	
+	/**
+	 * 课程表 双格下划线
+	 */
+	
+	public static ArrayList<Integer> mKcbLineList = null;
+	
+	public static ArrayList<Integer> getKcbLineList(){
+		if(mKcbLineList == null){
+			mKcbLineList = new ArrayList<Integer>();
+			mKcbLineList.add(2);
+			mKcbLineList.add(4);
+			mKcbLineList.add(6);
+			mKcbLineList.add(8);
+			mKcbLineList.add(10);
+		}
+		return mKcbLineList;
+	}
+}

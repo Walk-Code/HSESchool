@@ -1,0 +1,294 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRemoreListener;
+import com.layout.emoji.EmojiTextView;
+import com.layout.emoji.EmojiUtils;
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.util.MD5;
+import com.util.Utils;
+
+public class MyMessageActivity extends BaseActivity{
+	private PullToRefreshListView mListView;
+	private ContentAdapter mListAdapter;
+	private JSONArray mMsgArr;
+	private int mPageNo = 1;
+	private boolean mIsReadMore = false;
+	private ViewGroup mHeaderMsgNotifyView;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		
+		setContentView(R.layout.activity_my_message);
+		initView();
+	}
+	
+	protected void initView(){
+		((TextView)findViewById(R.id.textview_title)).setText(getString(R.string.message_title));
+		mListAdapter = new ContentAdapter() {
+			
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if(convertView == null){
+					convertView = ViewGroup.inflate(MyMessageActivity.this, R.layout.listcell_mymsg, null);
+				}
+				JSONObject obj = mMsgArr.optJSONObject(position);
+				if(obj != null){
+					((EmojiTextView)convertView.findViewById(R.id.textview_content)).setEmojiText(obj.optString("content"));
+					((TextView)convertView.findViewById(R.id.textview_date)).setText(Utils.friendlyTime(MyMessageActivity.this, obj.optLong("createDate")));
+					JSONObject fromUser = null;
+					JSONObject resouce = null;
+					if(obj.has("resource")){
+						resouce = obj.optJSONObject("resource");
+						if(resouce != null){
+							((EmojiTextView)convertView.findViewById(R.id.textview_title)).setEmojiText(resouce.has("xm") ? resouce.optString("xm") : resouce.optString("name"));
+							ImageLoader.getInstance().displayImage(resouce.has("headImage") ? resouce.optString("headImage") : resouce.optString("image"), 
+									((ImageView)convertView.findViewById(R.id.imageview)), resouce.has("xm") ? ImageLoaderConfigs.displayImageOptionsRound : ImageLoaderConfigs.displayImageOptionsBg);
+							//ImageLoader.getInstance().displayImage(resouce.has("headImage") ? resouce.optString("headImage") : resouce.optString("image"), 
+							//		((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsRound);
+							
+						}
+					}
+					else if(obj.has("fromUser")){
+						fromUser = obj.optJSONObject("fromUser");
+						if(fromUser != null){
+							((EmojiTextView)convertView.findViewById(R.id.textview_title)).setEmojiText(fromUser.optString("xm"));
+							ImageLoader.getInstance().displayImage(fromUser.optString("headImage"), 
+									((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsRound);
+						}
+					}
+					else{
+						switch (obj.optInt("fromResource")) {
+						case 1:
+							ImageLoader.getInstance().displayImage("", 
+									((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsRound);
+							break;
+
+						default:
+							break;
+						}
+					}
+					
+					switch (obj.optInt("fromResource")) {
+					case 0:
+						convertView.findViewById(R.id.textview_content).setVisibility(View.GONE);
+						((EmojiTextView)convertView.findViewById(R.id.textview_title)).setEmojiText(obj.optString("content"));
+						ImageLoader.getInstance().displayImage("", 
+								((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptions);
+						((ImageView)convertView.findViewById(R.id.imageview)).setBackgroundResource(R.drawable.information_system);
+						break;
+					case 13:
+						convertView.findViewById(R.id.textview_content).setVisibility(View.GONE);
+						((EmojiTextView)convertView.findViewById(R.id.textview_title)).setEmojiText(obj.optString("content"));
+						ImageLoader.getInstance().displayImage("", 
+								((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptions);
+						((ImageView)convertView.findViewById(R.id.imageview)).setBackgroundResource(R.drawable.consultationicon);
+						break;
+					case 14:
+						convertView.findViewById(R.id.textview_content).setVisibility(View.GONE);
+						((EmojiTextView)convertView.findViewById(R.id.textview_title)).setEmojiText(obj.optString("content"));
+						ImageLoader.getInstance().displayImage("", 
+								((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptions);
+						((ImageView)convertView.findViewById(R.id.imageview)).setBackgroundResource(R.drawable.feedbackicon);
+						break;
+
+					default:
+						convertView.findViewById(R.id.textview_content).setVisibility(View.VISIBLE);
+						((ImageView)convertView.findViewById(R.id.imageview)).setBackgroundResource(0);
+						break;
+					}
+					
+					if(obj.has("status") && obj.optString("status").equalsIgnoreCase("10")){
+						convertView.findViewById(R.id.view_unread).setVisibility(View.GONE);
+					}
+					else{
+						convertView.findViewById(R.id.view_unread).setVisibility(View.VISIBLE);
+					}
+				}
+				return convertView;
+			}
+			
+			@Override
+			public int getCount() {
+				return mMsgArr == null ? 0 : mMsgArr.length();
+			}
+		};
+		mListView = (PullToRefreshListView) findViewById(R.id.pullto_listview);
+		mHeaderMsgNotifyView = (ViewGroup) ViewGroup.inflate(MyMessageActivity.this, R.layout.header_my_chat, null);
+		((TextView)mHeaderMsgNotifyView.findViewById(R.id.textview_msgnull)).setText(getResources().getString(R.string.message_null));
+		mHeaderMsgNotifyView.setVisibility(View.GONE);
+		mListView.addHeaderView(mHeaderMsgNotifyView, null, false);
+		mListView.setAdapter(mListAdapter);
+		mListView.setOnRefreshListener(new PullToRefreshListView.OnRefreshListener() {
+			
+			@Override
+			public void onRefresh() {
+				// TODO Auto-generated method stub
+				mPageNo = 1;
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("pageNo", mPageNo);
+				params.put("pageSize", 20);
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MessageClassifiedMsgs, params, MyMessageActivity.this);
+			}
+		});
+		mListView.setRemoreable(false);
+		mListView.setOnRemoreListener(new OnRemoreListener() {
+			
+			@Override
+			public void onRemore() {
+				// TODO Auto-generated method stub
+				mPageNo++;
+				mIsReadMore = true;
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("pageNo", mPageNo);
+				params.put("pageSize", 20);
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MessageClassifiedMsgs, params, MyMessageActivity.this);
+			}
+		});
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				JSONObject obj = mMsgArr.optJSONObject(position - 2);
+				if(obj != null){
+					if(!obj.has("status") || !obj.optString("status").equalsIgnoreCase("10")){
+						try {
+							obj.put("status", "10");
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						view.findViewById(R.id.view_unread).setVisibility(View.GONE);
+						HashMap<String, Object> params = new HashMap<String, Object>();
+						params.put("messageId", obj.optString("id"));
+						params.put("status", "11");
+						params.put("resourceType", obj.optString("fromResource"));
+						DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MessageUpdateMsgStatus, params, MyMessageActivity.this);
+					}
+					Intent intent = null;
+					switch (obj.optInt("fromResource")) {
+					case 0:
+						intent = new Intent(MyMessageActivity.this, SystemAnnouncementActivity.class);
+						startActivity(intent);
+						break;
+					case 13:
+						intent = new Intent(MyMessageActivity.this, OnlineConsultActivity.class);
+						intent.putExtra("resourceType", 13);
+						startActivity(intent);
+						break;
+					case 14:
+						intent = new Intent(MyMessageActivity.this, FeedbackActivity.class);
+						intent.putExtra("isFeedback", true);
+						startActivity(intent);
+						break;
+					default:
+						if(!obj.has("resource") && !obj.has("fromUser")){
+							intent = new Intent(MyMessageActivity.this, FeedbackActivity.class);
+							intent.putExtra("data", obj.toString());
+							startActivity(intent);
+							return;
+						}
+						DataLoader.getInstance().openResourceMsg(MyMessageActivity.this, obj.optInt("fromResource"), obj.has("resource")? obj.optJSONObject("resource") : obj.optJSONObject("fromUser"));
+						break;
+					}
+				}
+			}
+		});
+		mListView.startRefresh();
+	}
+	
+	private void setViewStatus(ViewGroup viewGroup, int visible){
+		for(int i = 0; i < viewGroup.getChildCount(); i++){
+			View view = viewGroup.getChildAt(i);
+			view.setVisibility(visible);
+		}
+		viewGroup.setVisibility(visible);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		if(mListView != null){
+			mListView.complete();
+		}
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error && type != TaskType.TaskOrMethod_MessageUpdateMsgStatus){
+			try {
+				Toast.makeText(this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_MessageClassifiedMsgs:
+			if(result instanceof JSONObject && ((JSONObject) result).has("items")){
+				JSONArray temp = ((JSONObject)result).optJSONArray("items");
+				if(temp != null && temp.length() > 19){
+					mListView.setRemoreable(true);
+				}
+				else{
+					mListView.setRemoreable(false);
+				}
+				EmojiUtils.replaceEmoji(temp);
+				if(mIsReadMore){
+					mIsReadMore = false;
+					mMsgArr = DataLoader.getInstance().joinJSONArray(mMsgArr, temp);
+				}
+				else{
+					mMsgArr = temp;
+				}
+			}
+			else{
+				mListView.setRemoreable(false);
+			}
+			
+			if(mMsgArr == null || mMsgArr.length() == 0){
+				//mHeaderMsgNotifyView.setVisibility(View.VISIBLE);
+				setViewStatus(mHeaderMsgNotifyView, View.VISIBLE);
+			}
+			else{
+				//mHeaderMsgNotifyView.setVisibility(View.GONE);
+				setViewStatus(mHeaderMsgNotifyView, View.GONE);
+			}
+			if(mListAdapter != null){
+				mListAdapter.notifyDataSetChanged();
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

@@ -1,0 +1,189 @@
+package com.zhuochuang.hsej;
+
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.model.DataLoader;
+import com.model.DefineHandler;
+import com.model.EventManager;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.Utils;
+
+@SuppressLint("InflateParams")
+public class MyCenterFragment extends BaseFragment{
+
+	boolean mIsLogin = true;
+	
+	JSONObject mUserInfoObj;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		mMainLayout = (ViewGroup) LayoutInflater.from(getActivity()).inflate(R.layout.fragment_mycenter, null);
+	}
+	
+	private void initLoginStatue(){
+		mUserInfoObj = DataLoader.getInstance().getUserInfoObj();
+		if(mUserInfoObj != null){
+			mMainLayout.findViewById(R.id.mycenter_logined_layout).setVisibility(View.VISIBLE);
+			((TextView)mMainLayout.findViewById(R.id.mycenter_desc)).setTextColor(Color.WHITE);
+			((TextView)mMainLayout.findViewById(R.id.mycenter_name)).setText(DataLoader.getInstance().getUsetInfoKey("nickName"));
+			((TextView)mMainLayout.findViewById(R.id.mycenter_desc)).setText(
+					String.format(mActivity.getResources().getString(R.string.mycenter_usermsg), 
+							DataLoader.getInstance().getUsetInfoKey("bjmc"), 
+							DataLoader.getInstance().getUsetInfoKey("honoraryTitle")));
+			
+			((TextView)mMainLayout.findViewById(R.id.textview_integral)).setText(DataLoader.getInstance().getUsetInfoKey("integral"));
+			
+			ImageLoader.getInstance().displayImage(DataLoader.getInstance().getUsetInfoKey("headImage"), 
+			     ((ImageView)mMainLayout.findViewById(R.id.mycenter_imageview_header)), ImageLoaderConfigs.displayImageOptionsRoundCenter);
+		}
+		else{
+			mMainLayout.findViewById(R.id.mycenter_logined_layout).setVisibility(View.GONE);
+			((TextView)mMainLayout.findViewById(R.id.mycenter_desc)).setTextColor(Color.argb(255, 239, 212, 205));
+			((TextView)mMainLayout.findViewById(R.id.mycenter_name)).setText(mActivity.getResources().getString(R.string.mycenter_login));
+			((TextView)mMainLayout.findViewById(R.id.mycenter_desc)).setText(mActivity.getResources().getString(R.string.mycenter_login_notify));
+			ImageLoader.getInstance().displayImage("", 
+				     ((ImageView)mMainLayout.findViewById(R.id.mycenter_imageview_header)), ImageLoaderConfigs.displayImageOptionsRoundCenter);
+		}
+	}
+
+	public void onMycenterClick(View v) {
+		switch (v.getId()) {
+		case R.id.mycenter_imageview_header_layout:
+			//startActivity(new Intent(mActivity, FriendPageActivity.class));
+			if(mUserInfoObj != null){
+				startActivity(new Intent(mActivity, MyPageActivity.class));
+				//startActivity(new Intent(mActivity, PersonPageActivity.class));
+			}
+			else{
+				startActivity(new Intent(mActivity, LoginActivity.class));
+				mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+			}
+			break;
+		case R.id.mycenter_message:
+			startActivity(new Intent(mActivity, MyMessageActivity.class));
+			//mMainLayout.findViewById(R.id.icon_unread_msg).setVisibility(View.GONE);
+			//DefineHandler.updateMsgNotify(mActivity, DefineHandler.MsgType_Msg);
+			EventManager.getInstance().sendMessage(EventManager.EventType_MsgChange, new Object());
+			break;
+		case R.id.mycenter_friends:
+			Intent intent = new Intent(mActivity, MyFriendsActivity.class);
+			startActivity(intent);
+			break;
+		case R.id.mycenter_post:
+			startActivity(new Intent(mActivity, MyPostActivity.class));
+			break;
+		case R.id.mycenter_integral:
+			startActivity(new Intent(mActivity, MyIntegralActivity.class));
+			//mMainLayout.findViewById(R.id.icon_unread_integral).setVisibility(View.GONE);
+			break;
+		case R.id.mycenter_collect:
+			startActivity(new Intent(mActivity, MyFavoriteActivity.class));
+			break;
+		case R.id.mycenter_card:
+			startActivity(new Intent(mActivity, MyCardActivity.class));
+			break;
+		case R.id.mycenter_changepass:
+			startActivity(new Intent(mActivity, ChangePasswordActivity.class));
+			break;
+		case R.id.mycenter_setting:
+			if(mUserInfoObj != null){
+				startActivity(new Intent(mActivity, SettingActivity.class));
+			}
+			else{
+				startActivity(new Intent(mActivity, LoginActivity.class));
+				mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+			}
+			break;
+		case R.id.mycenter_about:
+			intent = new Intent(mActivity, WebViewActivity.class);
+			String url = DataLoader.getInstance().getSettingKey("aboutUrl");
+			if(url != null){
+				url += url.contains("?") ? "&version=" : "?version=";
+				intent.putExtra("url", url + Utils.getVersionName(mActivity)+"("+Utils.getVersionNumber(mActivity)+")");
+				startActivity(intent);
+			}
+			break;
+		case R.id.mycenter_feedback:
+			if(mUserInfoObj != null){
+				intent = new Intent(mActivity, FeedbackActivity.class);
+				intent.putExtra("isFeedback", true);
+				startActivity(new Intent(intent));
+			}
+			else{
+				startActivity(new Intent(mActivity, LoginActivity.class));
+				mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+	
+	private void notifyChangeUnreadStatu(){
+		if(DefineHandler.getMsgNotifyType(mActivity, DefineHandler.MsgType_Msg) != 0){
+			mMainLayout.findViewById(R.id.icon_unread_msg).setVisibility(View.VISIBLE);
+		}
+		else{
+			mMainLayout.findViewById(R.id.icon_unread_msg).setVisibility(View.GONE);
+		}
+		
+		if(DefineHandler.isMsgMyfriendVisible(mActivity)){
+			mMainLayout.findViewById(R.id.icon_unread_friend).setVisibility(View.VISIBLE);
+		}
+		else{
+			mMainLayout.findViewById(R.id.icon_unread_friend).setVisibility(View.GONE);
+		}
+		/*if(DefineHandler.getMsgNotifyType(mActivity, DefineHandler.MsgType_Friend) != 0){
+			mMainLayout.findViewById(R.id.icon_unread_friend).setVisibility(View.VISIBLE);
+		}
+		else{
+			mMainLayout.findViewById(R.id.icon_unread_friend).setVisibility(View.GONE);
+		}*/
+		//mMainLayout.findViewById(R.id.icon_unread_msg).setVisibility(View.VISIBLE);
+		//mMainLayout.findViewById(R.id.icon_unread_friend).setVisibility(View.VISIBLE);
+		//mMainLayout.findViewById(R.id.icon_unread_integral).setVisibility(View.VISIBLE);
+	}
+	
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		initLoginStatue();
+		if(DataLoader.getInstance().isLogin()){
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserUntreated, null, MyCenterFragment.this);
+		}
+		else{
+			EventManager.getInstance().sendMessage(EventManager.EventType_MsgChange, new Object());
+		}
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		switch (type) {
+		case TaskOrMethod_UserUntreated:
+			initLoginStatue();
+			notifyChangeUnreadStatu();
+			EventManager.getInstance().sendMessage(EventManager.EventType_MsgChange, new Object());
+			break;
+
+		default:
+			break;
+		}
+	}
+}

@@ -1,0 +1,75 @@
+package com.zhuochuang.hsej;
+
+import com.model.TaskType;
+import com.util.Utils;
+
+import android.graphics.Color;
+import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
+public class MyAccountChangeActivity extends BaseActivity{
+
+	String mLastContent;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_change_usermsg);
+		setTitleText(R.string.myaccount_change_title);
+		mLastContent = getIntent().getStringExtra("content");
+		findViewById(R.id.textview_right_text).setVisibility(View.VISIBLE);
+		findViewById(R.id.textview_right_text).setEnabled(false);
+		((TextView)findViewById(R.id.textview_right_text)).setTextColor(Color.parseColor("#999999"));
+		
+		((EditText)findViewById(R.id.edittext)).setHint(getIntent().getStringExtra("hint"));
+		((EditText)findViewById(R.id.edittext)).setText(mLastContent);
+		
+		((EditText)findViewById(R.id.edittext)).addTextChangedListener(new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+				// TODO Auto-generated method stub
+				String str = ((EditText)findViewById(R.id.edittext)).getText().toString();
+				if(Utils.isTextEmpty(str)){
+					findViewById(R.id.textview_right_text).setEnabled(false);
+					((TextView)findViewById(R.id.textview_right_text)).setTextColor(Color.parseColor("#999999"));
+				}
+				else if(str.equalsIgnoreCase(mLastContent)){
+					findViewById(R.id.textview_right_text).setEnabled(false);
+					((TextView)findViewById(R.id.textview_right_text)).setTextColor(Color.parseColor("#999999"));
+				}
+				else{
+					findViewById(R.id.textview_right_text).setEnabled(true);
+					((TextView)findViewById(R.id.textview_right_text)).setTextColor(Color.parseColor("#d74f51"));
+				}
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+	
+	public void onRightBtnClick(View view){
+		
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+	}
+}

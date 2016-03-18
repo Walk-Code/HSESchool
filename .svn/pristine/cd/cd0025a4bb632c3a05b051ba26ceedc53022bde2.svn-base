@@ -1,0 +1,135 @@
+package com.zhuochuang.hsej.store;
+
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.model.ImageLoaderConfigs;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.zhuochuang.hsej.R;
+
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+
+
+public class SectionedAdapter extends SectionedBaseAdapter {
+	
+	private Context mContext;
+	private String[] leftStr;
+	private Map<String,Object> map;
+	public SectionedAdapter(Context context, String[] leftStr,Map<String,Object> map){
+		this.mContext = context;
+		this.leftStr = leftStr;
+		this.map = map;
+	}
+
+    @Override
+    public Object getItem(int section, int position) {
+        return ((JSONArray)map.get(leftStr[section])).optJSONObject(position);
+    }
+
+    @Override
+    public long getItemId(int section, int position) {
+        return position;
+    }
+
+    @Override
+    public int getSectionCount() {
+        return leftStr.length == 0 ? 0 : leftStr.length;
+    }
+
+    @Override
+    public int getCountForSection(int section) { 
+    	if(((JSONArray)map.get(leftStr[section])).length() == 0){
+    		return 0;
+    	}else if(1 < ((JSONArray)map.get(leftStr[section])).length()){
+    		return ((JSONArray)map.get(leftStr[section])).length()-1;
+    	}else{
+    		return  ((JSONArray)map.get(leftStr[section])).length();
+    	}
+       // return ((JSONArray)map.get(leftStr[section])).length() == 0 ? 0 : ((JSONArray)map.get(leftStr[section])).length()-1;
+    }
+
+    @Override
+    public View getItemView(final int section, final int position, View convertView, ViewGroup parent) {
+        LinearLayout layout = null;
+        if (convertView == null) {
+            //LayoutInflater inflator = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.store_category_right, null);
+        }
+        final JSONArray dataArr = ((JSONArray)map.get(leftStr[section]));       
+       
+        GridViewForListView gridView = (GridViewForListView) convertView.findViewById(R.id.gridView);
+		gridView.setAdapter(new ContentAdapter(){
+			@Override
+			public int getCount() {					
+				return dataArr.length() != 0 ? dataArr.length() : 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				ViewHolder holder;
+				if(convertView == null){
+					holder = new ViewHolder();
+					convertView = LayoutInflater.from(mContext).inflate(R.layout.store_category_grid_item, null);
+					holder.storeImage = (ImageView)convertView.findViewById(R.id.store_category_typeicon);
+					holder.storeName = (TextView)convertView.findViewById(R.id.store_category_typename);
+					convertView.setTag(holder);
+				}else{
+					holder = (ViewHolder) convertView.getTag();
+				}
+				JSONObject obj = dataArr.optJSONObject(position);			
+				ImageLoader.getInstance().displayImage(obj.optString("logo"), holder.storeImage,ImageLoaderConfigs.displayImageOptionsBg);
+				holder.storeName.setText(obj.optString("name"));					
+				return convertView;
+			}
+			
+			class ViewHolder{
+				ImageView storeImage;
+				TextView storeName;
+			}
+		});
+		
+		gridView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				Intent intent = new Intent(mContext,StorePersonActivity.class);
+				intent.putExtra("shopId", ((JSONArray)map.get(leftStr[section])).optJSONObject(position).optString("id"));
+				mContext.startActivity(intent);
+			}			
+		});		
+        return convertView;
+    }
+
+    @Override
+    public View getSectionHeaderView(int section, View convertView, ViewGroup parent) {
+        LinearLayout layout = null;
+        if (convertView == null) {
+            LayoutInflater inflator = (LayoutInflater) parent.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            layout = (LinearLayout) inflator.inflate(R.layout.header_item, null);
+        } else {
+            layout = (LinearLayout) convertView;
+        }
+        layout.setClickable(false);
+        ((TextView) layout.findViewById(R.id.toptype)).setText(leftStr[section]);
+        return layout;
+    }
+
+}

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:descendantFocusability="blocksDescendants" >
+	
+    <LinearLayout
+        android:id="@+id/store_childs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#F8F8F8"
+        android:focusable="false"
+	    android:clickable="false"
+	    android:focusableInTouchMode="false" >
+
+        <CheckBox
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="center_vertical"
+            android:id="@+id/product_check"
+            style="@style/CustomCheckboxTheme"
+            android:layout_marginLeft="12dp"/>
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_margin="5dp"
+            android:src="@drawable/previewpic"
+            android:id="@+id/product_image"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:clickable="false"
+	        android:focusableInTouchMode="false"
+	        android:focusable="false" >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="5dp"
+                android:id="@+id/product_name"
+                android:textColor="#343434"
+                android:clickable="false"
+                android:lines="2"
+                android:ellipsize="end"/>
+            
+            <RelativeLayout 
+			    android:layout_width="match_parent"
+			    android:layout_height="wrap_content"
+			    android:orientation="horizontal"
+			    android:gravity="center_vertical">
+				    
+				    <!-- android:textColor="#BEBEBE" -->
+			    <TextView
+	                android:layout_width="match_parent"
+	                android:layout_height="wrap_content"
+	                android:layout_marginTop="4dp"
+	                android:layout_marginRight="5dp"
+	                android:id="@+id/product_size"
+	                android:textColor="#BEBEBE"
+	                android:clickable="false"
+	                android:layout_alignParentTop="true"
+	                android:layout_alignParentLeft="true"/>	
+                <TextView
+                    android:id="@+id/producter_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="14dp"
+                    android:textSize="15dp"
+                    android:textColor="#DD514F"
+                    android:clickable="false"
+			        android:focusableInTouchMode="false"
+			        android:focusable="false"
+			        android:layout_alignParentRight="true"
+			        android:layout_marginTop="1dp"/>               
+	                			 				    		    
+                <TextView
+                    android:id="@+id/product_markPrice"
+                    android:layout_toLeftOf="@id/producter_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12dp"
+                    android:textColor="#BEBEBE"
+                    android:clickable="false"
+			        android:focusableInTouchMode="false"
+			        android:focusable="false"
+					android:layout_marginRight="10dp"
+	                android:layout_marginTop="5dp" />
+				</RelativeLayout>
+				<RelativeLayout 
+				    android:layout_width="match_parent"
+				    android:layout_height="wrap_content">
+				   <TextView
+		                android:layout_width="wrap_content"
+		                android:layout_height="wrap_content"
+		                android:layout_marginTop="4dp"
+		                android:layout_marginRight="5dp"
+		                android:id="@+id/product_color"
+		                android:textColor="#BEBEBE"
+		                android:clickable="false"
+		                android:layout_alignParentLeft="true"/>
+				 <LinearLayout
+                    android:layout_width="100dp"
+                    android:layout_height="25dp"
+                    android:orientation="horizontal"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/shape_store_car_gridview_item"
+                    android:layout_marginRight="14dp"
+                    android:layout_marginBottom="5dp"
+                    android:descendantFocusability="beforeDescendants"
+                    android:layout_gravity="right|center"> 
+                    <FrameLayout 
+                        android:layout_width="0dp"
+                        android:layout_weight="1.5"
+                        android:layout_height="match_parent">                       
+                    <ImageView
+                        android:id="@+id/product_remove"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:src="@drawable/number_reduce"                       
+                        android:layout_margin="5dp" />
+                    </FrameLayout>                  
+                    <View 
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#B1B1B1"/>
+	                <TextView
+                        android:id="@+id/product_count"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:textColor="#000000"
+                        android:textSize="13sp"
+                        android:layout_weight="2"
+                        android:focusable="false" />
+                     <View 
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="#B1B1B1"/>
+                      <FrameLayout 
+                        android:layout_width="0dp"
+                        android:layout_weight="1.5"
+                        android:layout_height="match_parent">                       
+                    <ImageView
+                        android:id="@+id/product_add"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+						android:src="@drawable/number_add"
+                        android:gravity="center"
+                        android:layout_gravity="center"
+                        android:layout_margin="5dp" />
+                    </FrameLayout>     
+                    
+                </LinearLayout>
+				</RelativeLayout>
+            
+        </LinearLayout>
+    </LinearLayout>
+	<View 
+	    android:layout_width="match_parent"
+	    android:layout_height="5dp"
+	    android:background="#F0F0F0"/>
+</LinearLayout>

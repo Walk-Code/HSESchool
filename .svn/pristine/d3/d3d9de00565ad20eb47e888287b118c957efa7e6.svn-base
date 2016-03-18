@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffff">
+    
+    <TextView 
+   	    android:id="@+id/textview_title"
+   	    android:layout_width="match_parent"
+   		android:layout_height="wrap_content" 
+   		android:layout_marginLeft="15dp"
+   		android:layout_marginRight="15dp"
+   		android:layout_marginTop="15dp"
+   		android:layout_marginBottom="5dp"
+   		android:textSize="17dp"
+   		android:textColor="#2d2d2d"
+   		android:gravity="left|center_vertical"/>
+    
+    <TextView 
+   	    android:id="@+id/textview_date"
+   	    android:layout_width="match_parent"
+   		android:layout_height="wrap_content" 
+   		android:layout_marginLeft="15dp"
+   		android:layout_marginRight="15dp"
+   		android:layout_marginBottom="10dp"
+   		android:textSize="15dp"
+   		android:textColor="#7e7e7e"
+   		android:lineSpacingExtra="3dp"
+   		android:gravity="left|center_vertical"/>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#bebebe"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="#f0f0f0"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#bebebe"/>
+    
+    <RelativeLayout
+           android:layout_width="match_parent"
+           android:layout_height="50dp" >
+        <TextView
+            android:id="@+id/textview_count"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="match_parent" 
+	   		android:layout_alignParentLeft="true"
+	   		android:layout_marginLeft="15dp"
+	   		android:textSize="15dp"
+	   		android:textColor="#dc504f"
+	   		android:gravity="center"/>
+   	    <TextView 
+	   	    android:id="@+id/textview_join"
+	   	    android:layout_width="95dp"
+	   		android:layout_height="40dp" 
+	   		android:layout_centerVertical="true"
+	   		android:layout_alignParentRight="true"
+	   		android:layout_marginRight="10dp"
+	   		android:textSize="16dp"
+	   		android:textColor="#ffffff"
+	   		android:text="@string/activitydetails_join"
+	   		android:background="@drawable/btn_red_button_selector"
+	   		android:clickable="true"
+	   		android:onClick="onJoinClick"
+	   		android:gravity="center"/>
+    </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#dcdcdc"/>
+    
+    <TextView 
+   	    android:layout_width="wrap_content"
+   		android:layout_height="wrap_content" 
+   		android:layout_marginLeft="15dp"
+   		android:layout_marginRight="15dp"
+   		android:layout_marginTop="15dp"
+   		android:textSize="16dp"
+   		android:textColor="#868686"
+   		android:text="@string/activitydetails_hint"
+   		android:gravity="center"/>
+    
+    <com.layout.CustomWebView
+        android:id="@+id/webview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+		android:scrollbars="none"/>
+    
+    <!-- <TextView 
+   	    android:id="@+id/textview_content"
+   	    android:layout_width="match_parent"
+   		android:layout_height="wrap_content" 
+   		android:layout_marginLeft="15dp"
+   		android:layout_marginRight="15dp"
+   		android:layout_marginBottom="15dp"
+   		android:textSize="14dp"
+   		android:textColor="#7d7d7d"
+   		android:gravity="left|center_vertical"/> -->
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#bebebe"/>
+    
+    <LinearLayout
+        android:id="@+id/group_comment"
+	    android:layout_width="match_parent"
+	    android:layout_height="35dp"
+	    android:orientation="horizontal"
+	    android:background="#f0f0f0">
+        <View
+	        android:layout_width="16dp"
+	        android:layout_height="15dp"
+	        android:layout_gravity="center_vertical"
+	        android:layout_marginLeft="15dp"
+	        android:layout_marginRight="5dp"
+	        android:background="@drawable/inform_icon_comment"/>
+        <TextView 
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="match_parent"
+	   		android:textSize="14dp"
+	   		android:textColor="#848484"
+	   		android:text="@string/postdetails_commenttitle"
+	   		android:gravity="left|center_vertical"/>
+    </LinearLayout>
+    
+    <View
+        android:id="@+id/gourp_comment_line"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#bebebe"/>
+
+</LinearLayout>

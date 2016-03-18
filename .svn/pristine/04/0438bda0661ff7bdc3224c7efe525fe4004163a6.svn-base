@@ -1,0 +1,97 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.util.Utils;
+import com.zhuochuang.hsej.entity.EnglishScoreEntity;
+
+public class EnglishScoreQueryActivity extends BaseActivity {
+
+	private EditText etStuName;
+	private EditText etStuNumb;
+	private final int DIALOG_QUERY = 0x10000;
+
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_english_score_query);
+		setTitleText(R.string.text_sljcjcx);
+
+		initView();
+	}
+
+	private void initView() {
+		etStuName = (EditText) findViewById(R.id.english_query_stuname);
+		etStuNumb = (EditText) findViewById(R.id.english_query_stunumb);
+	}
+
+	public void onQueryClick(View view) {
+		String stuName = etStuName.getText().toString();
+		String stuNumb = etStuNumb.getText().toString();
+
+		String[] noticeMessage = getResources().getStringArray(
+				R.array.english_score_query_notice);
+		if (TextUtils.isEmpty(stuName)) {
+			Toast.makeText(this, noticeMessage[0], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(stuNumb)) {
+			Toast.makeText(this, noticeMessage[1], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		HashMap<String, Object> stuParams = new HashMap<String, Object>();
+		stuParams.put("xm", stuName);
+		stuParams.put("zkzh", stuNumb);
+		showDialogCustom(DIALOG_QUERY);
+		Utils.removeSoftKeyboard(EnglishScoreQueryActivity.this);
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_GetEnglishScore, stuParams, this);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		removeDialogCustom();
+		if (result == null)
+			return;
+		if (result instanceof Error) {
+			Toast.makeText(this, ((Error) result).getMessage(),
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_GetEnglishScore:
+			if ("1".equals(((JSONObject) result).optString("result").toString())) {
+				Gson gson = new Gson();
+				EnglishScoreEntity mScoreEntity = gson.fromJson(
+						((JSONObject) result).optString("item"),
+						EnglishScoreEntity.class);
+				Intent intent = new Intent(this,
+						EnglishScoreQueryResultActivity.class);
+				Bundle bundle = new Bundle();
+				bundle.putSerializable("score_entity", mScoreEntity);
+				intent.putExtras(bundle);
+				startActivity(intent);
+			} else {
+				Toast.makeText(this, ((JSONObject) result).optString("msg"),
+						Toast.LENGTH_SHORT).show();
+				finish();
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <declare-styleable name="CustomListCell">
+        <attr name="showButton" format="boolean"/>
+        <attr name="showArrow" format="boolean"/>
+    </declare-styleable>
+    
+    <declare-styleable name="CircleImageView">
+        <attr name="border_width" format="dimension" />
+        <attr name="border_color" format="color" />
+        <attr name="border_overlay" format="boolean" />
+    </declare-styleable>
+    
+    <!-- roundprogress -->
+    <declare-styleable name="RoundCornerProgress">
+        <attr name="rcReverse" format="boolean" />
+        <attr name="rcProgress" format="float" />
+        <attr name="rcBackgroundPadding" format="dimension" />
+        <attr name="rcBackgroundRadius" format="dimension" />
+        <attr name="rcMax" format="float" />
+        <attr name="rcIconSrc" format="integer" />
+        <attr name="rcIconSize" format="dimension" />
+        <attr name="rcIconPadding" format="dimension" />
+        <attr name="rcIconPaddingRight" format="dimension" />
+        <attr name="rcIconPaddingLeft" format="dimension" />
+        <attr name="rcIconPaddingTop" format="dimension" />
+        <attr name="rcIconPaddingBottom" format="dimension" />
+        <attr name="rcHeaderColor" format="color" />
+        <attr name="rcProgressColor" format="color" />
+        <attr name="rcBackgroundColor" format="color" />
+        <attr name="rcTextProgressColor" format="color" />
+        <attr name="rcTextProgress" format="string" />
+        <attr name="rcTextProgressUnit" format="string" />
+        <attr name="rcTextProgressSize" format="dimension" />
+        <attr name="rcTextProgressWidth" format="dimension" />
+        <attr name="rcTextProgressPadding" format="dimension" />
+        <attr name="rcAutoTextChange" format="boolean" />
+        <attr name="rcSecondaryProgress" format="float" />
+        <attr name="rcSecondaryProgressColor" format="color" />
+    </declare-styleable>
+</resources>

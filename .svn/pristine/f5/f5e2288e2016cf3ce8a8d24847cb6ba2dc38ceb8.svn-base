@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    <EditText
+        android:id="@+id/editview_oldpass"
+        android:layout_width="match_parent"
+    	android:layout_height="40dp"
+    	android:paddingLeft="5dp"
+    	android:paddingRight="5dp"
+    	android:background="@drawable/bg_loginlayout"
+    	android:layout_marginLeft="25dp"
+    	android:layout_marginRight="25dp"
+    	android:layout_marginTop="30dp"
+    	android:singleLine="true"
+    	android:textSize="15dp"
+    	android:textColor="#282828"
+    	android:textColorHint="#c0c0c0"
+    	android:hint="@string/changepass_old"/>
+    <EditText
+        android:id="@+id/editview_newpass"
+        android:layout_width="match_parent"
+    	android:layout_height="40dp"
+    	android:paddingLeft="5dp"
+    	android:paddingRight="5dp"
+    	android:background="@drawable/bg_loginlayout"
+    	android:layout_marginLeft="25dp"
+    	android:layout_marginRight="25dp"
+    	android:layout_marginTop="10dp"
+    	android:singleLine="true"
+    	android:textSize="15dp"
+    	android:textColor="#282828"
+    	android:textColorHint="#c0c0c0"
+    	android:hint="@string/changepass_new"/>
+    <EditText
+        android:id="@+id/editview_newpass_repetition"
+        android:layout_width="match_parent"
+    	android:layout_height="40dp"
+    	android:paddingLeft="5dp"
+    	android:paddingRight="5dp"
+    	android:background="@drawable/bg_loginlayout"
+    	android:layout_marginLeft="25dp"
+    	android:layout_marginRight="25dp"
+    	android:layout_marginTop="10dp"
+    	android:singleLine="true"
+    	android:textSize="15dp"
+    	android:textColor="#282828"
+    	android:textColorHint="#c0c0c0"
+    	android:hint="@string/changepass_new_re"/>
+    
+    <TextView 
+   	    android:id="@+id/textview_commit"
+   	    android:layout_width="match_parent"
+   		android:layout_height="40dp" 
+   		android:layout_marginLeft="25dp"
+   		android:layout_marginRight="25dp"
+   		android:layout_marginTop="15dp"
+   		android:textSize="17dp"
+   		android:textColor="#ffffff"
+   		android:text="@string/commit"
+   		android:background="@drawable/btn_red_button_selector"
+   		android:clickable="true"
+   		android:onClick="onCommitClick"
+   		android:gravity="center"/>
+
+</LinearLayout>

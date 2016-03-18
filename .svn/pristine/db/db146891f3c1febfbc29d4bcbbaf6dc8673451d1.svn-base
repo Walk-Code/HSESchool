@@ -1,0 +1,177 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.util.Utils;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class PhoneBindingActivity extends BaseActivity{
+
+	JSONObject mDataObj;
+	JSONObject mAuthCodeObj;
+	CountDownTimer mCountDownTimer;
+	String mAuthCode = null;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_phonebinding);
+		
+		String phone = getIntent().getStringExtra("phone");
+		
+		setTitleText(!Utils.isTextEmpty(phone)? R.string.my_homepage_changephone : R.string.my_homepage_bindingphone);
+		((EditText)findViewById(R.id.editview_pahone)).setText(phone);
+		
+		((EditText)findViewById(R.id.editview_pahone)).addTextChangedListener(new TextWatcher() {
+			
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+				// TODO Auto-generated method stub
+				mAuthCodeObj = null;
+				mAuthCode = null;
+				((EditText)findViewById(R.id.editview_authcode)).setText("");
+				if(mCountDownTimer != null){
+					mCountDownTimer.cancel();
+				}
+				findViewById(R.id.textview_seconds).setEnabled(true);
+				((TextView)findViewById(R.id.textview_seconds)).setText(getResources().getString(R.string.passwordauthcode_hint1));
+			}
+			
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void afterTextChanged(Editable arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+	
+	public void onTipBtnClick(View view){
+		String phone = ((EditText)findViewById(R.id.editview_pahone)).getText().toString();
+		switch (view.getId()) {
+		case R.id.textview_seconds:
+			if(Utils.isTextEmpty(phone)){
+				Toast.makeText(PhoneBindingActivity.this, getResources().getString(R.string.login_register_phone_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if(!Utils.isMobileNO(phone)){
+				Toast.makeText(PhoneBindingActivity.this, getResources().getString(R.string.login_register_phone_valid), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			showDialogCustom(DIALOG_CUSTOM);
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("phone", phone);
+			params.put("key", "");
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserGetCode, params, PhoneBindingActivity.this);
+			break;
+
+		case R.id.textview_done:
+			if(Utils.isTextEmpty(phone)){
+				Toast.makeText(PhoneBindingActivity.this, getResources().getString(R.string.login_register_phone_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if(!Utils.isMobileNO(phone)){
+				Toast.makeText(PhoneBindingActivity.this, getResources().getString(R.string.login_register_phone_valid), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if(mAuthCode == null){
+				Toast.makeText(PhoneBindingActivity.this, getResources().getString(R.string.passwordauthcode_hint6), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			String code = ((EditText)findViewById(R.id.editview_authcode)).getText().toString();
+			if(code == null || code.length() == 0 || code.replaceAll(" ", "").length() == 0){
+				Toast.makeText(PhoneBindingActivity.this, getResources().getString(R.string.passwordauthcode_hint2), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			if(mAuthCode.equalsIgnoreCase("unknown")){
+				Toast.makeText(PhoneBindingActivity.this, getResources().getString(R.string.passwordauthcode_hint4), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(!mAuthCode.equalsIgnoreCase(code)){
+				Toast.makeText(PhoneBindingActivity.this, getResources().getString(R.string.passwordauthcode_hint5), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			Intent intent = new Intent();
+			intent.putExtra("phone", phone);
+			setResult(Activity.RESULT_OK, intent);
+			PhoneBindingActivity.this.finish();
+		//	Intent intent = new Intent(PhoneBindingActivity.this, PasswordResetActivity.class);
+		//	intent.putExtra("key", mDataObj.optString("key"));
+		//	startActivity(intent);
+			break;
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		removeDialogCustom();
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(PhoneBindingActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_UserGetCode:
+			if(result instanceof JSONObject && ((JSONObject)result).has("item")){
+				mAuthCodeObj = ((JSONObject)result).optJSONObject("item");
+				mAuthCode = mAuthCodeObj.optString("code");
+				((EditText)findViewById(R.id.editview_authcode)).setFocusable(true);
+				((EditText)findViewById(R.id.editview_authcode)).setCursorVisible(true);
+				((EditText)findViewById(R.id.editview_authcode)).requestFocus();
+				mCountDownTimer = new CountDownTimer(mAuthCodeObj.optInt("seconds") * 1000, 1000) {
+					@Override
+					public void onTick(long millisUntilFinished) {
+						// TODO Auto-generated method stub
+						findViewById(R.id.textview_seconds).setEnabled(false);
+						((TextView)findViewById(R.id.textview_seconds)).setText(millisUntilFinished / 1000 + "s");
+					}
+					
+					@Override
+					public void onFinish() {
+						// TODO Auto-generated method stub
+						findViewById(R.id.textview_seconds).setEnabled(true);
+						((TextView)findViewById(R.id.textview_seconds)).setText(getResources().getString(R.string.passwordauthcode_hint1));
+						mAuthCode = "unknown";
+					}
+				};
+				if(mCountDownTimer != null){
+					mCountDownTimer.start();
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+}

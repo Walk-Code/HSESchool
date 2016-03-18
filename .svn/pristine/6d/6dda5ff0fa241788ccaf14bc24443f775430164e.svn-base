@@ -1,0 +1,369 @@
+package com.zhuochuang.hsej.store;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.EditText;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.PhotoAlbumDialog;
+import com.layout.RatingBarView;
+import com.layout.photoalbum.Bimp;
+import com.layout.photoalbum.FileUtils;
+import com.layout.photoalbum.PhotoAlbumActivity;
+import com.model.CacheHandler;
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.HSESchoolApp;
+import com.zhuochuang.hsej.R;
+/*
+ * DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserUploadPhoto, params, PublishActivity.this);
+ */
+public class StorePublishEvaluateActivity extends BaseActivity{
+	private PhotoAlbumDialog mPhotoAlbumDialog;
+	private String mCameraPath;
+	private String mBase64Str;
+	private GridView mGridView;
+	private ContentAdapter mAdapter;
+	private List<Bitmap> mUriList;
+	private List<String> mUpLoadPathList;
+	private RatingBarView mBarView; 
+	private int mStarNuml;
+	private int mUploadIndex = 0;
+		@Override
+		protected void onCreate(Bundle arg0) {
+			super.onCreate(arg0);
+			((HSESchoolApp)getApplication()).addActivityStore(this);
+			setContentView(R.layout.store_publish_evaluate);
+			setTitleText(getResources().getString(R.string.stores_publish_evaluate));			
+			initView();
+		}
+
+		private void initView() {
+			mUriList = new ArrayList<Bitmap>();
+			mUpLoadPathList = new ArrayList<String>();
+			InputStream is = getResources().openRawResource(R.drawable.icon_camera_add);
+			BitmapDrawable bmpDraw = new BitmapDrawable(is);
+			Bitmap bmp = bmpDraw.getBitmap();
+			
+			((TextView)findViewById(R.id.tv_details)).setText(getIntent().getStringExtra("goodsName"));
+			ImageLoader.getInstance().displayImage(getIntent().getStringExtra("img"), (ImageView)findViewById(R.id.good_image),ImageLoaderConfigs.displayImageOptionsBg);
+			mGridView = (GridView) findViewById(R.id.gridUil);
+			mGridView.setAdapter(mAdapter = new ContentAdapter(){
+
+				@Override
+				public int getCount() {					
+					return mUriList.size();
+				}
+
+				@Override
+				public View getView(int position, View convertView,ViewGroup parent) {
+					if(null == convertView){
+						convertView = LayoutInflater.from(StorePublishEvaluateActivity.this).inflate(R.layout.store_evaluate_gridview_item, null);
+					}
+					ImageView mImageView = (ImageView) convertView.findViewById(R.id.store_evaluate_gridview_item);
+					if (position < mUriList.size()) {  
+			            mImageView.setImageBitmap(listSort(mUriList).get(position)); 
+			        }else{  
+			            mImageView.setBackgroundResource(R.drawable.icon_camera_add);
+			        }  
+					return convertView;
+				}
+				
+			});
+			mUriList.add(bmp);
+			mAdapter.notifyDataSetChanged();
+			mGridView.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> parent, View view,int position, long id) {					
+					 if(position == parent.getChildCount()-1){  
+						 if(mPhotoAlbumDialog == null){
+								mPhotoAlbumDialog = new PhotoAlbumDialog(StorePublishEvaluateActivity.this);
+								mPhotoAlbumDialog.setItemSelectListener(new PhotoAlbumDialog.OnItemSelectListener() {
+									@Override
+									public void onItemClick(int position) {
+									switch (position) {
+									case R.id.dialog_item1:
+										File file = CacheHandler.getCameraImgPath(StorePublishEvaluateActivity.this);
+										mCameraPath = file.getAbsolutePath();
+										Intent intentFromCapture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+										intentFromCapture.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+										startActivityForResult(intentFromCapture, Configs.REQUESTCODE_CAMERA);
+										break;
+									case R.id.dialog_item2:
+										clearBimp();
+										Bimp.imgMaxSize = 1;
+										Intent intent = new Intent(StorePublishEvaluateActivity.this, PhotoAlbumActivity.class);
+										startActivityForResult(intent, Configs.REQUESTCODE_IMAGE);
+										break;
+									case R.id.dialog_item3:
+										mPhotoAlbumDialog.cancel();
+										break;
+									  }
+									}
+								});
+							}
+							mPhotoAlbumDialog.show();  
+		                    mAdapter.notifyDataSetChanged();		                   
+		                }  					
+				}
+			});
+			
+			mBarView = (RatingBarView) findViewById(R.id.custom_ratingbar);
+			mBarView.setOnRatingListener(new RatingBarView.OnRatingListener() {
+		            @Override
+		            public void onRating(Object bindObject, int RatingScore) {
+		            	mStarNuml = RatingScore;
+		            }
+		    });
+			
+			findViewById(R.id.commit_evaluate).setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					showDialogCustom(DIALOG_CUSTOM);					
+					if(0 == mStarNuml ){
+						Toast.makeText(StorePublishEvaluateActivity.this, getResources().getString(R.string.stores_goods_evaluate_mes_grade), Toast.LENGTH_SHORT);
+						return;
+					}
+					if(0 == ((EditText)findViewById(R.id.goods_publish_edit)).getText().toString().length()){
+						Toast.makeText(StorePublishEvaluateActivity.this, getResources().getString(R.string.stores_goods_evaluate_mes_review), Toast.LENGTH_SHORT);
+						return;
+					}
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_OrdersEvaluateOrders,
+							DataLoader.getInstance().setOrdersEvaluateOrdersTypeParams(getIntent().getStringExtra("goodId"),
+									((EditText)findViewById(R.id.goods_publish_edit)).getText().toString(),getImgIds(),mStarNuml), StorePublishEvaluateActivity.this);					
+				}
+			});
+		}
+		
+		
+		public List<Bitmap> listSort(List<Bitmap> list){
+			List<Bitmap> lists = new ArrayList<Bitmap>();
+			for(int i = list.size()-1;i >= 0; i --){
+				lists.add(list.get(i));
+				if(list.size() == 9){
+					lists.remove(8);
+					break;
+				}
+			}
+			return lists;
+		}
+		
+		
+		public void headerImageClick(View view){
+			if(mPhotoAlbumDialog == null){
+				mPhotoAlbumDialog = new PhotoAlbumDialog(StorePublishEvaluateActivity.this);
+				mPhotoAlbumDialog.setItemSelectListener(new PhotoAlbumDialog.OnItemSelectListener() {
+					@Override
+					public void onItemClick(int position) {
+					switch (position) {
+					case R.id.dialog_item1:
+						File file = CacheHandler.getCameraImgPath(StorePublishEvaluateActivity.this);
+						mCameraPath = file.getAbsolutePath();
+						mAdapter.notifyDataSetChanged();
+						Intent intentFromCapture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+						intentFromCapture.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+						startActivityForResult(intentFromCapture, Configs.REQUESTCODE_CAMERA);
+						break;
+					case R.id.dialog_item2:
+						clearBimp();
+						Bimp.imgMaxSize = 1;
+						Intent intent = new Intent(StorePublishEvaluateActivity.this, PhotoAlbumActivity.class);
+						startActivityForResult(intent, Configs.REQUESTCODE_IMAGE);
+						break;
+					case R.id.dialog_item3:
+						mPhotoAlbumDialog.cancel();
+						break;
+					}
+					}
+				});
+			}
+			mPhotoAlbumDialog.show();
+		}		
+		
+		public void startPhotoZoom(Uri uri) {
+			Intent intent = new Intent("com.android.camera.action.CROP");
+			intent.setDataAndType(uri, "image/*");
+			 // 设置裁剪
+			intent.putExtra("crop", "true");
+			// aspectX aspectY 是宽高的比例
+			intent.putExtra("aspectX", 1);
+			intent.putExtra("aspectY", 1);
+			// outputX outputY 是裁剪图片宽高
+			intent.putExtra("outputX", 180);
+			intent.putExtra("outputY", 180);
+			intent.putExtra("return-data", true);
+			startActivityForResult(intent, Configs.REQUESTCODE_CropResult);
+		}
+		
+		private void getImageToView(Intent data) {
+			Bundle extras = data.getExtras();
+			if (extras != null) {
+				Bitmap photo = extras.getParcelable("data");
+				ByteArrayOutputStream stream = new ByteArrayOutputStream();  
+	            photo.compress(Bitmap.CompressFormat.JPEG, 100, stream);	            
+	            byte[] bytes = stream.toByteArray();  
+	            mBase64Str = Base64.encodeToString(bytes, Base64.DEFAULT);
+	            starUpload(mBase64Str);
+	            mUriList.add(photo);
+	            mAdapter.notifyDataSetChanged();
+			}
+		}
+		
+		public void starUpload(String base64Str){			
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserUploadPhoto,
+					DataLoader.getInstance().setUploadPhotoTypeParams(base64Str,"6"), StorePublishEvaluateActivity.this);
+		}
+		
+		private void clearBimp(){
+			if(Bimp.drr.size() != 0){
+				Bimp.drr.clear();
+				Bimp.drr = new ArrayList<String>();
+			}
+			if(Bimp.bmp.size() != 0){
+				Bimp.bmp.clear();
+				Bimp.bmp = new ArrayList<Bitmap>();
+			}
+			if(Bimp.base64Arr.size() != 0){
+				Bimp.base64Arr.clear();
+				Bimp.base64Arr = new ArrayList<String>();
+			}
+			Bimp.max = 0;
+			Bimp.imgMaxSize = 9;
+			FileUtils.deleteDir();
+		}
+		
+		@Override
+		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+			if(resultCode == Activity.RESULT_OK && resultCode != Activity.RESULT_CANCELED) {
+				switch (requestCode) {
+				case Configs.REQUESTCODE_IMAGE:
+					try {
+						File file = new File(Bimp.drr.get(0));
+						startPhotoZoom(Uri.fromFile(file));
+					} catch (Exception e) {
+						// TODO: handle exception
+					}
+					break;
+				case Configs.REQUESTCODE_CAMERA:
+						File tempFile = new File(mCameraPath);
+						if(tempFile != null){
+							startPhotoZoom(Uri.fromFile(tempFile));
+						}
+					break;
+				case Configs.REQUESTCODE_CropResult:
+					if (data != null) {
+						getImageToView(data);
+					}
+					break;
+				}
+		    }
+			super.onActivityResult(requestCode, resultCode, data);			
+		}
+		
+		private String getImgIds(){
+			if(mUpLoadPathList == null || mUpLoadPathList.size() == 0){
+				return "";
+			}
+			
+			String imgIds = "";
+			for(String img : mUpLoadPathList){
+				imgIds += img + ",";
+			}
+			
+			if(imgIds.contains(",")){
+				imgIds = imgIds.substring(0, imgIds.length() - 1);
+			}
+			
+			return imgIds;
+		}
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		clearBimp();
+		((HSESchoolApp)getApplication()).removeActivityStore(this);
+	}
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		removeDialogCustom();
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(StorePublishEvaluateActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_UserUploadPhoto:
+			if(result instanceof JSONObject){
+				if(((JSONObject) result).has("item")) {
+					mUpLoadPathList.add(((JSONObject) result).optJSONObject("item").optString("id"));
+				}
+			}
+			break;
+		case TaskOrMethod_OrdersEvaluateOrders:
+			final String resString = ((JSONObject) result).optString("result");
+			AlertDialog.Builder builder = new AlertDialog.Builder(StorePublishEvaluateActivity.this);
+			builder.setTitle("Message");
+			builder.setMessage(getResources().getString(R.string.survey_commit));
+			builder.setPositiveButton(R.string.stores_goods_confirm, new DialogInterface.OnClickListener() {						
+
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					if("1".equals(resString)){
+						Toast.makeText(StorePublishEvaluateActivity.this,getResources().getString(R.string.vote_commit_success), Toast.LENGTH_LONG).show();
+						finish();
+					}else{
+						Toast.makeText(StorePublishEvaluateActivity.this,getResources().getString(R.string.stores_goods_evaluate_commit_lose), Toast.LENGTH_LONG).show();
+					}					
+				}
+			});
+			
+			builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					return;					
+				}
+			});
+			 builder.setCancelable(true);
+		     builder.create().show();
+			break;
+		}
+	}
+}

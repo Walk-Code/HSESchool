@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android_custom="http://schemas.android.com/apk/res/com.xtownmobile.grwth"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+	<com.layout.photoview.PhotoView
+	    android:id="@+id/photoview"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent" 
+	    android:layout_gravity="center"/>
+    
+	<!-- <com.llsh.layout.RoundProgressBar    
+        android:id="@+id/roundprogressbar"    
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_gravity="center"
+        android_custom:roundColor="#f2f2f2"
+        android_custom:roundProgressColor="#2174a0"
+        android_custom:textColor="#9A32CD"
+        android_custom:textIsDisplayable="false"
+        android:visibility="gone"
+        android_custom:roundWidth="2dp"
+        android_custom:textSize="18dp"/> -->
+
+</FrameLayout>

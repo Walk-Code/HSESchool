@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="6dp" >
+
+    <TextView
+        android:id="@+id/tv_sendtime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:background="#bfbfbf"
+        android:paddingBottom="2dp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="2dp"
+        android:textColor="#ffffff"
+        android:textSize="12dp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp" >
+
+        <ImageView
+            android:id="@+id/iv_userhead"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/app_ico" />
+
+        <com.layout.emoji.EmojiTextView
+         android:id="@+id/tv_chatcontent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textColor="#565656"
+            android:layout_toRightOf="@+id/iv_userhead"
+            android:background="@drawable/bg_dialogue_left"/>
+        <!-- <TextView
+            android:id="@+id/tv_chatcontent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textColor="#565656"
+            android:layout_toRightOf="@+id/iv_userhead"
+            android:background="@drawable/bg_dialogue_left" /> -->
+    </RelativeLayout>
+
+</LinearLayout>

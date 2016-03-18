@@ -1,0 +1,128 @@
+package com.layout;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.PopupWindow;
+import android.widget.TextView;
+
+import com.zhuochuang.hsej.R;
+public class ReportPopupWindows extends PopupWindow{
+	private Context mcontext;
+	private OnPopupWindowsClickListen listen;//回调接口对象
+	private ArrayAdapter adapter;
+	private MyBaseAdapter mAdapter;
+	private List<String> list = new ArrayList<String>();
+	private int [] image = new int[list.size()];
+	private int width = 0 ;//popupwindow宽度
+	public ReportPopupWindows(Context context) {
+		super();
+		mcontext = context;
+		
+		initView();
+	}
+	private void initView() {
+		LayoutInflater mInflater = (LayoutInflater) mcontext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		View popupwindow = mInflater.inflate(R.layout.popupwindow_listview, null);
+		setContentView(popupwindow);
+		setWidth(250);//设置宽度，无则LayoutParams.WRAP_CONTENT
+		setHeight(android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+		//setAnimationStyle(R.style.popupwindows_animation);//设置动画
+		
+		//获取焦点
+		this.setFocusable(true);
+		this.setBackgroundDrawable(new BitmapDrawable());
+		this.setOutsideTouchable(true);
+		ListView listview = (ListView) popupwindow.findViewById(R.id.popupwindow_listview);
+		//adapter = new ArrayAdapter<>(mcontext, R.layout.popupwindow_list_item,R.id.popup_item,list);
+		mAdapter = new MyBaseAdapter(image, list, mcontext);
+		
+	    listview.setAdapter(mAdapter);
+	    listview.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				ReportPopupWindows.this.dismiss();
+				if(listen != null){
+					listen.onPopupWindowItemClick(position);
+				}
+			}
+		});
+		
+		
+	}
+	
+	/*
+	 * 为popupWindow设置回调接口
+	 */
+	public void setOnPopupWindowClickListener(OnPopupWindowsClickListen listener){
+		this.listen = listener;
+	}
+	/*
+	 * 设置数据方法
+	 */
+	public void changeData(List<String> mList,int [] i){
+		list.addAll(mList);
+		image = i;
+Log.d("Ruse", image[0]+"");		
+		mAdapter.notifyDataSetChanged();		
+	}
+	/*
+	 * 回调接口
+	 */
+	public interface OnPopupWindowsClickListen{
+		/*
+		 * 当点击ListView item时调用
+		 *@param position 位置
+		 */
+		void onPopupWindowItemClick(int position);
+	}
+	class MyBaseAdapter extends BaseAdapter{
+		List<String> messID;
+		Context mContext;	
+		public MyBaseAdapter(int [] imageID, List<String> messID, Context mContext) {
+			super();
+			this.messID = messID;
+			this.mContext = mContext;			
+		}
+
+		@Override
+		public int getCount() {
+			return messID.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return messID.get(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return 0;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			convertView = LayoutInflater.from(mContext).inflate(R.layout.popupwindow_list_item, null);
+			TextView mes = (TextView) convertView.findViewById(R.id.popup_item);
+			ImageView imageView = (ImageView) convertView.findViewById(R.id.popup_image);
+			mes.setText(messID.get(position));		
+			imageView.setImageResource(image[position]);
+			return convertView;
+		}
+		
+	}
+	
+}

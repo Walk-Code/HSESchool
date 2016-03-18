@@ -1,0 +1,29 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:orientation="vertical" >
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        layout="@layout/pulltolistview" >
+    </include>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp" >
+
+        <Button
+            android:id="@+id/apply_btn_submit"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:background="@drawable/btn_red_button_selector"
+            android:text="@string/text_zwsq"
+            android:textColor="#FFF"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+</LinearLayout>

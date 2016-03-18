@@ -1,0 +1,548 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.layout.PullToRefreshListView.OnRemoreListener;
+import com.layout.emoji.EmojiTextView;
+import com.layout.emoji.EmojiUtils;
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.util.Utils;
+
+@SuppressLint("InflateParams")
+public class HobbyGroupListFragment extends BaseFragment{
+
+	private PullToRefreshListView mListView;
+	private ContentAdapter mAdapter;
+	private RelativeLayout mHeaderView;
+	
+	private JSONArray mDataArr;
+	private JSONObject mHeaderObj;
+	private Handler mHandler;
+	
+	private boolean mIsReadMore = false;
+	private boolean mIsChangeLogin = false;
+	
+	private int mTabType = 0;
+	private int mPageNo = 1;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		mMainLayout = (ViewGroup) LayoutInflater.from(getActivity()).inflate(R.layout.fragment_hobbygrouplist, null);
+		initListView();
+		EventManager.getInstance().setHandlerListenner(mHandler = new Handler(){
+			@Override
+			public void handleMessage(Message msg) {
+				// TODO Auto-generated method stub
+				super.handleMessage(msg);
+				Object[] objs = (Object[]) msg.obj;
+				if(objs == null){
+					return;
+				}
+				switch (msg.what) {
+				case EventManager.EventType_PostCommentCount:
+					if(mDataArr == null || mDataArr.length() == 0){
+						return;
+					}
+					for(int i = 0; i < mDataArr.length(); i++){
+						JSONObject obj = mDataArr.optJSONObject(i);
+						if(obj != null && obj.optString("id").equalsIgnoreCase((String) objs[0])){
+							try {
+								obj.put("discussionNum", objs[1]);
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							break;
+						}
+					}
+					if(mAdapter != null){
+						mAdapter.notifyDataSetChanged();
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		});
+	}
+	
+	public void setTabType(int type){
+		mTabType = type;
+	}
+	
+	public void setGetDataObj(JSONObject obj){
+		mHeaderObj = obj;
+	}
+	
+	private void initHeaderView(){
+		mHeaderView = (RelativeLayout) LayoutInflater.from(mActivity).inflate(R.layout.fragment_hobbygrouplist_header, null);
+		mHeaderView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, Utils.dipToPixels(mActivity, 105)));
+		setHeaderVisible(View.GONE);
+		mListView.addHeaderView(mHeaderView);
+		
+		mMainLayout.findViewById(R.id.bottom).setVisibility(View.VISIBLE);
+		mMainLayout.findViewById(R.id.bottom).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if(!DataLoader.getInstance().isLogin()){
+					startActivity(new Intent(mActivity, LoginActivity.class));
+					mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+					return;
+				}
+				Intent intent = new Intent(mActivity, PublishActivity.class);
+				intent.putExtra("hobbyGroupId", mHeaderObj.optString("id"));
+				intent.putExtra("resouceType", 9);
+				startActivityForResult(intent, Configs.REQUESTCODE_Publish);
+			}
+		});
+	}
+	
+	private void setHeaderVisible(int visible){
+		if(mHeaderView == null){
+			return;
+		}
+		for(int i = 0; i < mHeaderView.getChildCount(); i++){
+			View view = mHeaderView.getChildAt(i);
+			view.setVisibility(visible);
+		}
+	}
+	
+	private void setHeaderData(){
+		if(mHeaderObj == null || mHeaderView == null){
+			return;
+		}
+		setHeaderVisible(View.VISIBLE);
+		ImageLoader.getInstance().displayImage(mHeaderObj.optString("image"), 
+			     ((ImageView)mHeaderView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsPreRound);
+		
+		((TextView)mHeaderView.findViewById(R.id.textview_name)).setText(mHeaderObj.optString("name"));
+		try {
+			((TextView)mHeaderView.findViewById(R.id.textview_count)).setText(
+					String.format(mActivity.getResources().getString(R.string.hobbygroup_count), mHeaderObj.optString("applicants")));
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		if(mHeaderObj.has("favoriteStatus") && mHeaderObj.optString("favoriteStatus").equalsIgnoreCase("0")){
+			((TextView)mHeaderView.findViewById(R.id.textview_attention)).setText(mActivity.getResources().getString(R.string.hobbygroup_attention_cancle));
+		}
+		else{
+			((TextView)mHeaderView.findViewById(R.id.textview_attention)).setText(mActivity.getResources().getString(R.string.hobbygroup_attention));
+		}
+		
+		mHeaderView.findViewById(R.id.textview_attention).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if(!DataLoader.getInstance().isLogin()){
+					startActivity(new Intent(mActivity, LoginActivity.class));
+					mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+					return;
+				}
+				
+				showDialogCustom();
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("resourceType", "8");
+				params.put("resourceIds", mHeaderObj.optString("id"));
+				if(mHeaderObj.has("favoriteStatus") && mHeaderObj.optString("favoriteStatus").equalsIgnoreCase("0")){
+					params.put("statuses", 1);
+				}
+				else{
+					params.put("statuses", 0);
+				}
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_FavoriteApply, params, HobbyGroupListFragment.this);
+			}
+		});
+	}
+	
+	private void initListView(){
+		mListView = (PullToRefreshListView) mMainLayout.findViewById(R.id.pullto_listview);
+		if(mTabType == 0){
+			initHeaderView();
+		}
+		
+		mListView.setAdapter(mAdapter = new ContentAdapter(){
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				if(mDataArr != null && mDataArr.length() > 0){
+					return mDataArr.length();
+				}
+				return 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(mActivity, R.layout.listcell_post, null);
+					convertView.setLayoutParams(new AbsListView.LayoutParams(android.widget.AbsListView.LayoutParams.MATCH_PARENT, android.widget.AbsListView.LayoutParams.WRAP_CONTENT));
+				}
+				JSONObject obj = mDataArr.optJSONObject(position);
+				convertView.findViewById(R.id.textview_imagecount).setVisibility(View.GONE);
+				String imgLength = "";
+				String path = "";
+				if(obj != null){
+					if(obj.has("images")){
+						JSONArray imgs = obj.optJSONArray("images");
+						if(imgs != null && imgs.length() > 0){
+							JSONObject pathObj = imgs.optJSONObject(0);
+							if(pathObj != null){
+								path = pathObj.optString("path");
+							}
+							convertView.findViewById(R.id.textview_imagecount).setVisibility(imgs.length() > 1? View.VISIBLE : View.GONE);
+							imgLength = String.format(mActivity.getResources().getString(R.string.mypost_imagecount), imgs.length());
+						}
+					}
+					ImageLoader.getInstance().displayImage(path, ((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsBg);
+					
+					((TextView)convertView.findViewById(R.id.textview_title)).setText(obj.optString("name"));
+					((EmojiTextView)convertView.findViewById(R.id.textview_desc)).setEmojiText(obj.optString("intro"));
+					((TextView)convertView.findViewById(R.id.textview_imagecount)).setText(imgLength);
+					((TextView)convertView.findViewById(R.id.textview_date)).setText(Utils.friendlyTime(mActivity, obj.optLong("createDate")));
+				
+					((TextView)convertView.findViewById(R.id.textview_readcount)).setText(Utils.getChangeCount(obj.optInt("clickAmount", 0)));
+					((TextView)convertView.findViewById(R.id.textview_commentcount)).setText(Utils.getChangeCount(obj.optInt("discussionNum", 0)));
+				}
+				
+				return convertView;
+			}
+		});
+		
+		mListView.setOnRefreshListener(new OnRefreshListener() {
+			
+			@Override
+			public void onRefresh() {
+				// TODO Auto-generated method stub
+				mPageNo = 1;
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("pageNo", mPageNo);
+				params.put("pageSize", 20);
+				switch (mTabType) {
+				case 0:
+					params.put("hobbyGroupId", mHeaderObj.optString("id"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupListPosts, params, HobbyGroupListFragment.this);
+					break;
+				case 1:
+					if(!DataLoader.getInstance().isLogin()){
+						new Handler().postDelayed(new Runnable() {
+							
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								mListView.complete();
+							}
+						}, 500);
+						new AlertDialog.Builder(mActivity)
+						.setCancelable(false)
+					 	.setMessage(mActivity.getResources().getString(R.string.login_notify))
+					 	.setPositiveButton(mActivity.getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								startActivity(new Intent(mActivity, LoginActivity.class));
+								mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+							}
+						})
+						.setNegativeButton(mActivity.getResources().getString(R.string.cancel), null)
+					 	.show();
+						return;
+					}
+					params.put("fromId", DataLoader.getInstance().getHeaderUsetId());
+					params.put("hobbyGroupId", mHeaderObj.optString("id"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupListPosts, params, HobbyGroupListFragment.this);
+					break;
+				case 2:
+					if(!DataLoader.getInstance().isLogin()){
+						new Handler().postDelayed(new Runnable() {
+							
+							@Override
+							public void run() {
+								// TODO Auto-generated method stub
+								mListView.complete();
+							}
+						}, 500);
+						new AlertDialog.Builder(mActivity)
+						.setCancelable(false)
+					 	.setMessage(mActivity.getResources().getString(R.string.login_notify))
+					 	.setPositiveButton(mActivity.getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								startActivity(new Intent(mActivity, LoginActivity.class));
+								mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+							}
+						})
+						.setNegativeButton(mActivity.getResources().getString(R.string.cancel), null)
+					 	.show();
+						return;
+					}
+					params.put("replierId", DataLoader.getInstance().getHeaderUsetId());
+					params.put("hobbyGroupId", mHeaderObj.optString("id"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupRepliedPosts, params, HobbyGroupListFragment.this);
+					break;
+				case 3:
+					params.put("hobbyGroupId", mHeaderObj.optString("id"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupRepliedPosts, params, HobbyGroupListFragment.this);
+					break;
+				}
+			}
+		});
+		
+		mListView.setRemoreable(false);
+		
+		mListView.setOnRemoreListener(new OnRemoreListener() {
+			
+			@Override
+			public void onRemore() {
+				// TODO Auto-generated method stub
+				mPageNo++;
+				mIsReadMore = true;
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("pageNo", mPageNo);
+				params.put("pageSize", 20);
+				switch (mTabType) {
+				case 0:
+					params.put("hobbyGroupId", mHeaderObj.optString("id"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupListPosts, params, HobbyGroupListFragment.this);
+					break;
+				case 1:
+					params.put("fromId", DataLoader.getInstance().getHeaderUsetId());
+					params.put("hobbyGroupId", mHeaderObj.optString("id"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupListPosts, params, HobbyGroupListFragment.this);
+					break;
+				case 2:
+					params.put("replierId", DataLoader.getInstance().getHeaderUsetId());
+					params.put("hobbyGroupId", mHeaderObj.optString("id"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupRepliedPosts, params, HobbyGroupListFragment.this);
+					break;
+				case 3:
+					params.put("hobbyGroupId", mHeaderObj.optString("id"));
+					DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupRepliedPosts, params, HobbyGroupListFragment.this);
+					break;
+				}
+			}
+		});
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				if(mDataArr == null || mDataArr.length() == 0){
+					return;
+				}
+				JSONObject obj = mDataArr.optJSONObject(mTabType == 0? position - 2 : position - 1);
+				if(obj != null){
+					Intent intent = new Intent(mActivity, PostDetailsActivity.class);
+					intent.putExtra("id", obj.optString("id"));
+					intent.putExtra("resouceType", 9);
+					startActivity(intent);
+					
+					try {
+						obj.put("clickAmount", obj.optInt("clickAmount", 0) + 1);
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					new Handler().postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							// TODO Auto-generated method stub
+							if(mAdapter != null){
+								mAdapter.notifyDataSetChanged();
+							}
+						}
+					}, 800);
+				}
+			}
+		});
+		
+		switch (mTabType) {
+		case 0:
+			showDialogCustom();
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("hobbyGroupId", mHeaderObj.optString("id"));
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupGetHobbyGroup, params, HobbyGroupListFragment.this);
+			break;
+		default:
+			mListView.startRefresh();
+			break;
+		}
+	}
+
+	@Override
+	protected void onReceive(String brodecast) {
+		// TODO Auto-generated method stub
+		super.onReceive(brodecast);
+		if(brodecast.equalsIgnoreCase(Configs.LoginStateChange)){
+			mIsChangeLogin = true;
+			showDialogCustom();
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("hobbyGroupId", mHeaderObj.optString("id"));
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupGetHobbyGroup, params, HobbyGroupListFragment.this);
+		}
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
+		if(resultCode == Activity.RESULT_OK && resultCode != Activity.RESULT_CANCELED) {
+			switch (requestCode) {
+			case Configs.REQUESTCODE_Publish:
+				if(mListView != null){
+					if (!mListView.isStackFromBottom()) {
+						mListView.setStackFromBottom(true);
+					}
+					mListView.setStackFromBottom(false);
+					mListView.startRefresh();
+				}
+				break;
+			}
+	    }
+	}
+
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		EventManager.getInstance().removeHandlerListenner(mHandler);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		if(mListView != null){
+			mListView.complete();
+		}
+		
+		if(result == null){
+			removeDialogCustom();
+			return;
+		}
+		
+		if(result instanceof Error){
+			removeDialogCustom();
+			try {
+				Toast.makeText(mActivity, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_HobbygroupGetHobbyGroup:
+			removeDialogCustom();
+			if(result instanceof JSONObject && ((JSONObject)result).has("item")){
+				mHeaderObj = ((JSONObject)result).optJSONObject("item");
+			}
+			setHeaderData();
+			if(mIsChangeLogin){
+				mIsChangeLogin = false;
+			}
+			else{
+				mListView.startRefresh();
+			}
+			break;
+		case TaskOrMethod_HobbygroupListPosts:
+			if(result instanceof JSONObject && ((JSONObject)result).has("items")){
+				JSONArray temp = ((JSONObject)result).optJSONArray("items");
+				if(temp != null && temp.length() > 10){
+					mListView.setRemoreable(true);
+				}
+				else{
+					mListView.setRemoreable(false);
+				}
+				EmojiUtils.replaceEmojiIntro(temp);
+				if(mIsReadMore){
+					mIsReadMore = false;
+					mDataArr = DataLoader.getInstance().joinJSONArray(mDataArr, temp);
+				}
+				else{
+					mDataArr = temp;
+				}
+			}
+			if(mAdapter != null){
+				mAdapter.notifyDataSetChanged();
+			}
+			break;
+
+		case TaskOrMethod_HobbygroupRepliedPosts:
+			if(result instanceof JSONObject && ((JSONObject)result).has("items")){
+				JSONArray temp = ((JSONObject)result).optJSONArray("items");
+				if(temp != null && temp.length() > 10){
+					mListView.setRemoreable(true);
+				}
+				else{
+					mListView.setRemoreable(false);
+				}
+				EmojiUtils.replaceEmojiIntro(temp);
+				if(mIsReadMore){
+					mIsReadMore = false;
+					mDataArr = DataLoader.getInstance().joinJSONArray(mDataArr, temp);
+				}
+				else{
+					mDataArr = temp;
+				}
+			}
+			else{
+				mListView.setRemoreable(false);
+			}
+			if(mAdapter != null){
+				mAdapter.notifyDataSetChanged();
+			}
+			break;
+			
+		case TaskOrMethod_FavoriteApply:
+			mIsChangeLogin = true;
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("hobbyGroupId", mHeaderObj.optString("id"));
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HobbygroupGetHobbyGroup, params, HobbyGroupListFragment.this);
+			break;
+		default:
+			break;
+		}
+	}
+}

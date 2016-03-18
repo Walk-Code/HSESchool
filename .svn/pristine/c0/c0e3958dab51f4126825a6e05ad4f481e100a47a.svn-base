@@ -1,0 +1,79 @@
+package com.layout;
+
+import com.model.DataLoader;
+import com.zhuochuang.hsej.LoginActivity;
+import com.zhuochuang.hsej.MyPageActivity;
+import com.zhuochuang.hsej.PersonPageActivity;
+import com.zhuochuang.hsej.R;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.text.TextPaint;
+import android.text.style.CharacterStyle;
+import android.text.style.ClickableSpan;
+import android.view.View;
+import android.widget.Toast;
+
+public class TouchableSpan extends ClickableSpan {
+    private boolean mIsPressed;
+    private int mPressedBackgroundColor;
+    private int mNormalTextColor;
+    private int mPressedTextColor;
+    private String mPressString;
+    private String mPressUserId;
+    private Context mContext;
+
+    public TouchableSpan(Context context, int normalTextColor, int pressedTextColor, int pressedBackgroundColor) {
+        mNormalTextColor = normalTextColor;
+        mPressedTextColor = pressedTextColor;
+        mPressedBackgroundColor = pressedBackgroundColor;
+        mContext = context;
+    }
+
+    public void setPressString(String pressString){
+    	mPressString = pressString;
+    }
+    
+    public void setPressUserId(String userId){
+    	//DefineHandler.getCommentNameIdMap().put(mPressString, userId);
+    	mPressUserId = userId;
+    }
+    
+    public void setPressed(boolean isSelected) {
+        mIsPressed = isSelected;
+    }
+
+    @Override
+    public void updateDrawState(TextPaint ds) {
+        super.updateDrawState(ds);
+        ds.setColor(mIsPressed ? mPressedTextColor : mNormalTextColor);
+        ds.bgColor = mIsPressed ? mPressedBackgroundColor : 0x00eeeeee;
+        ds.setUnderlineText(false);
+    }
+
+	@Override
+	public CharacterStyle getUnderlying() {
+		// TODO Auto-generated method stub
+		return super.getUnderlying();
+	}
+
+	@Override
+	public void onClick(View widget) {
+		String myId = DataLoader.getInstance().getHeaderUsetId();
+		if(myId == null || myId.length() == 0){
+			Toast.makeText(mContext, mContext.getResources().getString(R.string.login_notify), Toast.LENGTH_SHORT).show();
+			mContext.startActivity(new Intent(mContext, LoginActivity.class));
+			((Activity)mContext).overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+			return;
+		}
+		if(mPressUserId != null &&  mPressUserId.equalsIgnoreCase(myId)){
+			mContext.startActivity(new Intent(mContext, MyPageActivity.class));
+		}
+		else{
+			Intent intent = new Intent(mContext, PersonPageActivity.class);
+			intent.putExtra("id", mPressUserId);
+			mContext.startActivity(intent);
+		}
+	}
+}

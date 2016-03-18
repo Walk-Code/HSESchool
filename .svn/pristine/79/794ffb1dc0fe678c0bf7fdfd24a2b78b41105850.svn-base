@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    <ImageView
+	    android:id="@+id/imageview"
+	    android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:contentDescription="@string/app_name"
+		android:layout_marginTop="22dp"
+		android:layout_marginLeft="29dp"
+		android:layout_marginRight="29dp"
+		android:layout_marginBottom="36dp"
+		android:scaleType="centerCrop"/>
+    
+    <TextView 
+	    android:id="@+id/text"
+	    android:layout_width="match_parent"
+		android:layout_height="wrap_content" 
+		android:gravity="center"
+		android:textSize="13dp"
+		android:layout_marginBottom="12dp"
+		android:layout_gravity="bottom"
+		android:textColor="#737471"/>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#d2d2cf"
+        android:layout_gravity="bottom"/>
+    
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:background="#d2d2cf"
+        android:layout_gravity="right"/>
+    
+    <View
+        android:id="@+id/ico_delete"
+        android:layout_width="23dp"
+        android:layout_height="23dp"
+        android:layout_marginTop="18dp"
+        android:layout_marginRight="20dp"
+        android:background="@drawable/list_delete"
+        android:layout_gravity="right|top"/>
+
+</FrameLayout>

@@ -1,0 +1,81 @@
+<resources>
+
+    <color name="detail_graybutton_bg_normal">#cccccc</color>
+    <color name="detail_graybutton_bg_press">#aaaaaa</color>
+    
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppBaseTheme" parent="android:Theme.Light">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    </style>
+    
+    <style name="transparentFrameWindowStyle" parent="android:style/Theme.Dialog">
+        <item name="android:windowBackground">@drawable/nulls</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+    
+    <style name="main_menu_animstyle">
+        <item name="android:windowEnterAnimation">@anim/photo_dialog_in_anim</item>
+        <item name="android:windowExitAnimation">@anim/photo_dialog_out_anim</item>
+    </style>
+    
+    <style name="FadeShowAnimation" parent="android:Animation" mce_bogus="1">          
+        <item name="android:windowEnterAnimation">@anim/fade_in</item>     
+        <item name="android:windowExitAnimation">@anim/fade_out</item>     
+    </style>
+
+    <style name="DialogStyle" parent="android:style/Theme.Dialog"> 
+    	<item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+	</style>
+	
+    <style name="chat_text_date_style">
+	    <item name="android:padding">2dp</item>    
+		<item name="android:textColor">#ffffff</item>   
+		<item name="android:textSize">12dp</item>      
+		<item name="android:background">#bfbfbf</item> 
+	</style>
+	
+    <style name="ReportDialog" parent="android:style/Theme.Dialog">  
+  
+        <!-- 背景颜色及透明程度 -->  
+        <item name="android:windowBackground">@android:color/transparent</item>  
+        <!-- 是否有标题 -->  
+        <item name="android:windowNoTitle">true</item>  
+        <!-- 是否浮现在activity之上 -->  
+        <item name="android:windowIsFloating">true</item>  
+        <!-- 是否模糊 -->  
+        <item name="android:backgroundDimEnabled">false</item>  
+        <item name="android:windowFrame">@null</item>  
+    </style>
+    
+     <!-- PopupWindwos 出现的动画 -->
+   	<style name="popupwindow_animation">  
+        <item name="android:windowEnterAnimation">@anim/store_popupwindow_enter</item>  
+        <item name="android:windowExitAnimation">@anim/store_popupwindow_exit</item>  
+    </style>
+    <!-- store car amimation -->
+    <style name="popupwindow_animation_store_car">   
+	    <item name="android:windowEnterAnimation">@anim/push_bottom_in</item>    
+	    <item name="android:windowExitAnimation">@anim/push_bottom_out</item>           
+    </style>
+    <!-- 购物车界面的checkbox的style -->
+    <style name="CustomCheckboxTheme" parent="@android:style/Widget.CompoundButton.CheckBox">  
+    <item name="android:button">@drawable/checkbox_style</item>  
+	</style>
+</resources>

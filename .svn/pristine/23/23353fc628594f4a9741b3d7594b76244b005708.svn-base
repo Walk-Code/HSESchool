@@ -1,0 +1,136 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.TaskType;
+import com.util.MD5;
+import com.util.Utils;
+
+import android.os.Bundle;
+import android.os.Handler;
+import android.text.InputType;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.Toast;
+
+public class LoginRegisterSecondActivity extends BaseActivity{
+
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		
+		setContentView(R.layout.activity_login_register_second);
+		setTitleText(R.string.login_register_title);
+		
+		((EditText) findViewById(R.id.editview_password)).setInputType(0x81 | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+		((EditText) findViewById(R.id.editview_password_more)).setInputType(0x81 | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE);
+	}
+	
+	public void onTipBtnClick(View view){
+		switch (view.getId()) {
+		case R.id.textview_loginwelcome_done:
+			String nickName = ((EditText)findViewById(R.id.editview_nickname)).getText().toString();
+			if(nickName == null || nickName.length() == 0 || nickName.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_nickname_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			String phone = ((EditText)findViewById(R.id.editview_pahone)).getText().toString();
+			if(phone == null || phone.length() == 0 || phone.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_phone_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(!Utils.isMobileNO(phone)){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_phone_valid), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			String password = ((EditText)findViewById(R.id.editview_password)).getText().toString();
+			if(password == null || password.length() == 0 || password.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_password_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			String passwordMore = ((EditText)findViewById(R.id.editview_password_more)).getText().toString();
+			if(passwordMore == null || passwordMore.length() == 0 || passwordMore.replaceAll(" ", "").length() == 0){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_password_more_null), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			if(!password.equalsIgnoreCase(passwordMore)){
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_password_more_same), Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
+			showDialogCustom(DIALOG_CUSTOM);
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("nickName", nickName);
+			params.put("phone", phone);
+			params.put("email", ((EditText)findViewById(R.id.editview_email)).getText().toString());
+			//params.put("password", password);
+			try {
+				params.put("password", MD5.getStringMD5String(MD5.getStringMD5String(Configs.EncryptConfuse + password)));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			params.put("tag", 1);
+			params.put("id", getIntent().getStringExtra("id"));
+			params.put("sign", 2);
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserRegister, params, LoginRegisterSecondActivity.this);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		removeDialogCustom();
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(LoginRegisterSecondActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_UserRegister:
+			if(result instanceof JSONObject){
+				
+				Toast.makeText(LoginRegisterSecondActivity.this, getResources().getString(R.string.login_register_success), Toast.LENGTH_SHORT).show();
+				
+				new Handler().postDelayed(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						((HSESchoolApp)getApplication()).finishActivityList();
+						LoginRegisterSecondActivity.this.finish();
+						EventManager.getInstance().sendMessage(EventManager.EventType_LoginForRegister, 
+								((EditText)findViewById(R.id.editview_nickname)).getText().toString(),
+								((EditText)findViewById(R.id.editview_password)).getText().toString());
+					}
+				}, 800);
+				
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

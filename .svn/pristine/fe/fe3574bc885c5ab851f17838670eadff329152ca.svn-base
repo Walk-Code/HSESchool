@@ -1,0 +1,46 @@
+package com.zhuochuang.hsej.store;
+
+import java.text.AttributedCharacterIterator.Attribute;
+
+import com.model.ImageLoaderConfigs;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.zhuochuang.hsej.R;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+public class CustomLinearLayout extends LinearLayout{
+	private ImageView mImageView;
+	private TextView mTextView;
+	private Context mContext;
+	public CustomLinearLayout(Context context) {
+		super(context);
+		mContext = context;
+		init();
+	}
+
+	public CustomLinearLayout(Context context,AttributeSet  attrs) {
+		super(context,attrs);
+		mContext = context;
+		init();
+		
+	}
+	private void init() {
+		LayoutInflater inflater=(LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		inflater.inflate(R.layout.store_home_page_shop, this);
+		mImageView = (ImageView) findViewById(R.id.shop_images);
+		mTextView = (TextView) findViewById(R.id.shop_name);
+	}
+
+	 public void setImages(String path) {  
+		 ImageLoader.getInstance().displayImage(path, mImageView,ImageLoaderConfigs.displayImageOptionsBg); 
+    }  
+	 public void setTextViewText(String text) {  
+		 mTextView.setText(text);  
+    }  
+
+}

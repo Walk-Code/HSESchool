@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:background="#ffffff">
+    <TextView 
+   	    android:id="@+id/textview_register"
+   	    android:layout_width="100dp"
+   		android:layout_height="40dp" 
+   		android:layout_margin="70dp"
+   		android:textSize="15dp"
+   		android:textColor="#de504f"
+   		android:text="aaaa"
+   		android:background="#999999"
+   		android:gravity="center"/>
+
+</LinearLayout>

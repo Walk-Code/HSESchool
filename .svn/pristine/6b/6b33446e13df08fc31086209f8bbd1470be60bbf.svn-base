@@ -1,0 +1,166 @@
+package com.zhuochuang.hsej;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.AbsListView.LayoutParams;
+import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.model.EventManager;
+import com.util.ContentAdapter;
+import com.util.Utils;
+
+/**
+ * 搜索条件
+ * @author dion
+ *
+ */
+public class FriendAddSettingActivity extends ListViewActivity{
+	
+	private JSONArray mArray = null;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		
+		mMainLayout.setBackgroundColor(Color.parseColor("#ffffff"));
+		
+		((HSESchoolApp)getApplication()).addActivity(FriendAddSettingActivity.this);
+		setTitleText(getIntent().getStringExtra("name"));
+		
+		try {
+			mArray = new JSONArray(getIntent().getStringExtra("array"));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		if(mListAdapter != null){
+			mListAdapter.notifyDataSetChanged();
+		}
+		
+	}
+	
+	@Override
+	public void getAdapter() {
+		
+		View headerView = LayoutInflater.from(this).inflate(R.layout.header_friend_add_setting, null);
+		headerView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, Utils.dipToPixels(FriendAddSettingActivity.this, 45)));
+		((TextView)headerView.findViewById(R.id.name_header_setting)).setText(R.string.unlimited_setting_add_friend);
+		headerView.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				//true is grade, false is other
+				EventManager.getInstance().sendMessage(EventManager.EventType_AreaGroup, getIntent().getIntExtra("index", 0), getResources().getString(R.string.unlimited_setting_add_friend), false);
+				((HSESchoolApp)getApplication()).removeActivityByName(FriendAddSettingActivity.class.getName());
+			}
+		});
+		mListView.addHeaderView(headerView, null, false);
+		
+		mListAdapter = new ContentAdapter(){
+			@Override
+			public int getCount() {
+				if(mArray != null && mArray.length() > 0){
+					return mArray.length();
+				}
+				return 0;
+			}
+			
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if(convertView == null){
+					convertView = LayoutInflater.from(FriendAddSettingActivity.this).inflate(R.layout.listcell_add_firend_setting, null);
+					convertView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT, Utils.dipToPixels(FriendAddSettingActivity.this, 45)));
+				}
+				JSONObject obj = mArray.optJSONObject(position);
+				String name = null;
+				
+				if(obj != null){
+					if(obj.has("name")){
+						name = obj.optString("name");
+					}else if(obj.has("title")){
+						name = obj.optString("title");
+					}
+				}else{
+					name = mArray.optString(position);
+				}
+					
+				if(getIntent().getIntExtra("layer", 0) == 0){
+					((ImageView)convertView.findViewById(R.id.arrow_setting)).setVisibility(View.GONE);
+				}
+				((TextView)convertView.findViewById(R.id.name_setting)).setText(name);
+				
+				return convertView;
+			}
+		};
+	}
+
+	@Override
+	public void OnItemClickListener(AdapterView<?> parent, View view,
+			int position, long id) {
+		if(mArray != null && mArray.length() > 0){
+			itemClick(position-1);
+		}
+	}
+	
+	private void itemClick(int position){
+		JSONArray array = null;
+		String name = null;
+		String code = null;
+		
+		if(getIntent().getIntExtra("layer", 0) > 0){
+			if(mArray.optJSONObject(position).has("item")){
+				array = mArray.optJSONObject(position).optJSONArray("item");
+				Intent mIntent = new Intent(FriendAddSettingActivity.this, FriendAddSettingActivity.class);
+				if(array != null){
+					mIntent.putExtra("array", array.toString());
+				}
+				int layer = getIntent().getIntExtra("layer", 0)-1;
+				mIntent.putExtra("name", mArray.optJSONObject(position).optString("name"));
+				mIntent.putExtra("layer", layer);
+				mIntent.putExtra("index", getIntent().getIntExtra("index", 0));
+				startActivity(mIntent);
+			}
+		}else{
+			JSONObject obj = null;
+			if(mArray.optJSONObject(position) != null){
+				obj = mArray.optJSONObject(position);
+				EventManager.getInstance().sendMessage(EventManager.EventType_AreaGroup, getIntent().getIntExtra("index", 0), obj.toString());
+			}else{
+				EventManager.getInstance().sendMessage(EventManager.EventType_AreaGroup, getIntent().getIntExtra("index", 0), mArray.optString(position),true);
+			}
+			((HSESchoolApp)getApplication()).removeActivityByName(FriendAddSettingActivity.class.getName());
+		}
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		((HSESchoolApp)getApplication()).removeActivity(FriendAddSettingActivity.this);
+	}
+
+	@Override
+	public void getHeaderView() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void getFooterView() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}

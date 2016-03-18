@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F3F3F3" >
+     <LinearLayout 
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:orientation="vertical"
+         android:background="#FFFFFF"
+         android:layout_alignParentTop="true">
+	    <EditText 
+	        android:layout_width="match_parent"
+	        android:layout_height="40dp"
+	        android:hint="@string/contacter_name"
+	        android:textSize="16dp"
+	        android:gravity="center_vertical"
+	        android:id="@+id/address_contacter_name"
+	        android:singleLine="true"
+	        android:background="#FFFFFF"
+	        android:layout_marginLeft="10dp"/>
+	    <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:background="#F3F3F3"/>
+	     <EditText 
+	        android:layout_width="match_parent"
+	        android:layout_height="40dp"
+	        android:textSize="16dp"
+	        android:gravity="center_vertical"
+	        android:hint="@string/contacter_phone"
+	        android:id="@+id/address_contacter_phone"
+	        android:singleLine="true"
+	        android:background="#FFFFFF"
+	        android:layout_marginLeft="10dp"
+	        android:phoneNumber="true"/>
+	       <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:background="#F3F3F3"/>
+	      <EditText 
+	        android:layout_width="match_parent"
+	        android:layout_height="40dp"
+	        android:textSize="16dp"
+	        android:gravity="center_vertical"
+	        android:hint="@string/contacter_code"
+	        android:id="@+id/address_contacter_code"
+	        android:singleLine="true"
+	        android:background="#FFFFFF"
+	        android:layout_marginLeft="10dp"
+	        android:numeric="integer"/>
+	      <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:background="#F3F3F3"/>
+	      <RelativeLayout 
+	        android:layout_width="match_parent"
+	        android:layout_height="40dp"
+	        android:background="#FFFFFF"
+	        android:clickable="true"
+	        android:focusable="true"
+	        android:focusableInTouchMode="true"
+	        android:id="@+id/store_choose_address">
+	        <TextView 
+	            android:layout_width="wrap_content"
+	            android:layout_height="match_parent"
+	            android:layout_alignParentLeft="true"
+	            android:layout_marginLeft="10dp"
+	            android:textSize="16dp"
+	            android:gravity="center_vertical"
+	            android:hint="@string/contacter_area"
+	            android:clickable="false"
+		        android:focusable="false"
+		        android:focusableInTouchMode="false"
+		        android:id="@+id/store_address_area"
+		        android:textColor="#949494"/>
+	        <ImageView 
+	            android:layout_width="12dp"
+	            android:layout_height="16dp"
+	            android:src="@drawable/arrow"
+	            android:layout_alignParentRight="true"
+	            android:layout_centerVertical="true"
+	            android:layout_marginRight="10dp"
+	            android:clickable="false"
+		        android:focusable="false"
+		        android:focusableInTouchMode="false"/>
+	          	
+	      </RelativeLayout>
+	      
+	      <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:background="#F3F3F3"/>
+
+	      <LinearLayout
+	          android:layout_width="match_parent"
+	          android:layout_height="87dp"
+	          android:orientation="vertical" >
+	          
+		      <EditText 
+		        android:layout_width="match_parent"
+		        android:layout_height="40dp"
+		        android:textSize="16dp"
+		        android:gravity="center_vertical"
+		        android:hint="@string/contacter_detail_address"
+		        android:id="@+id/address_contacter_detail_address"
+		        android:background="#FFFFFF"
+	       		android:layout_marginLeft="10dp"
+	       		android:singleLine="false"/>
+		  </LinearLayout>     
+	      <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:background="#F3F3F3"/>
+    
+	</LinearLayout>
+
+	<Button
+	    android:layout_width="match_parent"
+	    android:layout_height="50dp"
+	    android:text="@string/contacter_save_address"
+	    android:layout_alignParentBottom="true"
+	    android:background="#DD514F"
+	    android:textColor="#FFFFFF"
+	    android:textSize="15dp"
+	    android:id="@+id/store_save_address" />
+
+</RelativeLayout>

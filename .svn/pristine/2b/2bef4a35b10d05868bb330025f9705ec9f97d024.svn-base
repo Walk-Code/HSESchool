@@ -1,0 +1,455 @@
+package com.layout;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.drawable.AnimationDrawable;
+import android.os.Handler;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
+import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.PauseOnScrollListener;
+import com.zhuochuang.hsej.R;
+
+@SuppressLint({ "SimpleDateFormat", "ClickableViewAccessibility", "InflateParams" })
+public class PullToRefreshListView extends ListView implements OnScrollListener{
+
+	private final static int RELEASE_To_REFRESH = 0;
+	private final static int PULL_To_REFRESH = 1;
+	private final static int REFRESHING = 2;
+	private final static int DONE = 3;
+	private final static int LOADING = 4;
+	private LayoutInflater inflater;
+	private LinearLayout headView;
+	private FrameLayout footerView;
+	private TextView tipsTextview, lastUpdatedTextView;
+	private ImageView arrowImageView, progressBar;
+	private AnimationDrawable footerViewAnimation, animation1;
+	private RotateAnimation animation, reverseAnimation;
+	private int headContentHeight, startY, firstItemIndex, state, mCurrentRange;
+	private boolean isBack, isRemoreable, isRefreshable, isRecored, isReadmoreing = false, isRefreshing = false;
+	private SimpleDateFormat formats = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	private OnRefreshListener refreshListener;
+	private OnRemoreListener remoreListener;
+	private BaseAdapter mAdapter;
+	private Context context;
+
+	public PullToRefreshListView(Context context) {
+		super(context);
+		init(context);
+	}
+
+	public PullToRefreshListView(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context);
+	}
+
+	private void init(Context context) {
+		this.context = context;
+		setDividerHeight(0);
+		setVerticalFadingEdgeEnabled(false);
+		setCacheColorHint(Color.TRANSPARENT);
+		setSelector(android.R.color.transparent);
+		inflater = LayoutInflater.from(context);
+
+		headView = (LinearLayout) inflater.inflate(R.layout.pullto_head, null);
+
+		arrowImageView = (ImageView) headView.findViewById(R.id.head_arrowImageView);
+		arrowImageView.setMinimumWidth(70);
+		arrowImageView.setMinimumHeight(50);
+		progressBar = (ImageView) headView.findViewById(R.id.head_progressBar);
+		tipsTextview = (TextView) headView.findViewById(R.id.head_tipsTextView);
+		tipsTextview.setTextColor(Color.argb(255, 158, 158, 158));
+		lastUpdatedTextView = (TextView) headView.findViewById(R.id.head_lastUpdatedTextView);
+		lastUpdatedTextView.setTextColor(Color.argb(255, 180, 180, 180));
+
+		progressBar.setBackgroundResource(R.drawable.refresh_animation_list);
+        animation1 = (AnimationDrawable)progressBar.getBackground();
+		
+		measureView(headView);
+		headContentHeight = headView.getMeasuredHeight();
+
+		headView.setPadding(0, -1 * headContentHeight, 0, 0);
+		headView.invalidate();
+
+		addHeaderView(headView, null, false);
+		//setOnScrollListener(this);
+		setOnScrollListener(new PauseOnScrollListener(ImageLoader.getInstance(), true, false, this));
+		
+		animation = new RotateAnimation(0, -180,
+				RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+				RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+		animation.setInterpolator(new LinearInterpolator());
+		animation.setDuration(250);
+		animation.setFillAfter(true);
+
+		reverseAnimation = new RotateAnimation(-180, 0,
+				RotateAnimation.RELATIVE_TO_SELF, 0.5f,
+				RotateAnimation.RELATIVE_TO_SELF, 0.5f);
+		reverseAnimation.setInterpolator(new LinearInterpolator());
+		reverseAnimation.setDuration(200);
+		reverseAnimation.setFillAfter(true);
+
+		state = DONE;
+		isRefreshable = false;
+	}
+	
+	private void measureView(View child) {
+		ViewGroup.LayoutParams p = child.getLayoutParams();
+		if (p == null) {
+			p = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+					ViewGroup.LayoutParams.WRAP_CONTENT);
+		}
+		int childWidthSpec = ViewGroup.getChildMeasureSpec(0, 0 + 0, p.width);
+		int lpHeight = p.height;
+		int childHeightSpec;
+		if (lpHeight > 0) {
+			childHeightSpec = MeasureSpec.makeMeasureSpec(lpHeight,
+					MeasureSpec.EXACTLY);
+		} else {
+			childHeightSpec = MeasureSpec.makeMeasureSpec(0,
+					MeasureSpec.UNSPECIFIED);
+		}
+		child.measure(childWidthSpec, childHeightSpec);
+	}
+	
+	public void onScroll(AbsListView arg0, int firstVisiableItem, int arg2,
+			int arg3) {
+		firstItemIndex = firstVisiableItem;
+		
+	}
+
+	public void onScrollStateChanged(AbsListView arg0, int arg1) {
+		if(remoreListener == null) return;
+		if (getLastVisiblePosition() == (getCount() - 1) && state == DONE) {
+			onRemore();
+    	}
+	}
+
+	@Override
+	public boolean onInterceptTouchEvent(MotionEvent ev) {
+		return super.onInterceptTouchEvent(ev);
+	}
+	
+	public boolean onTouchEvent(MotionEvent event) {
+		if (isRefreshable) {
+			switch (event.getAction()) {
+			case MotionEvent.ACTION_DOWN:
+				if (firstItemIndex == 0 && !isRecored) {
+					isRecored = true;
+					startY = (int) event.getY();
+				}
+				break;
+
+			case MotionEvent.ACTION_UP:
+				if (state != REFRESHING && state != LOADING) {
+					if (state == DONE) {
+
+					}
+					if (state == PULL_To_REFRESH) {
+						state = DONE;
+						changeHeaderViewByState();
+					}
+					if (state == RELEASE_To_REFRESH) {
+						state = REFRESHING;
+						changeHeaderViewByState();
+						onRefresh();
+					}
+				}
+				isRecored = false;
+				isBack = false;
+				break;
+
+			case MotionEvent.ACTION_MOVE:
+				int tempY = (int) event.getY();
+				if (!isRecored && firstItemIndex == 0) {
+					isRecored = true;
+					startY = tempY;
+				}
+
+				if (state != REFRESHING && isRecored && state != LOADING) {
+					if (state == RELEASE_To_REFRESH) {
+						/*if(getFirstVisiblePosition() == 0){
+							setSelection(0);
+						}*/
+						setSelection(0);
+						if ((headView.getBottom() < headContentHeight) && (tempY - startY) > 0) {
+							state = PULL_To_REFRESH;
+							changeHeaderViewByState();
+						}
+
+						else if (tempY - startY <= 0) {
+							state = DONE;
+							changeHeaderViewByState();
+						}
+					}
+					
+					if (state == PULL_To_REFRESH) {
+						/*if(getFirstVisiblePosition() == 0){
+							setSelection(0);	
+						}*/
+						setSelection(0);
+						if ((tempY - startY) >= headContentHeight) {
+							state = RELEASE_To_REFRESH;
+							isBack = true;
+							changeHeaderViewByState();
+						}
+						
+						else if (tempY - startY <= 0) {
+							state = DONE;
+							changeHeaderViewByState();
+						}
+					}
+
+					if (state == DONE) {
+						if (tempY - startY > 0) {
+							state = PULL_To_REFRESH;
+							changeHeaderViewByState();
+						}
+					}
+
+					if (state == PULL_To_REFRESH) {
+						headView.setPadding(0, -1 * headContentHeight + (tempY - startY), 0, 0);
+					}
+
+					if (state == RELEASE_To_REFRESH) {
+						headView.setPadding(0, (tempY - startY) - headContentHeight, 0, 0);
+					}
+				}
+
+				break;
+			}
+		}
+
+		return super.onTouchEvent(event);
+	}
+
+	private void changeHeaderViewByState() {
+		switch (state) {
+		case RELEASE_To_REFRESH:
+			arrowImageView.setVisibility(View.VISIBLE);
+			progressBar.setVisibility(View.GONE);
+			tipsTextview.setVisibility(View.VISIBLE);
+			lastUpdatedTextView.setVisibility(View.VISIBLE);
+
+			arrowImageView.clearAnimation();
+			arrowImageView.startAnimation(animation);
+
+			tipsTextview.setText(getResources().getString(R.string.pull_to_refresh_release_labels));
+
+			break;
+		case PULL_To_REFRESH:
+			progressBar.setVisibility(View.GONE);
+			tipsTextview.setVisibility(View.VISIBLE);
+			lastUpdatedTextView.setVisibility(View.VISIBLE);
+			arrowImageView.clearAnimation();
+			arrowImageView.setVisibility(View.VISIBLE);
+
+			if (isBack) {
+				isBack = false;
+				arrowImageView.clearAnimation();
+				arrowImageView.startAnimation(reverseAnimation);
+
+				tipsTextview.setText(getResources().getString(R.string.pull_to_refresh_pull_labels));
+			}
+			else {
+				tipsTextview.setText(getResources().getString(R.string.pull_to_refresh_pull_labels));
+			}
+			break;
+
+		case REFRESHING:
+			headView.setPadding(0, 0, 0, 0);
+			new Handler().postDelayed(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					animation1.start();
+				}
+			}, 100);
+			progressBar.setVisibility(View.VISIBLE);
+			arrowImageView.clearAnimation();
+			arrowImageView.setVisibility(View.GONE);
+			tipsTextview.setText(getResources().getString(R.string.pull_to_refresh_refreshing_labels));
+			//lastUpdatedTextView.setVisibility(View.GONE);
+			break;
+		case DONE:
+			headView.setPadding(0, -1 * headContentHeight, 0, 0);
+			animation1.stop();
+			progressBar.setVisibility(View.GONE);
+			arrowImageView.clearAnimation();
+			//arrowImageView.setImageResource(R.drawable.listview_arrow);
+			tipsTextview.setText(getResources().getString(R.string.pull_to_refresh_pull_labels));
+			lastUpdatedTextView.setVisibility(View.VISIBLE);
+			break;
+		}
+	}
+
+	public void resetPullview(){
+		if (state != REFRESHING){
+			state = DONE;
+			changeHeaderViewByState();
+		}
+	}
+
+	public void startRefresh(){
+		state = REFRESHING;
+		if (refreshListener != null && !isRefreshing && !isReadmoreing) {
+			isRefreshing = true;
+			changeHeaderViewByState();
+			refreshListener.onRefresh();
+		}
+	}
+	
+	private void addFooterView(){
+		if(isRemoreable && mAdapter.getCount() > 0 && footerView == null){
+			footerView = (FrameLayout) LayoutInflater.from(context).inflate(R.layout.pullto_footer, null);
+			footerViewAnimation = (AnimationDrawable)((ImageView)footerView.findViewById(R.id.pullto_footer_img)).getBackground();
+			
+	 		addFooterView(footerView, null ,false);
+		}
+    }
+	
+	private void showFooterView(){
+		if(footerView != null){
+			for(int i = 0; i < footerView.getChildCount(); i++){
+				View view = footerView.getChildAt(i);
+				view.setVisibility(View.VISIBLE);
+			}
+			footerView.setVisibility(View.VISIBLE);
+			footerViewAnimation.start();
+		}
+	}
+	
+	private void hideFooterView(){
+		if(footerView != null){
+			for(int i = 0; i < footerView.getChildCount(); i++){
+				View view = footerView.getChildAt(i);
+				view.setVisibility(View.GONE);
+			}
+			footerView.setVisibility(View.GONE);
+			footerViewAnimation.stop();
+		}
+	}
+	
+	public void setOnRefreshListener(OnRefreshListener refreshListener) {
+		this.refreshListener = refreshListener;
+		isRefreshable = true;
+	}
+	
+	public void setRemoreable(boolean isRemoreable){
+		this.isRemoreable = isRemoreable;
+		this.isReadmoreing = false;
+		
+		if(this.isRemoreable){
+			showFooterView();
+		}
+	}
+	
+	public void setOnRemoreListener(OnRemoreListener remoreListener) {
+		this.remoreListener = remoreListener;
+		addFooterView();
+		if(remoreListener != null){
+			isRemoreable = true;
+		}
+		else{
+			isRemoreable = false;
+		}
+	}
+
+	public interface OnRefreshListener {
+		public void onRefresh();
+	}
+	
+	public interface OnRemoreListener {
+		public void onRemore();
+	}
+
+	public void onRefreshComplete() {
+		state = DONE;
+		lastUpdatedTextView.setText(getResources().getString(R.string.pull_to_refresh_complete) + formats.format(new Date()));
+		changeHeaderViewByState();
+		isRefreshing = false;
+		invalidateViews();
+	}
+	
+	public void onRemoreComplete() {
+		isReadmoreing = false;
+		hideFooterView();
+	}
+	
+	public void complete(){
+		onRefreshComplete();
+		onRemoreComplete();
+	}
+
+ 	private void onRefresh() {
+		if (refreshListener != null && !isReadmoreing && !isRefreshing && !isReadmoreing) {
+			isRefreshing = true;
+			refreshListener.onRefresh();
+		}
+	}
+	
+	private void onRemore() {
+		if (remoreListener != null && !isReadmoreing && !isRefreshing && isRemoreable) {
+			isReadmoreing = true;
+    		showFooterView();
+    		remoreListener.onRemore();
+		}
+	}
+	
+	@Override
+	protected void onLayout(boolean changed, int l, int t, int r, int b) {
+		// TODO Auto-generated method stub
+		super.onLayout(changed, l, t, r, b);
+		if(mAdapter == null) return;
+		if(mAdapter.getCount() == 0) return;
+		mCurrentRange = 0;
+		for(int i = 0; i < getChildCount(); i++){
+			mCurrentRange += getChildAt(i).getHeight();
+		}
+		if(mCurrentRange < getHeight()){
+			if(isRemoreable && !isReadmoreing && !isRefreshing){
+				onRemore();
+			}
+		}
+	}
+
+	public void setAdapter(BaseAdapter adapter) {
+		mAdapter = adapter;
+		lastUpdatedTextView.setText(getResources().getString(R.string.pull_to_refresh_complete) + formats.format(new Date()));
+		super.setAdapter(adapter);
+		mAdapter.registerDataSetObserver(new DataSetObserver() {
+			@Override
+			public void onChanged() {
+				// TODO Auto-generated method stub
+				super.onChanged();
+				addFooterView();
+			}
+
+			@Override
+			public void onInvalidated() {
+				// TODO Auto-generated method stub
+				super.onInvalidated();
+			}
+		});
+	}
+}

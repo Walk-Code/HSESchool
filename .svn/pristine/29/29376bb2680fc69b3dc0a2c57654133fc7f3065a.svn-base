@@ -1,0 +1,200 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF"
+    android:visibility="gone"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="37dp"
+        android:gravity="center_vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_my_amount"
+                android:textColor="#7F7F7F"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/card_end_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:textColor="#7F7F7F"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/card_no"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:singleLine="true"
+                android:textColor="#7F7F7F"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#DD514F"
+        android:orientation="vertical"
+        android:padding="10dp" >
+
+        <TextView
+            android:id="@+id/card_give_money"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:textColor="#FFF"
+            android:textSize="14sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_horizontal" >
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/money_sigh"
+                android:textColor="#FFF"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/card_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFF"
+                android:textSize="45sp" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_online_recharge"
+            android:layout_width="105dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/btn_white_border_selector"
+            android:onClick="onClick"
+            android:text="@string/text_online_recharge"
+            android:textColor="#FFF" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="wrap_content"
+        android:layout_height="37dp"
+        android:layout_marginLeft="15dp"
+        android:gravity="center_vertical"
+        android:text="@string/text_my_bill"
+        android:textColor="#7F7F7F"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp" >
+
+        <RadioGroup
+            android:id="@+id/rg_records_of_consumption"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:background="@drawable/bg_one_card_solution_radiogroup"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/rd_all_record"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_radiobutton_left_selector"
+                android:button="@null"
+                android:checked="true"
+                android:gravity="center"
+                android:text="@string/goods_all"
+                android:textColor="@drawable/color_radio_text_selector"
+                android:textSize="14sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#CBCBCB" />
+
+            <RadioButton
+                android:id="@+id/rd_recharge_record"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_radiobutton_center_selector"
+                android:button="@null"
+                android:gravity="center"
+                android:text="@string/text_tab_recharge"
+                android:textColor="@drawable/color_radio_text_selector"
+                android:textSize="14sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#CBCBCB" />
+
+            <RadioButton
+                android:id="@+id/rd_meals_record"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_radiobutton_center_selector"
+                android:button="@null"
+                android:gravity="center"
+                android:text="@string/text_tab_meals"
+                android:textColor="@drawable/color_radio_text_selector"
+                android:textSize="14sp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="#CBCBCB" />
+
+            <RadioButton
+                android:id="@+id/rd_electro_record"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_radiobutton_right_selector"
+                android:button="@null"
+                android:gravity="center"
+                android:text="@string/text_tab_electro"
+                android:textColor="@drawable/color_radio_text_selector"
+                android:textSize="14sp" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <com.layout.PullToRefreshListView
+        android:id="@+id/puulto_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:cacheColorHint="#00000000"
+        android:descendantFocusability="blocksDescendants"
+        android:divider="#DDDDDD"
+        android:dividerHeight="1dp"
+        android:fadingEdge="none"
+        android:listSelector="#00000000"
+        android:scrollbars="none" />
+
+</LinearLayout>

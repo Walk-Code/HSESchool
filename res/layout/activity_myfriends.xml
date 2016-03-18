@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+	<com.util.TabBarView 
+	    android:id="@+id/tabBar_myfriends"
+	    android:layout_width="match_parent"
+	    android:layout_height="40dp"
+	    android:background="#ffffff"
+	    />
+	<View 
+	    android:layout_width="match_parent"
+	   	android:layout_height="0.3dp"
+	   	android:background="#D2D2D2"
+	    />
+	
+	<FrameLayout 
+	    android:id="@+id/fragment_group_myfriends"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:background="#f2f2f2"
+	    ></FrameLayout>
+</LinearLayout>

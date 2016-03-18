@@ -1,0 +1,35 @@
+package com.zhuochuang.hsej.store;
+
+import com.model.TaskType;
+import com.zhuochuang.hsej.BaseFragment;
+import com.zhuochuang.hsej.R;
+
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+
+public class SchoolifeFragment extends BaseFragment{
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		mMainLayout = (ViewGroup) ViewGroup.inflate(mActivity, R.layout.fragment_schoollife, null);
+		mMainLayout.findViewById(R.id.textview_register).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+	}
+
+}

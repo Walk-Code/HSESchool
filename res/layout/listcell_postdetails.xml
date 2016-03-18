@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:descendantFocusability="blocksDescendants">
+    <FrameLayout
+        android:id="@+id/group_imageview"
+	    android:layout_width="45dp"
+		android:layout_height="45dp"
+		android:layout_margin="10dp">
+	    <ImageView
+		    android:id="@+id/imageview"
+		    android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:contentDescription="@string/app_name"
+			android:scaleType="centerCrop"/>
+		<!-- <View
+		    android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="@drawable/masklayer_bg"/> -->
+	</FrameLayout>
+	
+    <RelativeLayout
+        android:id="@+id/group_content"
+        android:layout_toRightOf="@id/group_imageview"
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_marginTop="10dp"
+	    android:layout_marginRight="5dp"
+	    android:background="@drawable/masklayer_bg">
+   		<com.layout.ConsumeTextView
+   		    android:id="@+id/textview_title"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content" 
+	   		android:textSize="16dp"
+	   		android:gravity="left|center_vertical"
+	   		android:lineSpacingExtra="3dp"
+	   		android:textColor="#4a4a4a"/>
+	    
+	   	<FrameLayout
+	   	    android:id="@+id/group_pic"
+	   	    android:layout_below="@id/textview_title"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:visibility="gone">
+		    <ImageView
+			    android:id="@+id/pic"
+			    android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:scaleType="centerCrop"
+				android:contentDescription="@string/app_name"/>
+			<View
+			    android:id="@+id/preview"
+			    android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:background="@drawable/masklayer_bg"/>
+		</FrameLayout>
+	   		
+	    <TextView 
+	   	    android:id="@+id/textview_date"
+	   	    android:layout_below="@id/group_pic"
+	   	    android:layout_width="wrap_content"
+	   		android:layout_height="wrap_content" 
+	   		android:layout_marginTop="5dp"
+	   		android:textSize="13dp"
+	   		android:gravity="center"
+	   		android:textColor="#a0a0a0"/>
+    </RelativeLayout>
+    
+    <View
+        android:layout_below="@id/group_content"
+	    android:layout_width="match_parent"
+		android:layout_height="0.5dp"
+		android:layout_marginTop="10dp"
+		android:background="#d2d2d2"/>
+</RelativeLayout>

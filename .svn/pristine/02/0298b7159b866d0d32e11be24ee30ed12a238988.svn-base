@@ -1,0 +1,925 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#eeeeee"
+    android:scrollbars="none" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <RelativeLayout
+            android:id="@+id/mycenter_group_header"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="#de504f"
+            android:onClick="onMycenterClick" >
+
+            <View
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/arrow_white" />
+
+            <FrameLayout
+                android:id="@+id/mycenter_imageview_header_layout"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp" >
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/my_head" />
+
+                <ImageView
+                    android:id="@+id/mycenter_imageview_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="1.5dp"
+                    android:contentDescription="@string/app_name"
+                    android:scaleType="centerCrop" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:layout_toRightOf="@id/mycenter_imageview_header_layout"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/mycenter_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="25dp"
+                    android:ellipsize="end"
+                    android:gravity="left"
+                    android:singleLine="true"
+                    android:text="@string/mycenter_login"
+                    android:textColor="#ffffff"
+                    android:textSize="17dp" />
+
+                <TextView
+                    android:id="@+id/mycenter_desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="25dp"
+                    android:layout_marginTop="3dp"
+                    android:ellipsize="end"
+                    android:gravity="left"
+                    android:text="@string/mycenter_login_notify"
+                    android:textColor="#efd4cd"
+                    android:textSize="14dp" />
+
+                <TextView
+                    android:id="@+id/mycenter_rank"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="25dp"
+                    android:layout_marginTop="3dp"
+                    android:ellipsize="end"
+                    android:gravity="left"
+                    android:textColor="#efd4cd"
+                    android:textSize="14sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/mycenter_store"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp"
+            android:background="#ffffff"
+            android:orientation="vertical" >
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_store_allorder"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <TextView
+                    android:id="@+id/textview_storeorder_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="15dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_storeorder_hint"
+                    android:textColor="#000000"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_right_store"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/textview_store_checkall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="5dp"
+                    android:layout_toLeftOf="@id/icon_right_store"
+                    android:gravity="center"
+                    android:text="@string/mycenter_storeorder_checkall"
+                    android:textColor="#999999"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:orientation="horizontal" >
+
+                <FrameLayout
+                    android:id="@+id/group_store1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/masklayer_bg"
+                    android:onClick="onMycenterClick" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:orientation="vertical" >
+
+                        <View
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/icon_stay_pay" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:gravity="center"
+                            android:text="@string/mycenter_storeorder_cell1"
+                            android:textColor="#707070"
+                            android:textSize="11dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/textview_unread1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="12dp"
+                        android:layout_gravity="right|top"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_red_round"
+                        android:gravity="center"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:text="1"
+                        android:textColor="#ffffff"
+                        android:textSize="8dp" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/group_store2"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/masklayer_bg"
+                    android:onClick="onMycenterClick" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:orientation="vertical" >
+
+                        <View
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/icon_stay_receiving" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:gravity="center"
+                            android:text="@string/mycenter_storeorder_cell2"
+                            android:textColor="#707070"
+                            android:textSize="11dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/textview_unread2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="12dp"
+                        android:layout_gravity="right|top"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_red_round"
+                        android:gravity="center"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:text="1"
+                        android:textColor="#ffffff"
+                        android:textSize="8dp" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/group_store3"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/masklayer_bg"
+                    android:onClick="onMycenterClick" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:orientation="vertical" >
+
+                        <View
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/icon_stay_evaluate" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:gravity="center"
+                            android:text="@string/mycenter_storeorder_cell3"
+                            android:textColor="#707070"
+                            android:textSize="11dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/textview_unread3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="12dp"
+                        android:layout_gravity="right|top"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_red_round"
+                        android:gravity="center"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:text="1"
+                        android:textColor="#ffffff"
+                        android:textSize="8dp" />
+                </FrameLayout>
+
+                <FrameLayout
+                    android:id="@+id/group_store4"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/masklayer_bg"
+                    android:onClick="onMycenterClick" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_gravity="center"
+                        android:orientation="vertical" >
+
+                        <View
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/icon_returns" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:gravity="center"
+                            android:text="@string/mycenter_storeorder_cell4"
+                            android:textColor="#707070"
+                            android:textSize="11dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/textview_unread4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="12dp"
+                        android:layout_gravity="right|top"
+                        android:layout_marginRight="20dp"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_red_round"
+                        android:gravity="center"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        android:text="1"
+                        android:textColor="#ffffff"
+                        android:textSize="8dp" />
+                </FrameLayout>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/mycenter_logined_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_message"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico1"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_message" />
+
+                <TextView
+                    android:id="@+id/textview_msg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico1"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell1"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_unread_msg"
+                    android:layout_width="7dp"
+                    android:layout_height="7dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@id/textview_msg"
+                    android:background="@drawable/red_unread"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/icon_right1"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right1"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_friends"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico2"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_friends" />
+
+                <TextView
+                    android:id="@+id/textview_friend_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico2"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell2"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_unread_friend"
+                    android:layout_width="7dp"
+                    android:layout_height="7dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@id/textview_friend_hint"
+                    android:background="@drawable/red_unread"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/icon_right2"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right2"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_post"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico3"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_post" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico3"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell3"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_right3"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right3"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_integral"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico4"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_integral" />
+
+                <TextView
+                    android:id="@+id/textview_integral_hint"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico4"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell4"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_unread_integral"
+                    android:layout_width="7dp"
+                    android:layout_height="7dp"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@id/textview_integral_hint"
+                    android:background="@drawable/red_unread"
+                    android:visibility="gone" />
+
+                <View
+                    android:id="@+id/icon_right4"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/textview_integral"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="15dp"
+                    android:layout_toLeftOf="@id/icon_right4"
+                    android:gravity="center"
+                    android:textColor="#747474"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_collect"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico5"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_collect" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico5"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell5"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_right5"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right5"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_card"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico9"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/icon_mycard" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico9"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell9"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_right9"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right9"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_changepass"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico10"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_code" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico10"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell10"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_right10"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right10"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:id="@+id/mycenter_setting"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico6"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_setting" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico6"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell6"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_right6"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right6"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_about"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico7"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_about" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico7"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell7"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_right7"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right7"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <RelativeLayout
+                android:id="@+id/mycenter_feedback"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/bg_white_gray_selector"
+                android:clickable="true"
+                android:onClick="onMycenterClick" >
+
+                <View
+                    android:id="@+id/ico8"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/my_ico_feedback" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toRightOf="@id/ico8"
+                    android:gravity="center_vertical"
+                    android:text="@string/mycenter_cell8"
+                    android:textColor="#454545"
+                    android:textSize="16dp" />
+
+                <View
+                    android:id="@+id/icon_right8"
+                    android:layout_width="9dp"
+                    android:layout_height="15dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="15dp"
+                    android:background="@drawable/list_arrow" />
+
+                <TextView
+                    android:id="@+id/text8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_toLeftOf="@id/icon_right8"
+                    android:gravity="center"
+                    android:textColor="#454545"
+                    android:textSize="14dp" />
+            </RelativeLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#d1d1d1" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</ScrollView>

@@ -1,0 +1,109 @@
+package com.zhuochuang.hsej.store;
+
+import java.text.DecimalFormat;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.graphics.Paint;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.model.ImageLoaderConfigs;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.zhuochuang.hsej.R;
+
+public class ServiceZoneAdapter extends BaseAdapter{
+	private LayoutInflater inflater = null;
+	private JSONArray mGoodsList = null;
+	private DisplayMetrics mWindowManager=null;
+	private Context mContext;
+	public ServiceZoneAdapter(JSONArray mGoodsList,Context c) {
+		super();
+		this.mGoodsList = mGoodsList;
+		inflater = (LayoutInflater) c.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		mWindowManager = c.getResources().getDisplayMetrics();
+		mContext = c;
+	}
+
+	@Override
+	public int getCount() { 	
+		return mGoodsList == null ? 0 : mGoodsList.length();
+	}
+
+	@Override
+	public int getItemViewType(int position) {
+		// TODO Auto-generated method stub
+		return super.getItemViewType(position);
+	}
+
+	@Override
+	public int getViewTypeCount() {
+		// TODO Auto-generated method stub
+		return 1;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		ViewHolder vIewHolder;
+		vIewHolder = new ViewHolder();
+		if(convertView == null){
+			if(StoreDetailActivity.isGridView){
+				convertView = inflater.inflate(R.layout.store_grid_layout, parent, false);
+				vIewHolder.vImageGoods = (ImageView) convertView.findViewById(R.id.good_image);
+				vIewHolder.vImageGoods.setLayoutParams(new LinearLayout.LayoutParams((mWindowManager.widthPixels-vIewHolder.vImageGoods.getWidth())/2,
+						(mWindowManager.widthPixels-vIewHolder.vImageGoods.getWidth())/2));	
+				
+				
+			}else{
+				convertView = inflater.inflate(R.layout.store_list_layout, parent, false);
+				vIewHolder.vImageGoods = (ImageView) convertView.findViewById(R.id.good_image);
+				vIewHolder.vImageGoods.setLayoutParams(new LinearLayout.LayoutParams((mWindowManager.widthPixels-vIewHolder.vImageGoods.getWidth())/4,
+						(mWindowManager.widthPixels-vIewHolder.vImageGoods.getWidth())/4));				
+			}			
+			vIewHolder.vDetails = (TextView) convertView.findViewById(R.id.tv_details);
+			vIewHolder.vPrice = (TextView) convertView.findViewById(R.id.tv_price);
+			vIewHolder.vMarkPrice = (TextView) convertView.findViewById(R.id.tv_mark_price);			
+			vIewHolder.vStock = (TextView) convertView.findViewById(R.id.tv_stock);
+			convertView.setTag(vIewHolder);
+		}else{
+			vIewHolder = (ViewHolder) convertView.getTag();
+		}
+		JSONObject goodsList = mGoodsList.optJSONObject(position);
+		if(goodsList == null){
+			return convertView;
+		}		
+				
+		vIewHolder.vDetails.setText(goodsList.optString("name"));//new DecimalFormat("#.00").format(
+		vIewHolder.vPrice.setText(mContext.getResources().getString(R.string.money_sigh)+new DecimalFormat("#.00").format(goodsList.optDouble("price")));
+		vIewHolder.vStock.setText(mContext.getResources().getString(R.string.goods_already_sold)+goodsList.optString("sales")+"件");
+		if(goodsList.has("money")){
+			vIewHolder.vMarkPrice.setText(mContext.getResources().getString(R.string.money_sigh)+new DecimalFormat("#.00").format(goodsList.optDouble("money")));
+			vIewHolder.vMarkPrice.getPaint().setFlags(Paint. STRIKE_THRU_TEXT_FLAG);
+		}
+		ImageLoader.getInstance().displayImage(goodsList.optString("image"), vIewHolder.vImageGoods, ImageLoaderConfigs.displayImageOptionsBg);
+		return convertView;
+	}
+	class ViewHolder{
+		TextView vDetails,vPrice,vStock,vMarkPrice;
+		ImageView vImageGoods;		
+	}
+	@Override
+	public Object getItem(int position) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public long getItemId(int position) {
+		return position;
+	}
+
+}

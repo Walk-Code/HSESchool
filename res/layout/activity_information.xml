@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" 
+    android:orientation="vertical"
+    >
+    
+	<com.util.TabBarView 
+	    android:id="@+id/tabbar_beauty_hs"
+	    android:layout_width="match_parent"
+	    android:layout_height="40dp"
+	    android:background="#ffffff"
+	    />
+	<View 
+	    android:layout_width="match_parent"
+	    android:layout_height="0.3dp"
+	    android:background="#BABABA"
+	    />
+	
+	<FrameLayout
+        android:id="@+id/fragmet_group_beauty_hs"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent">
+	</FrameLayout>
+	
+	
+</LinearLayout>

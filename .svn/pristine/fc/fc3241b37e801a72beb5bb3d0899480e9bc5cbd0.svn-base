@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF" >
+
+   				 <ImageView
+                        android:id="@+id/guess_im"
+                        android:layout_width="match_parent"
+                        android:layout_height="120dp"
+                        android:src="@drawable/previewpic"
+                        android:layout_gravity="center"
+                        android:scaleType="fitXY" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:singleLine="true"
+                        android:textColor="#9A9A9A"
+                        android:textSize="12sp"
+                        android:layout_marginTop="3dp"
+                        android:id="@+id/store_home_like_goods_names" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:singleLine="true"
+                        android:textColor="#DE544F"
+                        android:textSize="15sp"
+                        android:id="@+id/store_home_like_goods_prices" />
+		</LinearLayout>

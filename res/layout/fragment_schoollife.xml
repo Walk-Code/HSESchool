@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:descendantFocusability="blocksDescendants">       
+         <LinearLayout
+           		 android:layout_width="match_parent"
+           		 android:layout_height="50dp"
+            	 android:orientation="horizontal"
+            	 android:background="#de504f" >
+            <LinearLayout 
+                	android:layout_width="0dp"
+                	android:layout_height="35dp"
+               	 	android:layout_gravity="center"
+               		android:background="@drawable/shape_store_search_all_bg"
+               		android:layout_marginLeft="15dp"
+               		android:layout_weight="7"
+               		android:id="@+id/search_main"
+               		android:clickable="true"
+               		android:focusable="true"
+               		android:focusableInTouchMode="true">
+              	<ImageView 
+              	    android:layout_width="21dp"
+              	    android:layout_height="21dp"
+              	    android:layout_gravity="center_vertical|left"
+              	    android:background="@drawable/nav_icon_search"
+              	    android:layout_marginLeft="10dp"
+              	    android:focusable="false"
+              	    android:clickable="false"
+              	    android:focusableInTouchMode="true"/>
+              	<TextView 
+              	    android:layout_width="wrap_content"
+              	    android:layout_height="match_parent"
+              	    android:hint="@string/goods_search_all"
+              	    android:layout_gravity="center_vertical|left"
+              	    android:gravity="center_vertical"
+              	    android:layout_marginLeft="4dp"
+              	    android:textSize="15sp"
+              	    android:focusable="false"
+              	    android:clickable="false"
+              	    android:focusableInTouchMode="true"
+              	    android:textColor="#FFFFFF"
+              	    android:textColorHint="#bababa"/>                
+           </LinearLayout>         
+
+          <LinearLayout
+                android:id="@+id/home_shopping"
+                android:layout_width="0dp"
+                android:layout_height="35dp"
+                android:layout_gravity="center"
+                android:layout_weight="1.5"               
+                android:orientation="horizontal"
+                android:gravity="center" >
+                <ImageView
+                    android:layout_width="23dp"
+                    android:layout_height="23dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/icon_shopping" /> 
+				<TextView				    
+				    android:id="@+id/store_car_count"
+				    android:layout_width="10dp"
+				    android:layout_height="10dp"
+				    android:layout_gravity="top"				  
+				    android:background="@drawable/store_car_count_main"
+				    android:gravity="center"
+				    android:textColor="#DD514f"
+				    android:textSize="7dp"
+				    android:visibility="gone" />
+            </LinearLayout>
+      </LinearLayout> 
+       
+     <include
+	    android:id="@+id/pullto_listview"
+	    layout="@layout/pulltolistview"
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"/>  
+</LinearLayout>

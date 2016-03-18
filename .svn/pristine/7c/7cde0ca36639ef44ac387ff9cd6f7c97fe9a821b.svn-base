@@ -1,0 +1,117 @@
+package com.zhuochuang.hsej.adapter;
+
+import android.content.Context;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.Utils;
+import com.zhuochuang.hsej.R;
+import com.zhuochuang.hsej.entity.SecondHandEntity.ItemsEntity;
+import com.zhuochuang.hsej.view.SecondHandandLostItem;
+
+public class SecondHandandLostAdapter extends SHLBaseAdapter<ItemsEntity> {
+
+	private boolean isEdit = false;
+	@SuppressWarnings("unused")
+	private boolean isGoing = true;
+	private boolean isComplete = true;
+	private int nativeCode = 1;
+
+	public SecondHandandLostAdapter(Context context, boolean isGoing,
+			boolean isComplete, int nativeCode) {
+		super(context);
+		this.context = context;
+		this.isGoing = isGoing;
+		this.isComplete = isComplete;
+		this.nativeCode = nativeCode;
+	}
+
+	private Context context;
+
+	@Override
+	public View getView(final int position, View convertView, ViewGroup parent) {
+		final SecondHandandLostItem goingItem;
+		final ItemsEntity mEntity = (ItemsEntity) getItem(position);
+		if (convertView == null) {
+			convertView = new SecondHandandLostItem(context);
+			convertView.setTag(convertView);
+		}
+		goingItem = (SecondHandandLostItem) convertView.getTag();
+		goingItem.shlImage.setImageResource(R.drawable.list_loadpicture);
+		if (mEntity.getImages().size() > 0)
+			ImageLoader.getInstance().displayImage(
+					mEntity.getImages().get(0).getPath(), goingItem.shlImage);
+		if (isEdit) {
+			goingItem.shlCBox.setVisibility(View.VISIBLE);
+			goingItem.shlCBox.setChecked(mEntity.isSelect());
+		} else
+			goingItem.shlCBox.setVisibility(View.GONE);
+		goingItem.shlTitle.setText(mEntity.getName());
+		goingItem.shlContent.setText(mEntity.getContent());
+		goingItem.shlCBox
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+					@Override
+					public void onCheckedChanged(CompoundButton buttonView,
+							boolean isChecked) {
+						mEntity.setSelect(isChecked);
+						if (mClickListener != null) {
+							mClickListener.onChecked(mEntity.isSelect(),
+									position);
+						}
+					}
+				});
+		goingItem.btnEdit.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (mClickListener != null)
+					mClickListener.onEditClick(goingItem.btnEdit, position);
+			}
+		});
+		if (nativeCode == 2) {
+			goingItem.btnEdit.setVisibility(View.GONE);
+			goingItem.shlPriceLayout.setVisibility(View.GONE);
+		}
+		goingItem.btnFinish.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (mClickListener != null)
+					mClickListener.onFinishClick(goingItem.btnFinish, position);
+			}
+		});
+		goingItem.shlPrice.setText(String.format("%.2f", mEntity.getPrice()));
+		goingItem.shlDate.setText(Utils.getAlmostTime(mEntity.getCreateDate()));
+		if (isComplete) {
+			if ("1".equals(mEntity.getStatus()))
+				mEntity.setEdit(true);
+			else
+				mEntity.setEdit(false);
+		} else {
+			mEntity.setEdit(false);
+		}
+		if (mEntity.isEdit()) {
+			goingItem.shlEditLayout.setVisibility(View.VISIBLE);
+		} else {
+			goingItem.shlEditLayout.setVisibility(View.GONE);
+		}
+		return convertView;
+	}
+
+	public boolean isEdit() {
+		return isEdit;
+	}
+
+	public void setEdit(boolean isEdit) {
+		this.isEdit = isEdit;
+		notifyDataSetChanged();
+	}
+
+	private OnEFClickListener mClickListener;// 接口回调
+
+	public void setOnEFClickListener(OnEFClickListener listener) {
+		this.mClickListener = listener;
+	}
+}

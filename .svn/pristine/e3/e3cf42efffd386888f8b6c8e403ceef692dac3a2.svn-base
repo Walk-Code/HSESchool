@@ -1,0 +1,84 @@
+package com.zhuochuang.hsej.store;
+
+import java.util.List;
+import java.util.Map;
+
+import org.json.JSONArray;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.model.ImageLoaderConfigs;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.zhuochuang.hsej.R;
+
+public class ShoppingCarAdapter extends BaseAdapter{
+	private Context mContext;
+	private View.OnClickListener onAddNum;  
+	private View.OnClickListener onCutNum;
+	private View.OnClickListener onCheckBox;
+	private JSONArray mGoodsArr;
+	private List<Map<String,Object>> mData;
+	//public  Map<Integer, Boolean> mSelectedMap;
+	
+	public ShoppingCarAdapter(List<Map<String,Object>> mData, Context mContext) {
+		super();
+		this.mData = mData;
+		this.mContext = mContext;		
+	}
+	
+	public void setOnAddNum(View.OnClickListener onAddNum){ 
+        this.onAddNum = onAddNum;
+    }
+
+    public void setOnCutNum(View.OnClickListener onCutNum){
+        this.onCutNum = onCutNum;
+    }
+    public void setCheckBox(View.OnClickListener onCheckBox){
+    	this.onCheckBox = onCheckBox;
+    }
+	@Override
+	public int getCount() {
+		return mData != null ? mData.size() : 0;
+	}
+
+	@Override
+	public Object getItem(int position) {
+		return null;
+	}
+
+	@Override
+	public long getItemId(int position) {
+	
+		return 0;
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		if(convertView == null){
+			convertView = LayoutInflater.from(mContext).inflate(R.layout.store_shopping_car_item, null);
+		}
+		Map map = mData.get(position);
+		((TextView)convertView.findViewById(R.id.store_name)).setText(map.get("shopName")+"");
+		((TextView)convertView.findViewById(R.id.product_name)).setText(map.get("goodsName")+"");
+		((TextView)convertView.findViewById(R.id.producter_price)).setText(mContext.getResources().getString(R.string.money_sigh)+map.get("price")+"");
+		((TextView)convertView.findViewById(R.id.product_count)).setText(map.get("number")+"");
+		ImageLoader.getInstance().displayImage((String) map.get("image"),((ImageView)convertView.findViewById(R.id.product_image)),ImageLoaderConfigs.displayImageOptionsBg);
+		//add & cut
+		(convertView.findViewById(R.id.product_remove)).setOnClickListener(onCutNum);
+		(convertView.findViewById(R.id.product_add)).setOnClickListener(onAddNum);
+		
+		(convertView.findViewById(R.id.product_remove)).setTag(position);
+		(convertView.findViewById(R.id.product_add)).setTag(position);		
+		((CheckBox)convertView.findViewById(R.id.product_check)).setChecked(map.get("flag").equals("true"));
+		((CheckBox)convertView.findViewById(R.id.store_title_check)).setChecked(map.get("flag").equals("true"));
+		return convertView;
+	}
+	
+}

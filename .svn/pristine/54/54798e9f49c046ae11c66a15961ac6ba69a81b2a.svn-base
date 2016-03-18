@@ -1,0 +1,147 @@
+package com.zhuochuang.hsej;
+
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+
+import com.model.Configs;
+import com.model.TaskListener;
+import com.model.TaskType;
+
+public class BaseFragment extends Fragment implements TaskListener{
+	protected ViewGroup mMainLayout;
+	protected Activity mActivity;
+	protected int mWidth;
+	protected ProgressDialog mProgressDialog;
+	protected BroadcastReceiver mBroadcastReceiver;
+	
+	@SuppressWarnings("deprecation")
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);		
+		mWidth = mActivity.getWindowManager().getDefaultDisplay().getWidth();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Configs.LoginStateChange);
+Log.d("BaseActivity", getClass().toString());	
+		mActivity.registerReceiver(mBroadcastReceiver = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				// TODO Auto-generated method stub
+				BaseFragment.this.onReceive(intent.getAction());
+			}
+		}, filter);		
+	}
+
+	protected void onReceive(String brodecast){
+		
+	}
+	
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup container,
+			Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		ViewGroup group = ((ViewGroup)mMainLayout.getParent());
+		if(group != null)
+			group.removeAllViews();
+		mMainLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		return mMainLayout;
+	}
+	
+	public void showDialogCustom(){
+		removeDialogCustom();
+		if(mProgressDialog == null){
+			mProgressDialog = new ProgressDialog(mActivity);
+			mProgressDialog.setIndeterminate(false);
+			mProgressDialog.setCanceledOnTouchOutside(false);
+			mProgressDialog.setCancelable(true);
+			mProgressDialog.setOnCancelListener(new OnCancelListener() {
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					// TODO Auto-generated method stub
+					onCancelMethod();
+				}
+			});
+		}
+		
+		try {
+			mProgressDialog.show();
+			mProgressDialog.setContentView(R.layout.loading_custom);
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public void removeDialogCustom(){
+		try {
+			if(mProgressDialog != null && mProgressDialog.isShowing()){
+				mProgressDialog.cancel();
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+	}
+	
+	public void onCancelMethod(){
+		
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		// TODO Auto-generated method stub
+		super.onAttach(activity);
+		mActivity = activity;
+	}
+
+	@Override
+	public void onDetach() {
+		// TODO Auto-generated method stub
+		super.onDetach();
+		mActivity = null;
+	}
+	
+	@Override
+	public void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		if(mBroadcastReceiver != null){
+			mActivity.unregisterReceiver(mBroadcastReceiver);
+		}
+	}
+
+	@Override
+	public void taskStarted(TaskType type) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void taskIsCanceled(TaskType type) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void onClick(View v) {
+		// TODO Auto-generated method stub
+		
+	}
+}

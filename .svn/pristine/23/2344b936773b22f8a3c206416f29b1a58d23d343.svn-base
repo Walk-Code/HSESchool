@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+    
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#FFFFFF"
+        android:orientation="horizontal">
+		<FrameLayout 
+		    android:id="@+id/store_back"
+		    android:layout_width="50dp"
+		    android:layout_height="50dp">
+	        <ImageView	           
+	            android:layout_width="12dp"
+	            android:layout_height="22dp"
+	            android:layout_gravity="center"
+	            android:layout_weight="1"
+	            android:src="@drawable/navibar_icon_back" />
+		</FrameLayout>
+        <LinearLayout
+            android:id="@+id/search_main"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:layout_weight="8"
+            android:background="@drawable/shape_store_personal_bg"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:layout_marginRight="10dp">
+
+            <ImageView
+                android:layout_width="21dp"
+                android:layout_height="21dp"
+                android:layout_gravity="center_vertical|left"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/nav_icon_search"
+                android:clickable="false"
+                android:focusable="false" />
+
+            <EditText
+                android:id="@+id/search_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|left"
+                android:layout_marginLeft="4dp"
+                android:gravity="center_vertical"
+                android:hint="@string/goods_search_store"               
+                android:textSize="15sp"
+                android:background="#FFFFFF"
+                android:layout_marginRight="4dp"
+                android:imeOptions="actionSearch"
+            	android:singleLine="true"
+            	android:textColorHint="#9e9e9e"
+            	android:textColor="#656565"
+            	android:enabled="false"
+            	android:clickable="false"
+                android:focusable="false" />
+       </LinearLayout>      
+    </LinearLayout>
+	 <View 
+	    android:layout_width="match_parent"
+	    android:layout_height="1dp"
+	    android:background="#CCCCCC"/>   
+    <LinearLayout
+        android:id="@+id/centent_layout" 
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal">
+   	<ListView 
+        android:id="@+id/left_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="23"
+        android:background="#F3F4F6"
+        android:divider="#E4E5E7"
+        android:dividerHeight="1dp">        
+    </ListView>
+    <View 
+        android:layout_width="1dp" 
+        android:layout_height="match_parent"
+        android:background="#BEBFC1"/>
+    <com.zhuochuang.hsej.store.PinnedHeaderListView
+            android:id="@+id/pinnedListView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="9"
+            android:background="#FFFFFF"
+            android:divider="@null">
+    </com.zhuochuang.hsej.store.PinnedHeaderListView>
+  </LinearLayout>
+</LinearLayout>

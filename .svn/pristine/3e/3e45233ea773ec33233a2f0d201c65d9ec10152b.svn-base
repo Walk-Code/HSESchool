@@ -1,0 +1,134 @@
+package com.zhuochuang.hsej;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.layout.roundproress.RoundCornerProgressBar;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.ContentAdapter;
+import com.util.Utils;
+
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+public class VoteActivity extends BaseActivity{
+
+	ListView mListView;
+	View mHeaderView;
+	ContentAdapter mAdapter;
+	JSONObject mVoteObj;
+	JSONArray mVoteList;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+		// TODO Auto-generated method stub
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_vote);
+		
+		findViewById(R.id.textview_checkvote).setVisibility(View.VISIBLE);
+		
+		mHeaderView = ViewGroup.inflate(VoteActivity.this, R.layout.listcell_vote_header, null);
+		mListView = (ListView) findViewById(R.id.listview);
+		mListView.addHeaderView(mHeaderView, null, false);
+		mListView.setAdapter(mAdapter = new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				if(mVoteList != null && mVoteList.length() > 0){
+					return mVoteList.length();
+				}
+				return 5;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(VoteActivity.this, R.layout.listcell_vote, null);
+					LinearLayout.LayoutParams lp = (LayoutParams) convertView.findViewById(R.id.imageview).getLayoutParams();
+					lp.height = Utils.realVoteListImageHeight(VoteActivity.this);
+					convertView.findViewById(R.id.imageview).setLayoutParams(lp);
+				}
+				
+				ImageLoader.getInstance().displayImage("http://img5.duitang.com/uploads/item/201511/12/20151112161532_5cTBz.thumb.700_0.jpeg", (ImageView)convertView.findViewById(R.id.imageview), ImageLoaderConfigs.displayImageOptions);
+				((TextView)convertView.findViewById(R.id.textview_name)).setText("青岛。抹茶马芬。");
+				((TextView)convertView.findViewById(R.id.textview_declare)).setText("青岛。先生竟然中招肺炎，照料了两天，结果，女儿也发烧了。情况特殊，怕是传染，去验了血，幸好血项正常，只是普通病毒性感冒。");
+				
+				RoundCornerProgressBar progressBar = (RoundCornerProgressBar) convertView.findViewById(R.id.view_roundprogress);
+				progressBar.setBackgroundColor(Color.TRANSPARENT);
+				progressBar.setProgressColor(Color.parseColor("#dc5151"));
+				progressBar.setMax(100);
+				progressBar.setProgress(position * 20);
+				((TextView)convertView.findViewById(R.id.textview_commit_percent)).setText(getResources().getString(R.string.vote_commit_num)
+						+ (position * 20) + getResources().getString(R.string.vote_perecnt));
+				
+				/*JSONObject obj = mVoteList.optJSONObject(position);
+				if(obj != null){
+					
+				}*/
+				return convertView;
+			}
+		});
+		
+		setHeaderData();
+	}
+	
+	private void setHeaderData(){
+		if(mVoteObj == null){
+		//	return;
+		}
+		LinearLayout.LayoutParams lp = (LayoutParams) mHeaderView.findViewById(R.id.imageview).getLayoutParams();
+		lp.height = Utils.realVoteImageHeight(VoteActivity.this);
+		mHeaderView.findViewById(R.id.imageview).setLayoutParams(lp);
+		
+		ImageLoader.getInstance().displayImage("http://img5.duitang.com/uploads/item/201511/12/20151112161532_5cTBz.thumb.700_0.jpeg", (ImageView)mHeaderView.findViewById(R.id.imageview), ImageLoaderConfigs.displayImageOptions);
+		//ImageLoader.getInstance().displayImage(mVoteObj.optString(""), (ImageView)mHeaderView.findViewById(R.id.imageview), ImageLoaderConfigs.displayImageOptions);
+		//((TextView)mHeaderView.findViewById(R.id.textview_name)).setText(mVoteObj.optString(""));
+		((TextView)mHeaderView.findViewById(R.id.textview_name)).setText("青岛。先生竟然中招肺炎，照料了两天，结果，女儿也发烧了。情况特殊，怕是传染，去验了血，幸好血项正常，只是普通病毒性感冒。");
+		//((TextView)mHeaderView.findViewById(R.id.textview_num)).setText(String.format(getResources().getString(R.string.vote_join_num), mVoteObj.optString("")));
+		((TextView)mHeaderView.findViewById(R.id.textview_num)).setText("青岛。抹茶马芬。");
+	}
+	
+	public void onVoteResultClick(View view){
+		
+	}
+	
+	public void onCommitBtnClick(View view){
+		
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		removeDialogCustom();
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(VoteActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_ActivityGetActivity:
+			
+			break;
+
+		default:
+			break;
+		}
+	}
+
+}

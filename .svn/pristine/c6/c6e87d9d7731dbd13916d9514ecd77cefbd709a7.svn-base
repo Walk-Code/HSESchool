@@ -1,0 +1,90 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.zhuochuang.hsej.adapter.StructSpinnerAdapter;
+import com.zhuochuang.hsej.entity.CommunityStructEntity;
+
+/**
+ * 申请职位
+ * 
+ * @author Administrator
+ * 
+ */
+public class CommunityApplyPositionActivity extends BaseActivity {
+	private String commId;
+	private Spinner firstSpinner;
+	private Spinner secondSpinner;
+	private CommunityStructEntity mStructEntity;
+	private StructSpinnerAdapter mSpinnerAdapter1;
+	private StructSpinnerAdapter mSpinnerAdapter2;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_community_apply_position);
+		setTitleText(R.string.text_zwsq);
+		initView();
+	}
+
+	private void initView() {
+		JSONObject object = DataLoader.getInstance().getUserInfoObj();
+
+		((EditText) findViewById(R.id.apply_et_schid)).setText(object
+				.optString("xh"));
+		((EditText) findViewById(R.id.apply_et_name)).setText(object
+				.optString("xm"));
+		((EditText) findViewById(R.id.apply_et_classid)).setText(object
+				.optString("bjmc"));
+		((EditText) findViewById(R.id.apply_et_sex)).setText("0"
+				.equalsIgnoreCase(object.optString("xb")) ? "女" : "男");
+		commId = getIntent().getStringExtra("comm_id");
+		HashMap<String, Object> structParams = new HashMap<String, Object>();
+		structParams.put("communityId", commId);
+
+		firstSpinner = (Spinner) findViewById(R.id.apply_spinner_first);
+		secondSpinner = (Spinner) findViewById(R.id.apply_spinner_second);
+
+		showDialogCustom(100);
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_CommunityGetUserStructure, structParams,
+				this);
+		mSpinnerAdapter1 = new StructSpinnerAdapter(this);
+		firstSpinner.setAdapter(mSpinnerAdapter1);
+		mSpinnerAdapter2 = new StructSpinnerAdapter(this);
+		secondSpinner.setAdapter(mSpinnerAdapter2);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		removeDialogCustom();
+		if (result == null)
+			return;
+		if (result instanceof Error) {
+			Toast.makeText(this, ((Error) result).getMessage(),
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_CommunityGetUserStructure:
+			Gson gson = new Gson();
+			mStructEntity = gson.fromJson(result.toString(),
+					CommunityStructEntity.class);
+			mSpinnerAdapter1.setData(mStructEntity.getStructures());
+			mSpinnerAdapter2.setData(mStructEntity.getStructures());
+			break;
+		default:
+			break;
+		}
+	}
+}

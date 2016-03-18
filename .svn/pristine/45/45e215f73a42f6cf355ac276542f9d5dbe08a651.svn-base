@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/com.zhuochuang.hsej"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+     >
+    
+    <com.layout.CustomListCell 
+        android:id="@+id/search_firends"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        custom:showArrow="true"
+        />
+
+    <include
+	    layout="@layout/loading"
+	    android:id="@+id/firends_loading"
+	    android:layout_width="match_parent"
+    	android:layout_height="match_parent"
+    	android:visibility="gone"
+    	android:layout_gravity="center"/>
+</RelativeLayout>

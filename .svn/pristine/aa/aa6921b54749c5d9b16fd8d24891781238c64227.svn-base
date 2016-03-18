@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+       xmlns:android="http://schemas.android.com/apk/res/android"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:orientation="vertical"
+       android:id="@+id/foot_item"
+       android:descendantFocusability="blocksDescendants" >
+    
+    <TextView
+       android:layout_width="wrap_content"
+       android:layout_height="match_parent"
+       android:layout_margin="5dp"
+       android:textColor="#D65250"
+       android:layout_gravity="center_horizontal"
+       android:gravity="center_horizontal|center_vertical"
+       android:id="@+id/store_search_footer_item"
+       android:text="@string/goods_search_history_clean"
+       android:background="@drawable/store_clean_bg"
+       android:clickable="true"
+       android:focusable="true"
+       android:focusableInTouchMode="true" />
+	
+</LinearLayout>

@@ -1,0 +1,123 @@
+package com.zhuochuang.hsej.store;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.graphics.Paint;
+import android.os.Bundle;
+import android.provider.ContactsContract.RawContacts.Data;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.umeng.socialize.utils.Log;
+import com.util.ContentAdapter;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+
+public class StoreTodaySpecialActivity extends BaseActivity{
+	private ListView mListView;
+	private JSONArray mItemArr;
+	private ContentAdapter mAdapter;
+	
+		@Override
+		protected void onCreate(Bundle arg0) {
+			super.onCreate(arg0);
+			setContentView(R.layout.store_todayspecial);
+			setTitleText(R.string.today_special);
+			initView();
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_HotRecommendlistGoods, null, this);
+		}
+
+		private void initView() {
+			mListView = (ListView) findViewById(R.id.store_today_special);
+			mListView.setAdapter(mAdapter = new ContentAdapter(){
+				@Override
+				public int getCount() {
+					if(null != mItemArr){
+						return mItemArr.length();
+					}
+					return 0;
+				}
+
+				@Override
+				public View getView(int position, View convertView,
+						ViewGroup parent) {
+					ViewHolder holder = null;
+					if(convertView == null){						
+						convertView = LayoutInflater.from(StoreTodaySpecialActivity.this).inflate(R.layout.store_list_layout, null);
+						holder = new ViewHolder();
+						holder.goodsName = (TextView)convertView.findViewById(R.id.tv_details);
+						((TextView)convertView.findViewById(R.id.tv_price)).setVisibility(View.GONE);
+						((TextView)convertView.findViewById(R.id.tv_stock)).setVisibility(View.GONE);
+						((RelativeLayout)convertView.findViewById(R.id.store_price_layout)).setVisibility(View.VISIBLE);
+						holder.goodsPrice = (TextView) convertView.findViewById(R.id.tv_prices);
+						holder.goodsMarkPrice = (TextView)convertView.findViewById(R.id.tv_mark_price);
+						holder.goodsImage = (ImageView)convertView.findViewById(R.id.good_image);
+					}
+					JSONObject obj = mItemArr.optJSONObject(position);	
+					JSONObject goods = obj.optJSONObject("goods");
+									
+					holder.goodsName.setText(goods.optString("name"));
+					holder.goodsPrice.setText(getResources().getString(R.string.money_sigh)+goods.optDouble("price"));
+					holder.goodsMarkPrice.setText(getResources().getString(R.string.money_sigh)+goods.optDouble("money"));
+					holder.goodsMarkPrice.getPaint().setFlags(Paint.STRIKE_THRU_TEXT_FLAG);
+					ImageLoader.getInstance().displayImage(goods.optString("image"), holder.goodsImage ,ImageLoaderConfigs.displayImageOptionsBg);
+					return convertView;
+				}
+				
+				class ViewHolder{
+					TextView goodsName;
+					TextView goodsPrice;
+					TextView goodsMarkPrice;
+					ImageView goodsImage;
+				}
+			}); 
+			
+			mListView.setOnItemClickListener(new OnItemClickListener() {
+
+				@Override
+				public void onItemClick(AdapterView<?> arg0, View arg1,
+						int arg2, long arg3) {
+					JSONObject obj = mItemArr.optJSONObject(arg2);
+					Intent intent = new Intent(StoreTodaySpecialActivity.this, StoreGoodsMoreDetailsActivity.class);
+					intent.putExtra("shopId", obj.optJSONObject("goods").optString("id"));
+					startActivity(intent);
+				}
+			});			
+		}
+		
+		@Override
+		public void taskFinished(TaskType type, Object result, boolean isHistory) {
+			super.taskFinished(type, result, isHistory);
+			if(null == result){
+				return;
+			}
+			if(result instanceof Error){
+				Toast.makeText(StoreTodaySpecialActivity.this, ((Error)result).getMessage(),Toast.LENGTH_SHORT).show();
+			}
+			if(type == TaskType.TaskOrMethod_HotRecommendlistGoods){
+				if(result instanceof JSONObject){
+					if(((JSONObject)result).has("items")){
+						mItemArr = ((JSONObject)result).optJSONArray("items");
+						if(null != mItemArr && 0 < mItemArr.length()){							
+							mAdapter.notifyDataSetChanged();
+						}
+					}
+				}
+			}
+		}
+}

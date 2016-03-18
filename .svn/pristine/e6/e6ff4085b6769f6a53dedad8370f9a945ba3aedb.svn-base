@@ -1,0 +1,121 @@
+package com.zhuochuang.hsej.store;
+
+import java.util.List;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import com.util.ContentAdapter;
+import com.util.GetAddressUtil;
+import com.zhuochuang.hsej.BaseActivity;
+import com.zhuochuang.hsej.R;
+import com.zhuochuang.hsej.R.color;
+
+public class StoreGetAddressActivity extends BaseActivity{
+	private ListView mListView;
+	private List<String> mAddressList = null;
+	private Boolean IsCityChoose = false;
+	private String City = null;
+	private String province = null;
+	private GetAddressUtil mLocation;
+	private ContentAdapter mAdapter;
+	
+	@Override
+	protected void onCreate(Bundle arg0) {
+			super.onCreate(arg0);
+			setContentView(R.layout.store_choose_address);
+			setTitleText(R.string.contacter_choose_address);
+			initView();
+		}
+	
+	private void initView() {
+			mListView = (ListView) findViewById(R.id.store_choose_address_listview);
+			mLocation = new GetAddressUtil(this);
+			mAddressList = mLocation.getProvinceList();
+			
+			mListView.setAdapter(mAdapter = new ContentAdapter(){
+				@Override
+				public int getCount() {
+					return mAddressList.size();
+				}
+				
+				@Override
+				public View getView(int position, View convertView,
+						ViewGroup parent) {
+					View view;
+					if(convertView == null){
+						view = StoreGetAddressActivity.this.getLayoutInflater().inflate(android.R.layout.simple_list_item_1, null);
+						convertView = view;
+						convertView.setTag(view);
+					}else{
+						view = (View) convertView.getTag();
+					}
+					TextView text = (TextView) view.findViewById(android.R.id.text1);
+					text.setText(mAddressList.get(position));
+					text.setTextColor(Color.BLACK);
+					text.setTextSize(16);
+					return convertView;
+				}
+				
+			});
+			
+		  mListView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				if (!IsCityChoose) {
+					province = mAddressList.get(arg2);
+					mAddressList = mLocation.getCityList(mAddressList.get(arg2));
+					if (mAddressList.size() == 1) {
+						Intent intent = new Intent();
+						intent.putExtra("province", province);
+						
+						if (!mAddressList.get(0).equals(province)) {
+							intent.putExtra("city", mAddressList.get(0));
+							intent.putExtra("code", mLocation.getCode(mAddressList.get(0)));
+						}else{
+							intent.putExtra("code", mLocation.getCode(province));
+						}						
+						StoreGetAddressActivity.this.setResult(Activity.RESULT_OK, intent);
+						finish();
+						return;
+					}
+					mAdapter.notifyDataSetChanged();
+					IsCityChoose = true;
+				}else{
+					City = mAddressList.get(arg2);
+					Intent intent = new Intent();
+					intent.putExtra("province", province);
+					intent.putExtra("city", City);
+					intent.putExtra("code", mLocation.getCode(City));
+					StoreGetAddressActivity.this.setResult(Activity.RESULT_OK, intent);
+					finish();
+				}
+				
+			}});
+		  
+		  mListView.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				
+				
+				return false;
+			}
+		});
+		  
+	}	
+	
+		protected void removeListViewItem(View rowView,int positon){
+			
+		}
+}

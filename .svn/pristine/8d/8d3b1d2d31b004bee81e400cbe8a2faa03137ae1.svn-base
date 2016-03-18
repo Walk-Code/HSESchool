@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@android:color/transparent" />
+     <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="100dp"       
+        android:background="@android:color/transparent"
+        android:orientation="horizontal"
+        android:layout_marginTop="-30dp" >
+		
+        <View android:layout_width="10dp"
+			      android:layout_height="match_parent"
+			      android:layout_marginTop="30dp"
+			      android:background="#FFFFFF" /> 
+        <LinearLayout
+            android:id="@+id/store_car_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="100dp"           
+            android:background="@drawable/shape_store_bg"
+            android:orientation="horizontal"> 			
+            <com.zhuochuang.hsej.store.CustomImageView
+                android:id="@+id/store_car_images"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_vertical|left"
+                android:padding="1dp"          
+                android:src="@drawable/previewpic"
+                android:scaleType="fitXY"/>
+        </LinearLayout> 
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="30dp"
+            android:layout_toRightOf="@id/store_car_layout"
+            android:layout_weight="1.2"
+            android:background="#FFFFFF" >
+			
+            <TextView
+                android:id="@+id/store_goods_doh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:textColor="#DD514F"
+                android:textSize="15dp"
+                android:layout_alignParentTop="true" />
+            <TextView
+                android:id="@+id/store_goods_stock"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="5dp"
+                android:textColor="#DD514F"
+                android:textSize="15dp"
+          		
+                android:layout_below="@id/store_goods_doh" />
+
+            <TextView
+                android:id="@+id/store_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/store_goods_stock"
+                android:layout_marginLeft="5dp"
+                android:textColor="#000000"
+                android:textSize="15dp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="30dp"
+            android:layout_weight="0.5"
+            android:background="#ffffff" >
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignParentRight="true"
+                android:layout_margin="10dp"
+                android:src="@drawable/icon_store_close"
+                android:id="@+id/store_car_back" />
+        </RelativeLayout>
+    </LinearLayout>
+	<View
+        android:layout_width="match_parent"
+        android:layout_height="14dp"
+        android:background="#FFFFFF" />
+	<LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:background="#FFFFFF"
+	    android:id="@+id/store_lines">
+	    <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:background="#E3E3E3"
+	        android:layout_marginLeft="8dp"
+	        android:layout_marginRight="8dp"/>
+	</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFFFFF"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:id="@+id/store_color_layout" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/goods_color"
+            android:textColor="#000000"
+            android:textSize="18dp" />
+
+        <GridView
+            android:id="@+id/goods_color"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnWidth="20dp"
+            android:numColumns="4"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            android:listSelector="@android:color/transparent" />
+    </LinearLayout>
+
+   <LinearLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:background="#FFFFFF"
+	    android:id="@+id/store_line">
+	    <View
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:background="#E3E3E3"
+	        android:layout_marginLeft="8dp"
+	        android:layout_marginRight="8dp"/>
+	</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/store_size_layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#FFFFFF"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:layout_weight="4">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/goods_size"
+            android:textColor="#000000"
+            android:textSize="18dp"
+            android:id="@+id/goods_sizes" />
+
+        <GridView
+            android:id="@+id/goods_size"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:columnWidth="20dp"
+            android:numColumns="4"
+            android:verticalSpacing="10dp"
+            android:horizontalSpacing="10dp"
+            android:listSelector="@android:color/transparent" />
+    </LinearLayout>
+	<RelativeLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="0dp"
+	    android:layout_weight="1"
+	    android:layout_gravity="bottom"
+	    android:background="#FFFFFF">
+    	<Button
+    	    android:id="@+id/store_car_commint"
+        	android:layout_width="match_parent"
+        	android:layout_height="50dp"
+        	android:gravity="center"
+        	android:layout_alignParentBottom="true"
+        	android:background="#DD514F"
+        	android:text="@string/stores_goods_confirm"
+        	android:textColor="#FFFFFF"
+        	android:textSize="20dp"	/>
+	</RelativeLayout>
+</LinearLayout>

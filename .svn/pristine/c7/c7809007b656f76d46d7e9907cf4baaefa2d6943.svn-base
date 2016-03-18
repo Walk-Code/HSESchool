@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    <com.layout.photoview.HackyViewPager
+        android:id="@+id/photoview_viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"/>
+
+    <com.util.PageGuide
+        android:id="@+id/photoview_pageguide"
+        android:layout_width="wrap_content"
+    	android:layout_height="wrap_content"
+    	android:layout_marginBottom="10dp"
+    	android:layout_gravity="bottom|center_horizontal"/>
+    
+    <View
+        android:id="@+id/photoview_colorview"
+        android:layout_width="30dp"
+	    android:layout_height="30dp"
+	    android:layout_marginTop="35dp"
+	    android:layout_marginRight="15dp"
+	    android:visibility="gone"
+	    android:layout_gravity="top|right"/>
+    
+    <TextView
+        android:id="@+id/textview_pageguide"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="25dp"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        android:textSize="15dp"/>
+    
+    <include layout="@layout/navbar_base"
+        android:id="@+id/navbar_base"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:visibility="gone"/>
+</FrameLayout>

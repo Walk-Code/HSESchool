@@ -1,0 +1,58 @@
+package com.zhuochuang.hsej.view;
+
+import android.content.Context;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.zhuochuang.hsej.R;
+
+public class SecondHandandLostItem extends LinearLayout {
+
+	public CheckBox shlCBox;// 选择
+	public ImageView shlImage;// 图片
+	public TextView shlTitle;// 标题
+	public TextView shlContent;// 内容
+	public TextView shlPrice;// 价格
+	public TextView shlDate;// 日期
+	public LinearLayout shlEditLayout;
+	public LinearLayout shlPriceLayout;
+	public Button btnEdit;
+	public Button btnFinish;
+	public TextView shlGoing;
+
+	public SecondHandandLostItem(Context context) {
+		super(context);
+		initView(context);
+	}
+
+	private void initView(Context context) {
+		View view = View.inflate(context, R.layout.fm_secend_handand_lost_item,
+				this);
+		shlCBox = (CheckBox) view
+				.findViewById(R.id.secend_handend_lost_item_select);
+		shlImage = (ImageView) view
+				.findViewById(R.id.secend_handend_lost_item_image);
+		shlTitle = (TextView) view
+				.findViewById(R.id.secend_handend_lost_item_title);
+		shlGoing = (TextView) view
+				.findViewById(R.id.secend_handend_lost_item_s);
+		shlContent = (TextView) view
+				.findViewById(R.id.secend_handend_lost_item_content);
+		shlPriceLayout = (LinearLayout) view
+				.findViewById(R.id.linear_price_layout);
+		shlPrice = (TextView) view
+				.findViewById(R.id.secend_handend_lost_item_price);
+		shlDate = (TextView) view
+				.findViewById(R.id.secend_handend_lost_item_date);
+		shlEditLayout = (LinearLayout) view
+				.findViewById(R.id.secend_handend_lost_item_edit);
+		btnEdit = (Button) view.findViewById(R.id.btn_edit);
+		btnFinish = (Button) view.findViewById(R.id.btn_finish);
+
+	}
+
+}

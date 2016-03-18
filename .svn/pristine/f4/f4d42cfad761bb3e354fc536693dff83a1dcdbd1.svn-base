@@ -1,0 +1,18 @@
+package com.zhuochuang.hsej.adapter;
+
+import android.content.Context;
+import android.view.View;
+import android.view.ViewGroup;
+
+public class GoodsReleaseEditGridViewAdapter extends MBaseAdapter<Object> {
+
+	public GoodsReleaseEditGridViewAdapter(Context context) {
+		super(context);
+	}
+
+	@Override
+	public View getView(int position, View convertView, ViewGroup parent) {
+		return null;
+	}
+
+}

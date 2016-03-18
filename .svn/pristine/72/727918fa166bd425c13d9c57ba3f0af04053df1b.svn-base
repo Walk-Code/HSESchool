@@ -1,0 +1,354 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.AutoGallery;
+import com.util.ContentAdapter;
+import com.util.PageGuide;
+import com.util.StaticGridView;
+import com.util.Utils;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.Gallery;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+
+@SuppressWarnings("deprecation")
+@SuppressLint({ "InflateParams", "HandlerLeak" })
+public class SchoolyardServiceFragment extends BaseFragment{
+
+	private PullToRefreshListView mListView;
+	private ContentAdapter mListViewAdapter;
+	
+	private LinearLayout mHeaderView;
+	private AutoGallery mGallery;
+	private PageGuide mPageGuide;
+	private StaticGridView mGridView;
+	private ContentAdapter mGridAdapter;
+	
+	private JSONArray mDataArr;
+	private JSONArray mBannerArr;
+	
+	private boolean mIsCompile = false;
+	private boolean mIsNeedRefresh = false;
+	
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		mMainLayout = (ViewGroup) LayoutInflater.from(mActivity).inflate(R.layout.fragment_schoolyardservice, null);
+		initListView();
+		
+		mMainLayout.findViewById(R.id.topnavbar_rightlayout).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if(!DataLoader.getInstance().isLogin()){
+					startActivity(new Intent(mActivity, LoginActivity.class));
+					mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+					return;
+				}
+				
+				mIsCompile = !mIsCompile;
+				
+				mMainLayout.findViewById(R.id.ico).setVisibility(mIsCompile? View.GONE : View.VISIBLE);
+				mMainLayout.findViewById(R.id.textview).setVisibility(mIsCompile? View.VISIBLE : View.GONE);
+				if(mGridAdapter != null){
+					mGridAdapter.notifyDataSetChanged();
+				}
+			}
+		});
+		
+		EventManager.getInstance().setHandlerListenner(new Handler(){
+
+			@Override
+			public void handleMessage(Message msg) {
+				// TODO Auto-generated method stub
+				super.handleMessage(msg);
+				switch (msg.what) {
+				case EventManager.EventType_ServicesAddDone:
+					if(mListView != null){
+						if (!mListView.isStackFromBottom()) {
+							mListView.setStackFromBottom(true);
+						}
+						mListView.setStackFromBottom(false);
+						mListView.startRefresh();
+					}
+					break;
+
+				default:
+					break;
+				}
+			}
+		});
+	}
+	
+	private void initHeaderView(){
+		mHeaderView = (LinearLayout) LayoutInflater.from(mActivity).inflate(R.layout.fragment_schoolyardservice_header, null);
+		mPageGuide = (PageGuide) mHeaderView.findViewById(R.id.pageguide);
+		mGallery = (AutoGallery) mHeaderView.findViewById(R.id.gallery);
+		mGridView = (StaticGridView) mHeaderView.findViewById(R.id.gridView);
+		mGallery.setAdapter(new ContentAdapter(){
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				if(mBannerArr != null && mBannerArr.length() > 0){
+					return mBannerArr.length();
+				}
+				return 0;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = ViewGroup.inflate(mActivity, R.layout.listcell_myschoolyard_headercell, null);
+					convertView.setLayoutParams(new Gallery.LayoutParams(LayoutParams.MATCH_PARENT, Utils.realServiceBannerHeight(mActivity)));
+				}
+				JSONObject obj = mBannerArr.optJSONObject(position);
+				if(obj != null){
+					ImageLoader.getInstance().displayImage(obj.optString("image"), ((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsBg);
+				}
+				return convertView;
+			}
+		});
+		mGallery.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				if(mBannerArr != null && mBannerArr.length() > 0){
+					mPageGuide.setSelect(position);
+				}
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		mGallery.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				// TODO Auto-generated method stub
+				if(mBannerArr != null && mBannerArr.length() > 0){
+					JSONObject obj = mBannerArr.optJSONObject(position);
+					if(obj != null){
+						JSONObject resourceObj = obj.optJSONObject("resource");
+						if(resourceObj == null){
+							return;
+						}
+						
+						DataLoader.getInstance().openResource(mActivity, obj.optInt("ownerResource"), resourceObj);
+					}
+				}
+			}
+		});
+		
+		mGridView.setAdapter(mGridAdapter = new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				// TODO Auto-generated method stub
+				if(mDataArr != null && mDataArr.length() > 0){
+					return mDataArr.length() + 1;
+				}
+				return 1;
+			}
+
+			@Override
+			public View getView(final int position, View convertView, ViewGroup parent) {
+				// TODO Auto-generated method stub
+				if(convertView == null){
+					convertView = LayoutInflater.from(mActivity).inflate(R.layout.listcell_schoolyardservice_cell, null);
+					convertView.setLayoutParams(new AbsListView.LayoutParams(mWidth / 3, mWidth / 3));
+				}
+				
+				if(position == getCount() - 1){
+					((TextView)convertView.findViewById(R.id.text)).setText(mActivity.getResources().getString(R.string.add));
+					((ImageView)convertView.findViewById(R.id.imageview)).setBackgroundResource(R.drawable.icon_add);//.setImageResource(R.drawable.icon_add);
+					convertView.findViewById(R.id.ico_delete).setVisibility(View.GONE);
+					ImageLoader.getInstance().displayImage("", ((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptions);
+				}
+				else{
+					JSONObject obj = mDataArr.optJSONObject(position);
+					if(obj != null){
+						((TextView)convertView.findViewById(R.id.text)).setText(obj.optString("name"));
+						ImageLoader.getInstance().displayImage(obj.optString("image"), ((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsBg);
+					}
+					convertView.findViewById(R.id.ico_delete).setVisibility(mIsCompile? View.VISIBLE : View.GONE);
+				}
+				
+				convertView.findViewById(R.id.ico_delete).setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						// TODO Auto-generated method stub
+						JSONObject obj = mDataArr.optJSONObject(position);
+						if(obj != null){
+							HashMap<String, Object> params = new HashMap<String, Object>();
+							params.put("resourceType", "5");
+							params.put("resourceIds", obj.optString("id"));
+							params.put("statuses", "1");
+							DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_FavoriteApply, params, SchoolyardServiceFragment.this);
+						}
+					}
+				});
+				return convertView;
+			}
+		});
+		
+		mGridView.setOnItemClickListener(new OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				// TODO Auto-generated method stub
+				if(mIsCompile) return;
+				
+				if(arg2 == mGridAdapter.getCount() - 1){
+					if(!DataLoader.getInstance().isLogin()){
+						Intent intent = new Intent(mActivity, LoginActivity.class);
+						startActivity(intent);
+						mActivity.overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+						return;
+					}
+					startActivity(new Intent(mActivity, SchoolyardServiceAddActivity.class));
+				}
+				else{
+					DataLoader.getInstance().openNativeOrThirdWeb(mActivity, mDataArr.optJSONObject(arg2), false);
+				}
+			}
+		});
+	}
+	
+	private void initListView(){
+		initHeaderView();
+		mListView = (PullToRefreshListView) mMainLayout.findViewById(R.id.pullto_listview);
+		mListView.setBackgroundColor(Color.WHITE);
+		mListView.addHeaderView(mHeaderView);
+		mListView.setAdapter(mListViewAdapter = new ContentAdapter());
+		mListView.setOnRefreshListener(new OnRefreshListener() {
+			
+			@Override
+			public void onRefresh() {
+				// TODO Auto-generated method stub
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put("pageSize", 1000);
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_CampusFavorites, params, SchoolyardServiceFragment.this);
+			}
+		});
+		
+		mListView.startRefresh();
+	}
+	
+	@Override
+	public void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if(mIsNeedRefresh){
+			mIsNeedRefresh = false;
+			if (!mListView.isStackFromBottom()) {
+				mListView.setStackFromBottom(true);
+			}
+			mListView.setStackFromBottom(false);
+			mListView.startRefresh();
+		}
+	}
+
+	@Override
+	protected void onReceive(String brodecast) {
+		// TODO Auto-generated method stub
+		super.onReceive(brodecast);
+		if(brodecast.equalsIgnoreCase(Configs.LoginStateChange)){
+			mIsNeedRefresh = true;
+		}
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		super.taskFinished(type, result, isHistory);
+		
+		if(mListView != null){
+			mListView.complete();
+		}
+		removeDialogCustom();
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(mActivity, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_CampusFavorites:
+			if(mHeaderView != null){
+				mHeaderView.setVisibility(View.VISIBLE);
+			}
+			if(result instanceof JSONObject && ((JSONObject)result).has("banner")){
+				mBannerArr = ((JSONObject)result).optJSONArray("banner");
+				if(mBannerArr != null && mBannerArr.length() > 0){
+					mHeaderView.setVisibility(View.VISIBLE);
+					mPageGuide.setParams(mBannerArr.length(), Utils.dipToPixels(mActivity, 7), Utils.dipToPixels(mActivity, 7));
+					mGallery.setSelection(0);
+					mGallery.setLength(mBannerArr.length());
+					mGallery.setDuration(4000);
+					mGallery.setAutoScroll();
+				}
+				else{
+					mHeaderView.setVisibility(View.GONE);
+				}
+			}
+			if(mGallery.getAdapter() != null){
+				((ContentAdapter)mGallery.getAdapter()).notifyDataSetChanged();
+			}
+			if(result instanceof JSONObject && ((JSONObject)result).has("items")){
+				mDataArr = ((JSONObject)result).optJSONArray("items");
+			}
+			mGridAdapter.notifyDataSetChanged();
+			break;
+
+		case TaskOrMethod_FavoriteApply:
+			showDialogCustom();
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put("pageSize", 1000);
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_CampusFavorites, params, SchoolyardServiceFragment.this);
+			break;
+		default:
+			break;
+		}
+	}
+}

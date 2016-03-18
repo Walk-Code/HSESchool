@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ECECEC" >
+       
+    <LinearLayout
+      	android:id="@+id/layout_top" 
+		android:layout_width="match_parent"
+		android:layout_height="90dp"
+		android:orientation="horizontal"
+		android:background="#FFFFFF"
+		android:layout_marginTop="5dp"
+		android:padding="10dp">   
+     	<ImageView 
+       	  	android:id="@+id/good_image"
+     		android:layout_width="65dp"
+     		  android:layout_height="65dp"
+     		  android:src="@drawable/previewpic"
+     		  android:layout_marginRight="10dp"
+     		  android:scaleType="centerCrop"/>
+     	<LinearLayout 
+              android:layout_width="match_parent"
+        	  android:layout_height="wrap_content"
+        	  android:layout_marginLeft="5dp"
+         	  android:orientation="vertical">         
+	        <TextView
+	              android:id="@+id/tv_details"
+	              android:layout_width="match_parent"
+	              android:layout_height="wrap_content"
+	              android:textColor="#343434"
+	              android:text="就是的恢复快介绍费开始交话费圣诞节后付款时会发生的康复回家卡萨丁合肥市的康复后绝对是看房间看见是合肥市地方回到家双方"
+	              android:lines="2"
+	              android:ellipsize="end"
+	              android:textSize="14dp"
+	              android:gravity="left" /> 
+		       <RelativeLayout 
+		         	 android:layout_width="match_parent"
+		         	 android:layout_height="wrap_content"
+		         	 android:layout_marginTop="5dp"> 
+		         	<TextView
+		       	      android:id="@+id/tv_evaluate"
+		              android:layout_width="wrap_content"
+		              android:layout_height="wrap_content"
+		              android:textSize="14dp"
+		              android:textColor="#343434"      
+		              android:text="@string/stores_goods_evaluate_marks"
+		              android:layout_marginRight="20dp"
+		              android:layout_marginTop="5dp"/>
+		         	<com.layout.RatingBarView 
+         	            android:layout_toRightOf="@id/tv_evaluate"
+         	            android:id="@+id/custom_ratingbar"
+				        android:layout_width="match_parent"
+				        android:layout_height="wrap_content"
+				        android:layout_centerVertical="true" 
+				        app:starCount="5"
+				        app:starEmpty="@drawable/evaluate_icon_star_nor"
+				        app:starFill="@drawable/evaluate_icon_star_pre"
+				        app:starImageSize="25dp"/>
+			       
+	        </RelativeLayout>  		 
+		 </LinearLayout> 
+	 </LinearLayout>
+	  
+	 <FrameLayout
+	     android:id="@+id/line_layout" 
+	     android:layout_below="@id/layout_top"
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content">	     
+	 <View
+	     android:layout_width="match_parent"
+	     android:layout_height="1dp"
+	     android:background="#DFDFDF"/>
+	 <View
+	     android:layout_width="match_parent"
+	     android:layout_height="5dp"
+	     android:background="#ECECEC"/>
+	 <View
+	     android:layout_width="match_parent"
+	     android:layout_height="1dp"
+	     android:background="#DFDFDF"/>
+	 </FrameLayout>
+	 
+    <FrameLayout
+        android:id="@+id/edit_layout"
+        android:layout_below="@id/line_layout" 
+        android:layout_width="match_parent"
+        android:layout_height="130dp"
+        android:background="#FFFFFF">
+        <EditText 
+            android:id="@+id/goods_publish_edit"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="left|top"
+            android:background="#FFFFFF"
+            android:layout_margin="10dp"
+            android:hint="@string/stores_goods_evaluate_hint"
+            android:textSize="14dp"
+            android:textColorHint="#9f9f9f"
+            android:textColor="#343434"/>        
+    </FrameLayout>
+    
+      <FrameLayout 
+         android:id="@+id/lines_layout"
+         android:layout_below="@id/edit_layout" 
+	     android:layout_width="match_parent"
+	     android:layout_height="wrap_content">	     
+	 <View
+	     android:layout_width="match_parent"
+	     android:layout_height="1dp"
+	     android:background="#DFDFDF"/>
+	 <View
+	     android:layout_width="match_parent"
+	     android:layout_height="5dp"
+	     android:background="#ECECEC"/>
+	 <View
+	     android:layout_width="match_parent"
+	     android:layout_height="1dp"
+	     android:background="#DFDFDF"/>
+	 </FrameLayout>
+     <FrameLayout 
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:background="#FFFFFF"
+         android:layout_below="@id/lines_layout">	 
+     <com.util.StaticGridView
+         android:id="@+id/gridpic"        
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         android:numColumns="4"
+         android:listSelector="@color/transparent"
+         android:layout_marginLeft="10dp"
+         android:layout_marginRight="10dp"
+         android:layout_marginTop="5dp"
+         android:layout_marginBottom="5dp"
+         android:verticalSpacing="5dp" />
+	 </FrameLayout>
+     
+    
+       <FrameLayout
+           android:layout_width="match_parent"
+           android:layout_height="50dp"
+           android:layout_alignParentBottom="true"
+           android:background="#FFFFFF" >
+ 			<Button
+ 			    android:id="@+id/commit_evaluate" 
+ 			    android:layout_width="match_parent"
+ 			    android:layout_height="match_parent"
+ 			    android:background="#DD514F"
+ 			    android:text="@string/stores_goods_evaluate_commit"
+ 			    android:textColor="#FFFFFF"
+ 			    android:textSize="18dp" />	
+      </FrameLayout> 	  
+</RelativeLayout>

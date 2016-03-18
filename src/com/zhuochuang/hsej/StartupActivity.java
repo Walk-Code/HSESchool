@@ -1,0 +1,324 @@
+package com.zhuochuang.hsej;
+
+import java.io.File;
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.model.AdvertiseLoader;
+import com.model.CacheHandler;
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.LoginParamsItem;
+import com.model.SharedPreferenceHandler;
+import com.model.TaskListener;
+import com.model.TaskType;
+import com.umeng.analytics.MobclickAgent;
+import com.util.MD5;
+import com.util.Utils;
+
+public class StartupActivity extends Activity implements TaskListener{
+
+	private final int UpdateForce = 1;
+	private final int UpdateNonobligatory = 2;
+	private final int UpdateNormal = 3;
+	
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		// TODO Auto-generated method stub
+		super.onCreate(savedInstanceState);
+		if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {  
+            finish();
+            return;
+        }
+		setContentView(R.layout.activity_startup);
+		findViewById(R.id.loading).setVisibility(View.VISIBLE);
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserUntreated, null, StartupActivity.this);
+		
+		new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_SettingsGet, null, StartupActivity.this);
+			}
+		}, 500);
+	}
+	
+	private void newPageStart(){
+		findViewById(R.id.loading).setVisibility(View.GONE);
+		String advertise = CacheHandler.getCacheDir(StartupActivity.this) + "/" + Configs.AdvertiseImg;
+		File file = new File(advertise);
+		if(file.exists()){
+			startActivity(new Intent(StartupActivity.this, AdvertiseActivity.class));
+		}
+		else{
+			try {
+				SharedPreferenceHandler.saveAdvertisePath(StartupActivity.this, null);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			startActivity(new Intent(StartupActivity.this, MainActivity.class));
+		}
+		StartupActivity.this.finish();
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private void checkVerion(JSONObject obj){
+		if(obj == null){
+			newPageStart();
+			return;
+		}
+		if(obj.has("launchImage")){
+			String advertise = obj.optString("launchImage");
+			if(advertise != null && advertise.length() > 0){
+				String advertiseHistory = null;
+				try {
+					advertiseHistory = SharedPreferenceHandler.getAdvertisePath(StartupActivity.this);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				String md5Parh = null;
+				try {
+					md5Parh = MD5.getStringMD5String(advertise);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(advertiseHistory == null || advertiseHistory.length() == 0 || !md5Parh.equalsIgnoreCase(advertiseHistory)){
+					AdvertiseLoader loader = new AdvertiseLoader(StartupActivity.this);
+					loader.execute(advertise);
+				}
+			}
+		}
+		
+		/*Comparator cmp = Collator.getInstance(java.util.Locale.CHINA);
+		if(cmp.compare(Utils.getVersionName(StartupActivity.this), obj.optString("minVersion")) < 0){
+			//强制更新或者退出
+			showVersionDialog(UpdateForce, obj);
+			return;
+		}
+		if(cmp.compare(Utils.getVersionName(StartupActivity.this), obj.optString("currentVersion")) != 0
+				&& cmp.compare(Utils.getVersionName(StartupActivity.this), obj.optString("currentVersion")) < 0){
+			//提示有新版本， 不强制更新
+			versionCompares = UpdateNonobligatory;
+		}
+		showVersionDialog(versionCompares, obj);*/
+		
+		int appVersionCode = Utils.getVersionNumber(StartupActivity.this);
+		
+		if(obj == null || !obj.has("minVersion") || !obj.has("currentVersion")){
+			//无操作  直接跳过
+			showVersionDialog(UpdateNormal, obj);
+			return;
+		}
+		
+		if(appVersionCode < obj.optInt("minVersion")){
+			//强制更新或者退出
+			showVersionDialog(UpdateForce, obj);
+			return;
+		}
+		
+		if(appVersionCode == obj.optInt("currentVersion") || appVersionCode > obj.optInt("currentVersion")){
+			//无操作  直接跳过
+			showVersionDialog(UpdateNormal, obj);
+			return;
+		}
+		
+		if(appVersionCode < obj.optInt("currentVersion")){
+			//提示有新版本， 不强制更新
+			showVersionDialog(UpdateNonobligatory, obj);
+		}
+	}
+	
+	private void showVersionDialog(int versionCompare, final JSONObject obj){
+		switch (versionCompare) {
+		case UpdateForce:
+			new AlertDialog.Builder(StartupActivity.this) 
+			.setCancelable(false)
+		 	.setMessage(obj.optString("intro"))
+		 	.setPositiveButton(getResources().getString(R.string.version_update), new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					String upgradeUrl = obj.optString("upgradeUrl");
+					if(upgradeUrl != null && upgradeUrl.length() > 0){
+						Intent intent = new Intent("android.intent.action.VIEW",Uri.parse(upgradeUrl));
+						StartupActivity.this.startActivity(intent);
+					}
+					else{
+						Toast.makeText(StartupActivity.this, StartupActivity.this.getResources().getString(R.string.version_valid), Toast.LENGTH_SHORT).show();
+					}
+					StartupActivity.this.finish();
+					System.exit(0);
+				}
+			})
+		 	.setNegativeButton(getResources().getString(R.string.version_exit), new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					StartupActivity.this.finish();
+					System.exit(0);
+				}
+			})
+		 	.show();
+			break;
+		case UpdateNonobligatory:
+			new AlertDialog.Builder(StartupActivity.this) 
+			.setCancelable(false)
+		 	.setMessage(obj.optString("intro"))
+		 	.setPositiveButton(getResources().getString(R.string.version_update), new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					String upgradeUrl = obj.optString("upgradeUrl");
+					if(upgradeUrl != null && upgradeUrl.length() > 0){
+						Intent intent = new Intent("android.intent.action.VIEW",Uri.parse(upgradeUrl));
+						StartupActivity.this.startActivity(intent);
+					}
+					else{
+						Toast.makeText(StartupActivity.this, StartupActivity.this.getResources().getString(R.string.version_valid), Toast.LENGTH_SHORT).show();
+					}
+					StartupActivity.this.finish();
+					System.exit(0);
+				}
+			})
+		 	.setNegativeButton(getResources().getString(R.string.version_cancel), new OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					userCheckLogin();
+				}
+			})
+		 	.show();
+			break;
+		case UpdateNormal:
+			userCheckLogin();
+			break;
+		}
+	}
+	
+	private void userCheckLogin(){
+		LoginParamsItem item = null;
+		try {
+			item = SharedPreferenceHandler.getLoginParamsItem(StartupActivity.this);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(item == null){
+			newPageStart();
+			return;
+		}
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("sign", item.userType);
+		params.put("account", item.userAccount);
+		params.put("password", item.userPassword);
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_UserLogin, params, StartupActivity.this);
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		MobclickAgent.onResume(StartupActivity.this);
+	}
+
+	@Override
+	protected void onPause() {
+		// TODO Auto-generated method stub
+		super.onPause();
+		MobclickAgent.onPause(StartupActivity.this);
+	}
+	
+	@Override
+	public void taskStarted(TaskType type) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		// TODO Auto-generated method stub
+		
+		if(type == TaskType.TaskOrMethod_UserUntreated){
+			return;
+		}
+		
+		if(result == null){
+			if(type == TaskType.TaskOrMethod_SettingsGet){
+				userCheckLogin();
+			}
+			else{
+				((HSESchoolApp)getApplication()).isLoginFailed = true;
+				newPageStart();
+			}
+			return;
+		}
+		
+		if(result instanceof Error){
+			if(type == TaskType.TaskOrMethod_SettingsGet){
+				userCheckLogin();
+			}
+			else{
+				((HSESchoolApp)getApplication()).isLoginFailed = true;
+				newPageStart();
+			}
+			Toast.makeText(StartupActivity.this, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch (type) {
+		case TaskOrMethod_SettingsGet:
+			if(result instanceof JSONObject && ((JSONObject)result).has("settings")){
+				checkVerion(((JSONObject)result).optJSONObject("settings"));
+			}
+			else{
+				startActivity(new Intent(StartupActivity.this, MainActivity.class));
+				StartupActivity.this.finish();
+			}
+			break;
+
+		case TaskOrMethod_UserLogin:
+			newPageStart();
+			break;
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void taskIsCanceled(TaskType type) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		try{
+			((BitmapDrawable)((ImageView)findViewById(R.id.imageview)).getBackground()).getBitmap().recycle();
+		}
+		catch(Exception e){
+			e.printStackTrace();
+		}
+		catch (Error error) {
+			// TODO: handle exception
+		}
+	}
+}

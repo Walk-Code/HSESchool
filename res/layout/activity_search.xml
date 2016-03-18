@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#ffffff">
+    <RelativeLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="50dp"
+	    android:background="#de504f">
+	    <TextView
+	   	    android:id="@+id/textview"
+	   	    android:layout_width="55dp"
+	   		android:layout_height="match_parent" 
+	   		android:textSize="16dp"
+	   		android:gravity="center"
+	   		android:text="@string/cancel"
+	   		android:clickable="true"
+	   		android:onClick="onCancelClick"
+	   		android:layout_alignParentRight="true"
+	   		android:textColor="#f5e6e8"/>
+	    <FrameLayout
+	        android:layout_toLeftOf="@id/textview"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:background="@drawable/navibar_searchbox"
+		    android:layout_marginTop="7dp"
+		    android:layout_marginLeft="10dp"
+		    android:layout_marginBottom="7dp">
+		    <EditText
+		        android:id="@+id/editview"
+		        android:layout_width="match_parent"
+		    	android:layout_height="match_parent"
+		    	android:paddingLeft="5dp"
+		    	android:paddingRight="33dp"
+		    	android:background="#00000000"
+		    	android:singleLine="true"
+		    	android:textSize="15dp"
+		    	android:textColor="#282828"
+		    	android:textColorHint="#999999"
+		    	android:imeOptions="actionSearch"
+		    	android:hint="@string/search_hint"
+		    	android:gravity="left|center_vertical"/>
+	        <View
+		        android:layout_width="22dp"
+		        android:layout_height="22dp"
+		        android:layout_marginRight="7dp"
+		        android:onClick="onSearchTextDelete"
+		        android:background="@drawable/search_delete_icon"
+		        android:layout_gravity="right|center_vertical"/>
+	    </FrameLayout>
+	</RelativeLayout>
+	
+    <ExpandableListView   
+	    android:id ="@+id/expandablelistview"   
+	    android:layout_width ="match_parent"   
+	    android:layout_height ="match_parent"
+	    android:listSelector="#00000000"
+	    android:groupIndicator="@null"
+	    android:divider="@null"
+	    android:dividerHeight="0dp"
+	    android:childDivider="@null"/> 
+
+</LinearLayout>

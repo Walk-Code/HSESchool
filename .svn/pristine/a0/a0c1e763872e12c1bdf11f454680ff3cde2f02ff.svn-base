@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <ImageView
+	    android:id="@+id/imageview"
+	    android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:contentDescription="@string/app_name"
+		android:layout_alignParentTop="true"
+		android:layout_marginTop="15dp"
+		android:layout_marginLeft="15dp"
+		android:layout_marginRight="15dp"
+		android:layout_marginBottom="30dp"
+		android:scaleType="centerCrop"/>
+    
+    <TextView 
+	    android:id="@+id/text"
+	    android:layout_width="match_parent"
+		android:layout_height="wrap_content" 
+		android:gravity="center"
+		android:textSize="13dp"
+		android:layout_marginBottom="8dp"
+		android:layout_alignParentBottom="true"
+		android:textColor="#737471"/>
+ 
+    <View
+        android:id="@+id/item_servicegrid_preview"
+	    android:layout_width="match_parent"
+		android:layout_height="match_parent"/>
+    
+    <View
+        android:id="@+id/deleteview"
+	    android:layout_width="25dp"
+		android:layout_height="25dp"
+		android:visibility="gone"
+		android:layout_marginRight="5dp"
+		android:layout_alignParentTop="true"
+		android:layout_alignParentRight="true"
+		android:background="#f0f0f0"/>
+</RelativeLayout>

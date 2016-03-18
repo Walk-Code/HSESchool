@@ -1,0 +1,126 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import android.content.Intent;
+import android.content.res.Resources;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.gson.Gson;
+import com.model.Configs;
+import com.model.DataLoader;
+import com.model.TaskType;
+import com.util.Utils;
+import com.zhuochuang.hsej.entity.EnglishScoreEntity;
+
+public class EnglishScoreQueryResultActivity extends BaseActivity {
+	private EnglishScoreEntity mScoreEntity;
+	private final int DIALOG_QUERY = 0x101;
+
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_english_score_query_result);
+		setTitleText(R.string.activity_english_score_query_result_title);
+
+		showDialogCustom(DIALOG_QUERY);
+		Utils.removeSoftKeyboard(EnglishScoreQueryResultActivity.this);
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_GetEnglishScore, null, this);
+	}
+
+	private void initData() {
+		Resources mResources = getResources();
+		double passScore = Double.parseDouble(mScoreEntity.getPassScore());
+		double myScore = Double.parseDouble(mScoreEntity.getTotalScore());
+		((TextView) findViewById(R.id.english_result_pass_score))
+				.setText(String.format(
+						mResources.getString(R.string.text_tgfs),
+						mScoreEntity.getPassScore()));
+		((TextView) findViewById(R.id.english_result_my_score))
+				.setText(mScoreEntity.getTotalScore());
+		String type = mScoreEntity.getType();
+		if (myScore >= passScore) {
+			((TextView) findViewById(R.id.english_result_info)).setText(String
+					.format(mResources.getString(R.string.english_pass_info),
+							type));
+		} else {
+			((TextView) findViewById(R.id.english_result_info)).setText(String
+					.format(mResources
+							.getString(R.string.english_not_pass_info), type));
+
+		}
+		((TextView) findViewById(R.id.english_result_name))
+				.setText(mScoreEntity.getXm());
+		((TextView) findViewById(R.id.english_result_numb))
+				.setText(mScoreEntity.getZkzh());
+		((TextView) findViewById(R.id.english_result_class_avg))
+				.setText(mScoreEntity.getBjAverage());
+		((TextView) findViewById(R.id.english_result_class_rank))
+				.setText(mScoreEntity.getBjRanking());
+		((TextView) findViewById(R.id.english_result_school_avg))
+				.setText(mScoreEntity.getXxAverage());
+		((TextView) findViewById(R.id.english_result_school_rank))
+				.setText(mScoreEntity.getXxRanking());
+
+	}
+
+	public void onScoreDetailClick(View view) {
+		if(mScoreEntity==null)
+			return;
+		Intent intent = new Intent(this,
+				EnglishScoreQueryResultDetailsActivity.class);
+		intent.putExtra("stuName", mScoreEntity.getXm());
+		intent.putExtra("schName", mScoreEntity.getXxmc());
+		intent.putExtra("examType", mScoreEntity.getType());
+		intent.putExtra("stuZkzh", mScoreEntity.getZkzh());
+		intent.putExtra("totalScore", mScoreEntity.getTotalScore());
+		intent.putExtra("listenScore", mScoreEntity.getListenScore());
+		intent.putExtra("readScore", mScoreEntity.getReadScore());
+		intent.putExtra("writeScore", mScoreEntity.getWriteScore());
+		startActivity(intent);
+	}
+	
+	public void onSharePkClick(View view){
+		if(((HSESchoolApp)getApplicationContext()).umSocialServiceShare != null){
+			((HSESchoolApp)getApplicationContext()).setUmengShareObj(EnglishScoreQueryResultActivity.this, null, Configs.UmengShare_App);
+			((HSESchoolApp)getApplicationContext()).umSocialServiceShare.openShare(EnglishScoreQueryResultActivity.this, false);
+		}
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		removeDialogCustom();
+		if (result == null)
+			return;
+		if (result instanceof Error) {
+			Toast.makeText(this, ((Error) result).getMessage(),
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_GetEnglishScore:
+			if ("1".equals(((JSONObject) result).optString("result").toString())) {
+				Gson gson = new Gson();
+				mScoreEntity = gson.fromJson(
+						((JSONObject) result).optString("item"),
+						EnglishScoreEntity.class);
+				initData();
+			} else {
+				Toast.makeText(this, ((JSONObject) result).optString("msg"),
+						Toast.LENGTH_SHORT).show();
+				finish();
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+}

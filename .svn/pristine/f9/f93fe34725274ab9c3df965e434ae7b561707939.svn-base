@@ -1,0 +1,449 @@
+package com.zhuochuang.hsej.store;
+
+import java.text.DecimalFormat;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
+import android.widget.AbsListView;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Gallery;
+import android.widget.GridView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.layout.PullToRefreshListView;
+import com.layout.PullToRefreshListView.OnRefreshListener;
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.ImageLoaderConfigs;
+import com.model.TaskType;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.util.AutoGallery;
+import com.util.ContentAdapter;
+import com.util.PageGuide;
+import com.util.Utils;
+import com.zhuochuang.hsej.BaseFragment;
+import com.zhuochuang.hsej.LoginActivity;
+import com.zhuochuang.hsej.R;
+
+public class SchoolifeFragment extends BaseFragment {
+	private static final int LIVE_GOODS = 1;
+	private static final int SPORT_GOODS = 2;
+	private static final int STUDY_GOODS = 3;
+	private PullToRefreshListView mListView;
+	private LinearLayout mHeaderView;
+	private AutoGallery mBannerGallery;
+	private PageGuide mPageGuide;
+	private ContentAdapter mGridViewAdapter;
+	private boolean mIsNeedRefresh = false;	
+	private JSONArray mBannerArr;
+	private JSONArray mAdsArr;
+	private JSONArray mGoodsListArr;
+	private JSONArray mShopListArr ;
+	private JSONObject mShopObj;
+	private JSONArray mGoodsTypeArr;
+	private JSONArray mModeImageArray;
+	private GridView mGoodsGridView;
+	private ContentAdapter mGoodsListViewAdapter;
+	private Handler mHandler;
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		mMainLayout = (ViewGroup) ViewGroup.inflate(mActivity, R.layout.fragment_schoollife, null);
+		initListView();		
+		mMainLayout.findViewById(R.id.search_main).setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(mActivity,StoreSearchActivity.class);
+				startActivity(intent);
+			}
+		});
+		
+		mMainLayout.findViewById(R.id.home_shopping).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				if(DataLoader.getInstance().isLogin()){
+					Intent intent = new Intent(mActivity,StoreShoppingCarActivity.class);
+					startActivity(intent);
+				}else{
+					startActivity(new Intent(mActivity, LoginActivity.class));
+					((Activity) mActivity).overridePendingTransition(R.anim.push_bottom_in,  R.anim.push_bottom_out);
+					return;
+				}				
+			}
+		});
+		
+		DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MallHomeHome, null, this);
+		if(DataLoader.getInstance().isLogin()){
+			DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_ShoppingCarListShoppingCar,null, this);
+		}
+		EventManager.getInstance().setHandlerListenner(new Handler(){
+
+			@Override
+			public void handleMessage(Message msg) {
+				super.handleMessage(msg);
+				switch (msg.what) {
+				case EventManager.EventType_MsgChange:					
+					((TextView)mMainLayout.findViewById(R.id.store_car_count)).setText((String)msg.obj);
+					break;
+				default:
+					break;
+				}
+			}
+			
+		});
+	}
+	
+	public void initListView(){		
+		initHeaderView();		
+		mListView = (PullToRefreshListView) mMainLayout.findViewById(R.id.pullto_listview);
+		mListView.addHeaderView(mHeaderView);
+		mListView.setAdapter(new ContentAdapter(){
+			@Override
+			public int getCount() {
+				if(mAdsArr != null && mAdsArr.length() > 0){
+					return mAdsArr.length();
+				}
+				return 0;
+			}
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if(convertView == null){
+					convertView = ViewGroup.inflate(mActivity, R.layout.listcell_myschoolyard, null);
+					convertView.setLayoutParams(new AbsListView.LayoutParams(LayoutParams.MATCH_PARENT,Utils.realSchoolBannerHeight(mActivity)));
+				}
+				return convertView;
+			}
+		});
+		
+		mListView.setOnRefreshListener(new OnRefreshListener() {			
+			@Override
+			public void onRefresh() {
+				DataLoader.getInstance().startTaskForResult(TaskType.TaskOrMethod_MallHomeHome, null, SchoolifeFragment.this);				
+			}
+		});
+		
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				JSONObject obj = mAdsArr.optJSONObject(position - 2);
+				if(obj != null){
+					JSONObject resourceObj = obj.optJSONObject("resource");
+					if(resourceObj == null){
+						return;
+					}
+					DataLoader.getInstance().openResource(mActivity, obj.optInt("ownerResource"), resourceObj);
+				}				
+			}
+		});		 
+		mListView.startRefresh();
+	}
+	@Override
+	public void onDestroy() {		
+		super.onDestroy();
+		EventManager.getInstance().removeHandlerListenner(mHandler);
+	}
+	@SuppressLint("InflateParams")
+	private void initHeaderView() {	
+		mHeaderView = (LinearLayout) LayoutInflater.from(mActivity).inflate(R.layout.fragment_schoollife_header, null);	
+		LinearLayout.LayoutParams layoutParam = new LinearLayout.LayoutParams(Utils.getScreenWidth(mActivity)/10*3,Utils.getScreenWidth(mActivity)/10*3);
+		mHeaderView.findViewById(R.id.store_modle_layout).setLayoutParams(new LinearLayout.LayoutParams(Utils.getScreenWidth(mActivity)/5*2,Utils.getScreenWidth(mActivity)/20*9));		
+		mHeaderView.findViewById(R.id.commdoity_goods_layout).setLayoutParams(new LinearLayout.LayoutParams(Utils.getScreenWidth(mActivity)/5*3,Utils.getScreenWidth(mActivity)/20*3));
+		mHeaderView.findViewById(R.id.sport_goods_layout).setLayoutParams(layoutParam);
+		mHeaderView.findViewById(R.id.study_goods_layout).setLayoutParams(layoutParam);
+		mBannerGallery = (AutoGallery) mHeaderView.findViewById(R.id.gallery_banner);
+		mBannerGallery = (AutoGallery) mHeaderView.findViewById(R.id.gallery_banner);				
+		mPageGuide = (PageGuide) mHeaderView.findViewById(R.id.pageguide);		
+		mBannerGallery.setAdapter(new ContentAdapter(){
+
+			@Override
+			public int getCount() {
+				if(mBannerArr == null || mBannerArr.length() == 0 ){
+					return 0 ;
+				}
+				return Integer.MAX_VALUE;
+			}
+
+			@Override
+			public View getView(int position, View convertView, ViewGroup parent) {
+				if (position >= mBannerArr.length()) {
+	                position = position % mBannerArr.length();
+	            }
+			
+				JSONObject obj = mBannerArr.optJSONObject(position);
+				if(convertView == null){
+					convertView = ViewGroup.inflate(mActivity, R.layout.listcell_myschoolyard_headercell, null);				
+					convertView.setLayoutParams(new Gallery.LayoutParams(LayoutParams.MATCH_PARENT, Utils.realSchoolBannerHeight(mActivity)));
+				}
+				ImageLoader.getInstance().displayImage(obj.optString("image"), ((ImageView)convertView.findViewById(R.id.imageview)), ImageLoaderConfigs.displayImageOptionsBg);
+				return convertView;
+			}
+			
+		});
+		
+		mBannerGallery.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				if (position >= mBannerArr.length()) {
+	                position = position % mBannerArr.length();
+	            }
+				mPageGuide.setSelect(position);
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {				
+			}			
+		});
+		
+		mBannerGallery.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position,
+					long id) {
+				if (position >= mBannerArr.length()) {
+	                position = position % mBannerArr.length();
+	            }
+				
+			}		 
+		});
+		
+	   mHeaderView.findViewById(R.id.store_today_special).setOnClickListener(new OnClickListener() {
+		
+			@Override
+			public void onClick(View arg0) {
+				startActivity(new Intent(mActivity, StoreTodaySpecialActivity.class));			
+			}
+	   });
+	  
+	  mHeaderView.findViewById(R.id.commdoity_goods_layout).setOnClickListener(new OnClickListener() {
+		
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(mActivity, StoreDetailActivity.class);
+				intent.putExtra("num", LIVE_GOODS);
+				startActivity(intent);
+			}
+	  });
+	  
+	  mHeaderView.findViewById(R.id.sport_goods_layout).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(mActivity, StoreDetailActivity.class);
+				intent.putExtra("num", SPORT_GOODS);
+				startActivity(intent);
+			}
+		});
+	  
+	  mHeaderView.findViewById(R.id.study_goods_layout).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(mActivity, StoreDetailActivity.class);
+				intent.putExtra("num", STUDY_GOODS);
+				startActivity(intent);
+			}
+		});
+	  
+	  mHeaderView.findViewById(R.id.store_more).setOnClickListener(new OnClickListener() {
+		
+		@Override
+		public void onClick(View v) {
+			Intent intent = new Intent(mActivity, StoreCategoryActivity.class);
+			if(null != mGoodsTypeArr){
+			intent.putExtra("goodType", mGoodsTypeArr.toString());
+			startActivity(intent);
+			}
+			
+		}
+	  });
+	  
+	  mGoodsGridView = (GridView) mHeaderView.findViewById(R.id.store_home_grid);	 
+	  mGoodsGridView.setAdapter(mGoodsListViewAdapter = new ContentAdapter(){
+
+		@Override
+		public int getCount() {
+			return mGoodsListArr != null ? mGoodsListArr.length() : 0;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			if(null == convertView){
+				convertView = LayoutInflater.from(mActivity).inflate(R.layout.store_home_grid_item, null);
+			}
+			JSONObject obj = mGoodsListArr.optJSONObject(position).optJSONObject("goods");
+			((TextView)convertView.findViewById(R.id.store_home_like_goods_names)).setText(obj.optString("name"));
+			((TextView)convertView.findViewById(R.id.store_home_like_goods_prices)).setText(getResources().getString(R.string.money_sigh)+new DecimalFormat("#.00").format(obj.optDouble("price")));
+			ImageLoader.getInstance().displayImage(obj.optString("image"), (ImageView)convertView.findViewById(R.id.guess_im),ImageLoaderConfigs.displayImageOptionsBg);
+			return convertView;
+		}		  	
+	  });
+	  
+	  mGoodsGridView.setOnItemClickListener(new OnItemClickListener() {
+
+		@Override
+		public void onItemClick(AdapterView<?> parent, View view, int position,long id) {
+			JSONObject obj = mGoodsListArr.optJSONObject(position).optJSONObject("goods");
+			Intent intent = new Intent(mActivity, StoreGoodsMoreDetailsActivity.class);
+			intent.putExtra("shopId", obj.optString("id"));
+			startActivity(intent);			
+		}		  
+	  });
+	}
+	
+	@Override
+	public void onResume() {
+		super.onResume();
+		if(mIsNeedRefresh){
+			mIsNeedRefresh = false;
+			if (!mListView.isStackFromBottom()) {
+				mListView.setStackFromBottom(true);
+			}
+			mListView.setStackFromBottom(false);
+			mListView.startRefresh();
+		}
+	}
+	
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		super.taskFinished(type, result, isHistory);
+		if(mListView != null){
+			mListView.complete();
+		}
+		
+		if(result == null){
+			return;
+		}
+		
+		if(result instanceof Error){
+			Toast.makeText(mActivity, ((Error) result).getMessage(), Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
+		switch(type){
+		case TaskOrMethod_MallHomeHome:
+			if(mHeaderView != null){
+				mHeaderView.setVisibility(View.VISIBLE);
+			}
+			if(result instanceof JSONObject ){		
+				if(((JSONObject)result).has("banner")){					
+					mBannerArr = ((JSONObject)result).optJSONArray("banner");				
+					if(mBannerArr != null && mBannerArr.length() > 0){
+						mHeaderView.findViewById(R.id.header_banner).setVisibility(View.VISIBLE);
+						mPageGuide.setParams(mBannerArr.length(), Utils.dipToPixels(mActivity, 7), Utils.dipToPixels(mActivity, 7));
+						mBannerGallery.setSelection(mBannerArr.length() * 1000000);
+						mBannerGallery.setLength(mBannerArr.length());
+						mBannerGallery.setDuration(4000);
+						mBannerGallery.setAutoScroll();
+					}
+					else{
+						mHeaderView.findViewById(R.id.header_banner).setVisibility(View.GONE);
+					}
+					if(mBannerGallery != null && mBannerGallery.getAdapter() != null){
+						((ContentAdapter)mBannerGallery.getAdapter()).notifyDataSetChanged();
+					}
+					
+				}
+				if(((JSONObject)result).has("goodsList")){
+					mGoodsListArr = ((JSONObject)result).optJSONArray("goodsList");
+					if(null != mGoodsListArr){
+						mGoodsListViewAdapter.notifyDataSetChanged();
+					}					
+				}
+				//商店list
+				if(((JSONObject)result).has("shopList")){
+				    mShopListArr = ((JSONObject)result).optJSONArray("shopList");				     				
+				    LinearLayout linearLayout = (LinearLayout) mHeaderView.findViewById(R.id.store_home_choose);
+				    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,1);
+				    final CustomLinearLayout [] customLinearLayout = new CustomLinearLayout[3];
+				    linearLayout.removeAllViews(); 
+				    
+				for(int count = 0;count < 3;count ++){				    			
+					if(count > mShopListArr.length()-1){
+						customLinearLayout[count] = new CustomLinearLayout(getActivity());
+						customLinearLayout[count].setVisibility(View.INVISIBLE);
+						linearLayout.addView(customLinearLayout[count], layoutParams);
+						continue;
+					}
+					
+					JSONObject shopChoose = mShopListArr.optJSONObject(count);
+					mShopObj  = shopChoose.optJSONObject("shop");
+					customLinearLayout[count] = new CustomLinearLayout(getActivity());
+			    	customLinearLayout[count].setImages(mShopObj.optString("image"));
+					customLinearLayout[count].setTextViewText(mShopObj.optString("name"));
+				    customLinearLayout[count].setTag(mShopObj.optString("id"));
+					linearLayout.addView(customLinearLayout[count], layoutParams);
+				    customLinearLayout[count].setOnClickListener(new OnClickListener() {
+						@Override
+						public void onClick(View v) {							
+							Intent intent = new Intent(getActivity(),StorePersonActivity.class);				
+							intent.putExtra("shopId", (String)v.getTag());
+							startActivity(intent);
+								}
+							});
+					}				    				    
+				}
+				
+				if(((JSONObject)result).has("goodsType")){
+					mGoodsTypeArr = ((JSONObject)result).optJSONArray("goodsType");
+				}
+				
+				if(((JSONObject)result).has("module")){
+					mModeImageArray = ((JSONObject)result).optJSONArray("module");
+					if(mModeImageArray != null){												
+					   ImageLoader.getInstance().displayImage(mModeImageArray.optJSONObject(0).optString("image"),(ImageView)mHeaderView.findViewById(R.id.store_modle_images1),
+							   ImageLoaderConfigs.displayImageOptionsBg);
+					   ImageLoader.getInstance().displayImage(mModeImageArray.optJSONObject(1).optString("image"),(ImageView)mHeaderView.findViewById(R.id.store_modle_images2),
+							   ImageLoaderConfigs.displayImageOptionsBg);
+					   ImageLoader.getInstance().displayImage(mModeImageArray.optJSONObject(2).optString("image"),(ImageView)mHeaderView.findViewById(R.id.store_modle_images3),
+							   ImageLoaderConfigs.displayImageOptionsBg);
+					   ImageLoader.getInstance().displayImage(mModeImageArray.optJSONObject(3).optString("image"),(ImageView)mHeaderView.findViewById(R.id.store_modle_images4),
+							   ImageLoaderConfigs.displayImageOptionsBg);
+					  }					
+				}
+			}			
+			break;	
+			
+		  case TaskOrMethod_ShoppingCarListShoppingCar:	
+			if(((JSONObject)result).has("items")){				
+				JSONArray itemsArr = ((JSONObject)result).optJSONArray("items");			
+				if(itemsArr.length() > 0){
+					mMainLayout.findViewById(R.id.store_car_count).setVisibility(View.VISIBLE);
+					//EventManager.getInstance().sendMessage(EventManager.EventType_MsgChange,itemsArr.length());
+					((TextView)mMainLayout.findViewById(R.id.store_car_count)).setText(itemsArr.length()+"");
+				}
+				else{
+					mMainLayout.findViewById(R.id.store_car_count).setVisibility(View.GONE);
+				}
+			}
+			break;
+			
+		default:
+			break;
+		   
+		}
+	}
+
+}

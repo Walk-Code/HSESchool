@@ -1,0 +1,168 @@
+package com.zhuochuang.hsej;
+
+import java.util.HashMap;
+
+import org.json.JSONObject;
+
+import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.model.DataLoader;
+import com.model.EventManager;
+import com.model.TaskType;
+import com.util.Utils;
+import com.zhuochuang.hsej.adapter.MSpinnerAdapter;
+
+public class PublishRecruitActivity extends BaseActivity {
+	private final int DIALOG_LOADING = 0x1000;
+	private final int DATA_CHANGE_CODE = 0x1002;
+	private Spinner spJobType;
+
+	private int jobType;
+
+	@Override
+	protected void onCreate(Bundle arg0) {
+		super.onCreate(arg0);
+		setContentView(R.layout.activity_publish_recruit);
+		setTitleText(R.string.text_zpfb);
+		findViewById(R.id.textview_right_text).setVisibility(View.GONE);
+
+		initView();
+		initData();
+	}
+
+	private void initView() {
+		spJobType = (Spinner) findViewById(R.id.publish_recruit_job_type);
+
+	}
+
+	private void initData() {
+		String[] modes = getResources().getStringArray(
+				R.array.activity_publish_recruit_job_type);
+		spJobType.setAdapter(new MSpinnerAdapter(this, modes));
+		spJobType.setOnItemSelectedListener(new OnItemSelectedListener() {
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int position, long id) {
+				jobType = position + 1;
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
+
+			}
+		});
+	}
+
+	public void onPublishClick(View view) {
+		String jobDesc = ((TextView) findViewById(R.id.publish_recruit_job_desc))
+				.getText().toString();
+		String jobNumber = ((TextView) findViewById(R.id.publish_recruit_job_number))
+				.getText().toString();
+		String jobSalary = ((TextView) findViewById(R.id.publish_recruit_job_salary))
+				.getText().toString();
+		String jobRequire = ((TextView) findViewById(R.id.publish_recruit_job_requirements))
+				.getText().toString();
+		String jobContent = ((TextView) findViewById(R.id.publish_recruit_job_content))
+				.getText().toString();
+		String jobContact = ((TextView) findViewById(R.id.publish_recruit_job_contact))
+				.getText().toString();
+		String jobContactPhone = ((TextView) findViewById(R.id.publish_recruit_job_contact_phone))
+				.getText().toString();
+		String jobUpTime = ((TextView) findViewById(R.id.publish_recruit_job_time))
+				.getText().toString();
+		String jobAddress = ((TextView) findViewById(R.id.publish_recruit_job_address))
+				.getText().toString();
+
+		String[] noticeMessage = getResources().getStringArray(
+				R.array.publish_recruit_notice);
+		if (TextUtils.isEmpty(jobDesc)) {
+			Toast.makeText(this, noticeMessage[0], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(jobNumber)) {
+			Toast.makeText(this, noticeMessage[1], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(jobSalary)) {
+			Toast.makeText(this, noticeMessage[2], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(jobRequire)) {
+			Toast.makeText(this, noticeMessage[3], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(jobContent)) {
+			Toast.makeText(this, noticeMessage[4], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(jobContact)) {
+			Toast.makeText(this, noticeMessage[5], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(jobContactPhone)) {
+			Toast.makeText(this, noticeMessage[6], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(jobUpTime)) {
+			Toast.makeText(this, noticeMessage[7], Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(jobAddress)) {
+			Toast.makeText(this, noticeMessage[8], Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		HashMap<String, Object> jobParams = new HashMap<String, Object>();
+		jobParams.put("name", jobDesc);
+		jobParams.put("jobNature", jobType);
+		jobParams.put("peopleNum", jobNumber);
+		jobParams.put("jobRequirements", jobRequire);
+		jobParams.put("jobContent", jobContent);
+		jobParams.put("linkMan", jobContact);
+		jobParams.put("phone", jobContactPhone);
+		jobParams.put("jobTime", jobUpTime);
+		jobParams.put("jobAddress", jobAddress);
+		jobParams.put("salary", jobSalary);
+
+		showDialogCustom(DIALOG_LOADING);
+		DataLoader.getInstance().startTaskForResult(
+				TaskType.TaskOrMethod_RecruitServiceSend, jobParams, this);
+	}
+
+	@Override
+	public void taskFinished(TaskType type, Object result, boolean isHistory) {
+		removeDialogCustom();
+		if (result == null)
+			return;
+		if (result instanceof Error) {
+			Toast.makeText(this, ((Error) result).getMessage(),
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		switch (type) {
+		case TaskOrMethod_RecruitServiceSend:
+			if ("1".equals(((JSONObject) result).optString("result").toString())) {
+				EventManager.getInstance().sendMessage(DATA_CHANGE_CODE, "");
+				Utils.removeSoftKeyboard(this);
+				Toast.makeText(this,
+						getResources().getString(R.string.publish_success),
+						Toast.LENGTH_SHORT).show();
+				finish();
+			} else {
+				Toast.makeText(this,
+						getResources().getString(R.string.publish_fail),
+						Toast.LENGTH_SHORT).show();
+			}
+			break;
+		default:
+			break;
+		}
+	}
+}
